@@ -6,7 +6,6 @@ import { Colors } from "../constants/Colors";
 import { useContext } from "react";
 import { AppThemeContext } from "../store/app-theme-context";
 import PreAuthScreen from "../screens/PreAuthScreen";
-import GoogleModal from "../modals/GoogleModal";
 
 const Stack = createNativeStackNavigator();
 
@@ -59,13 +58,6 @@ function AuthStack() {
           },
         }}
       />
-      <Stack.Group
-        screenOptions={{
-          presentation: "modal",
-        }}
-      >
-        <Stack.Screen name="google" component={GoogleModal} />
-      </Stack.Group>
     </Stack.Navigator>
   );
 }
