@@ -9,12 +9,16 @@ function PreAuthScreen({ navigation }) {
     console.log("Hi! I want to see the terms of service");
   }
 
+   function privacyPolicyHandler() {
+    console.log("Hi! I want to see the privacy policy");
+  }
+
   function emailHandler() {
     navigation.navigate("LoginScreen");
   }
 
   function googleHandler() {
-    navigation.navigate("google");
+    
   }
 
   return (
@@ -41,7 +45,7 @@ function PreAuthScreen({ navigation }) {
           Terms of Service{" "}
         </FlatButton>
         and{" "}
-        <FlatButton inline size={"m"}>
+        <FlatButton inline size={"m"} onPress={privacyPolicyHandler}>
           Privacy Policy
         </FlatButton>
       </SubtitleText>

@@ -3,7 +3,7 @@ import { Colors } from "../../constants/Colors";
 import { useContext } from "react";
 import { AppThemeContext } from "../../store/app-theme-context";
 
-function FlatButton({ children, onPress, inline, size }) {
+function FlatButton({ children, onPress, inline, size = "m" }) {
   const theme = Colors[useContext(AppThemeContext)];
   return (
     <Text onPress={onPress} style={styles(theme, inline, size).text}>
@@ -14,13 +14,13 @@ function FlatButton({ children, onPress, inline, size }) {
 
 export default FlatButton;
 
-  const FONT_SIZE = {
-    'xs': 12,
-    's': 14,
-    'm': 16,
-    'l': 18,
-    'xl': 20
-  }
+const FONT_SIZE = {
+  xs: 12,
+  s: 14,
+  m: 16,
+  l: 18,
+  xl: 20,
+};
 
 const styles = (theme, inline, size) =>
   StyleSheet.create({
@@ -31,6 +31,6 @@ const styles = (theme, inline, size) =>
       includeFontPadding: false,
       fontSize: FONT_SIZE[size],
       padding: inline ? 0 : 8,
-      textDecorationLine: inline ? 'underline' : 'none'
+      textDecorationLine: inline ? "underline" : "none",
     },
   });
