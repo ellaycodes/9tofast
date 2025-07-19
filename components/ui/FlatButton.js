@@ -1,38 +1,36 @@
-import { Text, Pressable, StyleSheet } from "react-native";
+import { Text, StyleSheet } from "react-native";
 import { Colors } from "../../constants/Colors";
 import { useContext } from "react";
 import { AppThemeContext } from "../../store/app-theme-context";
-import { View } from "react-native";
 
-function FlatButton({ children, onPress }) {
+function FlatButton({ children, onPress, inline, size }) {
   const theme = Colors[useContext(AppThemeContext)];
   return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles(theme).container,
-        pressed && styles(theme).pressed,
-      ]}
-    >
-      <View>
-        <Text style={styles(theme).text}>{children}</Text>
-      </View>
-    </Pressable>
+    <Text onPress={onPress} style={styles(theme, inline, size).text}>
+      {children}
+    </Text>
   );
 }
 
 export default FlatButton;
 
-const styles = (theme) =>
+  const FONT_SIZE = {
+    'xs': 12,
+    's': 14,
+    'm': 16,
+    'l': 18,
+    'xl': 20
+  }
+
+const styles = (theme, inline, size) =>
   StyleSheet.create({
-    container: {
-      padding: 8,
-    },
-    pressed: {
-      opacity: 0.7,
-    },
     text: {
       color: theme.muted,
       textAlign: "center",
+      textAlignVertical: "center",
+      includeFontPadding: false,
+      fontSize: FONT_SIZE[size],
+      padding: inline ? 0 : 8,
+      textDecorationLine: inline ? 'underline' : 'none'
     },
   });

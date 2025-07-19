@@ -26,9 +26,9 @@ function SignupScreen() {
   }
 
   return (
-    <SafeAreaView>
+    // <SafeAreaView>
       <AuthContent authenticate={signUpHandler} />
-    </SafeAreaView>
+    // </SafeAreaView>
   );
 }
 
