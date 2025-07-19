@@ -27,9 +27,9 @@ function LoginScreen() {
   }
 
   return (
-    <SafeAreaView>
+    // <SafeAreaView>
       <AuthContent isLogin authenticate={loginHandler} />
-    </SafeAreaView>
+    // </SafeAreaView>
   );
 }
 
