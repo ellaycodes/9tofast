@@ -2,10 +2,11 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import LoginScreen from "../screens/LoginScreen";
 import SignupScreen from "../screens/SignupScreen";
 import OnboardingCarousel from "../screens/OnboardingCarousel";
-import AppTabs from "./AppTabs";
 import { Colors } from "../constants/Colors";
 import { useContext } from "react";
 import { AppThemeContext } from "../store/app-theme-context";
+import PreAuthScreen from "../screens/PreAuthScreen";
+import GoogleModal from "../modals/GoogleModal";
 
 const Stack = createNativeStackNavigator();
 
@@ -25,6 +26,13 @@ function AuthStack() {
       }}
     >
       <Stack.Screen
+        name="PreAuthScreen"
+        component={PreAuthScreen}
+        options={{
+          title: "9ToFast",
+        }}
+      />
+      <Stack.Screen
         name="LoginScreen"
         component={LoginScreen}
         options={{
@@ -40,7 +48,24 @@ function AuthStack() {
           headerShown: false,
         }}
       />
-      <Stack.Screen name="OnboardingCarousel" component={OnboardingCarousel} />
+      <Stack.Screen
+        name="OnboardingCarousel"
+        component={OnboardingCarousel}
+        options={{
+          title: "Welcome",
+          headerBackVisible: false,
+          headerTitleStyle: {
+            fontSize: 20,
+          },
+        }}
+      />
+      <Stack.Group
+        screenOptions={{
+          presentation: "modal",
+        }}
+      >
+        <Stack.Screen name="google" component={GoogleModal} />
+      </Stack.Group>
     </Stack.Navigator>
   );
 }

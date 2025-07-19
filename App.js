@@ -8,10 +8,6 @@ import { NavigationContainer } from "@react-navigation/native";
 import AppTabs from "./navigation/AppTabs";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import LoadingOverlay from "./components/ui/LoadingOverlay";
-import * as SplashScreen from "expo-splash-screen";
-import Constants from "expo-constants";
-
-// SplashScreen.preventAutoHideAsync();
 
 function Navigator() {
   const authCxt = useContext(AuthContext);

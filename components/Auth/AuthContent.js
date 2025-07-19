@@ -1,11 +1,16 @@
 import AuthForm from "./AuthForm";
 import FlatButton from "../ui/FlatButton";
 import { useNavigation } from "@react-navigation/native";
-import Title from "./Title";
-import { View } from "react-native";
+import Header from "./Header";
+import { Text, View } from "react-native";
+import { StyleSheet } from "react-native";
+import { Colors } from "../../constants/Colors";
+import { useContext } from "react";
+import { AppThemeContext } from "../../store/app-theme-context";
 
 function AuthContent({ isLogin, authenticate }) {
   const navigation = useNavigation();
+  const theme = Colors[useContext(AppThemeContext)]
 
   function switchAuthModeHandler() {
     if (isLogin) {
@@ -13,6 +18,10 @@ function AuthContent({ isLogin, authenticate }) {
     } else {
       navigation.replace("LoginScreen");
     }
+  }
+
+  function signInDifferently() {
+    navigation.goBack();
   }
 
   function submitHandler(authDetails) {
@@ -37,20 +46,35 @@ function AuthContent({ isLogin, authenticate }) {
       });
       return;
     }
-    authenticate({ email, password });
+    isLogin
+      ? authenticate({ email, password })
+      : navigation.navigate("OnboardingCarousel");
   }
 
   return (
-    <View>
-      <Title>{isLogin ? "Log In" : "Sign Up"}</Title>
+    <View style={styles.container}>
+      <Header>{isLogin ? "Log In" : "Sign Up"}</Header>
       <AuthForm isLogin={isLogin} onSubmit={submitHandler} />
-      <View>
+      <View style={styles.flatbuttonContainer}>
         <FlatButton onPress={switchAuthModeHandler}>
           {isLogin ? "Create Account" : "I already have an account"}
         </FlatButton>
+        <Text style={{color: theme.muted}}> | </Text>
+        <FlatButton onPress={signInDifferently}>Sign in a different way</FlatButton>
       </View>
     </View>
   );
 }
 
 export default AuthContent;
+
+const styles = StyleSheet.create({
+  flatbuttonContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  container: {
+    margin: 16
+  }
+})

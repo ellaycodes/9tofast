@@ -3,18 +3,18 @@ import { Colors } from "../../constants/Colors";
 import { useContext } from "react";
 import { AppThemeContext } from "../../store/app-theme-context";
 
-function PrimaryButton({ children, onPress }) {
+function PrimaryButton({ children, onPress, lowlight }) {
   const theme = Colors[useContext(AppThemeContext)];
   return (
     <Pressable
       style={({ pressed }) => [
-        styles(theme).buttonContainer,
+        styles(theme, lowlight).buttonContainer,
         pressed && styles(theme).pressed,
       ]}
       onPress={onPress}
     >
       <View>
-        <Text style={styles(theme).buttonText}>{children}</Text>
+        <Text style={styles(theme, lowlight).buttonText}>{children}</Text>
       </View>
     </Pressable>
   );
@@ -22,22 +22,22 @@ function PrimaryButton({ children, onPress }) {
 
 export default PrimaryButton;
 
-const styles = (theme) =>
+const styles = (theme, lowlight) =>
   StyleSheet.create({
     buttonContainer: {
-      backgroundColor: theme.primary100,
-      padding: 16,
+      backgroundColor: lowlight ? theme.secondary100 : theme.primary100,
+      padding: 18,
       borderRadius: 50,
       marginHorizontal: 8,
-      marginVertical: 16
+      marginVertical: 8,
     },
     pressed: {
       opacity: 0.75,
     },
     buttonText: {
-      color: theme.background,
-      textAlign: 'center',
+      color: lowlight ? theme.text : theme.background,
+      textAlign: "center",
       fontSize: 18,
-      fontWeight: 'bold'
+      fontWeight: "bold",
     },
   });
