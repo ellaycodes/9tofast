@@ -1,7 +1,6 @@
 import { login } from "../util/useAuth";
 import { useContext, useState } from "react";
 import AuthContent from "../components/Auth/AuthContent";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { AuthContext } from "../store/auth-context";
 import { Alert } from "react-native";
 import LoadingOverlay from "../components/ui/LoadingOverlay";
@@ -27,9 +26,7 @@ function LoginScreen() {
   }
 
   return (
-    // <SafeAreaView>
       <AuthContent isLogin authenticate={loginHandler} />
-    // </SafeAreaView>
   );
 }
 

@@ -1,4 +1,3 @@
-import { SafeAreaView } from "react-native-safe-area-context";
 import AuthContent from "../components/Auth/AuthContent";
 import { createUser } from "../util/useAuth";
 import { useContext, useState } from "react";
@@ -26,9 +25,7 @@ function SignupScreen() {
   }
 
   return (
-    // <SafeAreaView>
       <AuthContent authenticate={signUpHandler} />
-    // </SafeAreaView>
   );
 }
 

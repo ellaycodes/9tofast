@@ -3,13 +3,21 @@ import Title from "../components/ui/Title";
 import PrimaryButton from "../components/ui/PrimaryButton";
 import SubtitleText from "../components/ui/SubtitleText";
 import FlatButton from "../components/ui/FlatButton";
+import { useContext, useState } from "react";
+import { AuthContext } from "../store/auth-context";
+import { anonymousUser } from "../util/useAuth";
+import { Alert } from "react-native";
 
 function PreAuthScreen({ navigation }) {
+  const [isAuthing, setIsAuthing] = useState();
+
+  const authCxt = useContext(AuthContext);
+
   function termsOfServiceHandler() {
     console.log("Hi! I want to see the terms of service");
   }
 
-   function privacyPolicyHandler() {
+  function privacyPolicyHandler() {
     console.log("Hi! I want to see the privacy policy");
   }
 
@@ -17,8 +25,16 @@ function PreAuthScreen({ navigation }) {
     navigation.navigate("LoginScreen");
   }
 
-  function googleHandler() {
-    
+  async function signInAnonymouslyHandler() {
+    setIsAuthing(true);
+    try {
+      const token = await anonymousUser();
+      authCxt.authenticate(token);
+      console.log(authCxt);
+    } catch (err) {
+      Alert.alert("Authentication Failed", "Could not log you in!");
+      setIsAuthing(false);
+    }
   }
 
   return (
@@ -29,15 +45,16 @@ function PreAuthScreen({ navigation }) {
         goals.
       </SubtitleText>
       <View style={styles.buttonContainer}>
-        <PrimaryButton onPress={googleHandler}>
+        {/* <PrimaryButton onPress={googleHandler}>
           Continue with Google
-        </PrimaryButton>
-        <PrimaryButton lowlight>Continue with Apple</PrimaryButton>
-        <PrimaryButton lowlight onPress={emailHandler}>
+        </PrimaryButton> */}
+        <PrimaryButton onPress={emailHandler}>
           Continue with Email
         </PrimaryButton>
-        {/* <PrimaryButton lowlight >Continue without signing up</PrimaryButton> */}
-        <FlatButton>Continue without signing up</FlatButton>
+        <PrimaryButton lowlight onPress={signInAnonymouslyHandler}>Continue without signing up</PrimaryButton>
+        {/* <FlatButton onPress={signInAnonymouslyHandler}>
+          Continue without signing up
+        </FlatButton> */}
       </View>
       <SubtitleText size={"m"} muted>
         By continuing, you agree to our{" "}
