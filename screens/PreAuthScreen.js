@@ -7,6 +7,7 @@ import { useContext, useState } from "react";
 import { AuthContext } from "../store/auth-context";
 import { anonymousUser } from "../util/useAuth";
 import { Alert } from "react-native";
+import LoadingOverlay from "../components/ui/LoadingOverlay";
 
 function PreAuthScreen({ navigation }) {
   const [isAuthing, setIsAuthing] = useState();
@@ -35,6 +36,10 @@ function PreAuthScreen({ navigation }) {
       Alert.alert("Authentication Failed", "Could not log you in!");
       setIsAuthing(false);
     }
+  }
+
+  if (isAuthing) {
+    return <LoadingOverlay>Logging you in</LoadingOverlay>;
   }
 
   return (
