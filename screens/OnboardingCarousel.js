@@ -1,44 +1,38 @@
-import { StyleSheet, Text, View } from "react-native";
-import CarouselButton from "../components/ui/CarouselButton";
-import PrimaryButton from "../components/ui/PrimaryButton";
-import Title from "../components/ui/Title";
 import { Colors } from "../constants/Colors";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { AppThemeContext } from "../store/app-theme-context";
+import ScheduleSlide from "../components/Carousel/ScheduleSlide";
+import StartTimerSlide from "../components/Carousel/StartTimerSlide";
+import StatsIntroSlide from "../components/Carousel/StatsIntroSlide";
+import { StyleSheet, View } from "react-native";
+import ProgressDots from "../components/Carousel/ProgressDots";
 
 function OnboardingCarousel() {
   const theme = Colors[useContext(AppThemeContext)];
+  const [wizardState, setWizardState] = useState({
+    step: 0,
+    schedule: null,
+    fastStartedAt: null,
+  });
+
+  const slides = [
+    <ScheduleSlide {...{ wizardState, setWizardState }} />,
+    <StartTimerSlide {...{ wizardState, setWizardState }} />,
+    <StatsIntroSlide {...{ wizardState, setWizardState }} />,
+  ];
+
   return (
-    <View style={styles(theme).container}>
-      <View>
-        <View style={styles(theme).progressBar}></View>
-        <View>
-          <Title>Choose your Fasting Schedule</Title>
-        </View>
-        <View>
-          <CarouselButton>
-            Skip Breakfast 16:8 (12pm - 8pm)
-          </CarouselButton>
-          <CarouselButton>Work-Lunch Window 14:10(9am - 7pm)</CarouselButton>
-          <CarouselButton>After Hours Fast 18:6 (1pm - 7pm)</CarouselButton>
-          <CarouselButton>Custom</CarouselButton>
-        </View>
-      </View>
-      <View>
-        <PrimaryButton>Next</PrimaryButton>
-      </View>
+    <View style={styles.container}>
+      <ProgressDots step={wizardState.step} total={slides.length} />
+      {slides[wizardState.step]}
     </View>
   );
 }
 
 export default OnboardingCarousel;
 
-const styles = (theme) =>
-  StyleSheet.create({
-    container: {
-      // backgroundColor: "#ffc7c7",
-      flex: 1,
-      justifyContent: "space-between",
-      margin: 16,
-    }
-  });
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});
