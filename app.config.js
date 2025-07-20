@@ -3,7 +3,7 @@ import "dotenv/config";
 export default ({ config }) => ({
   ...config,
   name: "9ToFast",
-  slug: "9ToFast",
+  slug: "9tofast",
   version: "1.0.0",
   orientation: "portrait",
   icon: "./assets/icon.png",

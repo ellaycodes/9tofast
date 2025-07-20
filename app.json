@@ -1,7 +1,8 @@
 {
   "expo": {
+    "owner": "ell-y",
     "name": "9ToFast",
-    "slug": "9ToFast",
+    "slug": "9tofast",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -13,9 +14,7 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true
     },
