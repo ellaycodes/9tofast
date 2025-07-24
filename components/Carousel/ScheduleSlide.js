@@ -16,9 +16,11 @@ import PrimaryButton from "../ui/PrimaryButton";
 import { Colors } from "../../constants/Colors";
 import { AppThemeContext } from "../../store/app-theme-context";
 import formatTime from "../../util/formatTime";
+import { useFasting } from "../../store/fasting-context";
 
 function ScheduleSlide({ wizardState, setWizardState }) {
   const theme = Colors[useContext(AppThemeContext)];
+  const { setSchedule } = useFasting();
 
   const [showCustom, setShowCustom] = useState(
     wizardState.schedule?.label === "Custom"
@@ -51,59 +53,57 @@ function ScheduleSlide({ wizardState, setWizardState }) {
     },
   ];
 
-  /* ---------- helpers ---------- */
   function selectPreset(schedule) {
-    setWizardState((s) => ({
-      ...s,
-      schedule: {
-        label: schedule.label,
-        start: new Date(schedule.start),
-        end: new Date(schedule.end),
-      },
-    }));
+    const chosen = {
+      label: schedule.label,
+      start:
+        schedule.start instanceof Date
+          ? schedule.start
+          : new Date(schedule.start),
+      end: schedule.end instanceof Date ? schedule.end : new Date(schedule.end),
+    };
+    setWizardState((s) => ({ ...s, schedule: chosen }));
+    setSchedule(chosen);
     setShowCustom(false);
   }
 
   function selectCustom() {
+    const chosen = { label: "Custom", start: startTime, end: endTime };
     setShowCustom(true);
-    setWizardState((s) => ({
-      ...s,
-      schedule: {
-        label: "Custom",
-        start: startTime,
-        end: endTime,
-      },
-    }));
+    setWizardState((s) => ({ ...s, schedule: chosen }));
+    setSchedule(chosen);
   }
 
   const onChangeStart = (_e, date) => {
     if (Platform.OS !== "ios") setShowStartPicker(false);
     if (date) {
-      setWizardState((s) => ({
-        ...s,
-        schedule: { ...s.schedule, start: date },
-      }));
+      setWizardState((prev) => {
+        const updated = { ...prev.schedule, start: date };
+        setSchedule(updated);
+        return { ...prev, schedule: updated };
+      });
     }
   };
 
   const onChangeEnd = (_e, date) => {
     if (Platform.OS !== "ios") setShowEndPicker(false);
     if (date) {
-      setWizardState((s) => ({
-        ...s,
-        schedule: { ...s.schedule, end: date },
-      }));
+      setWizardState((prev) => {
+        const updated = { ...prev.schedule, end: date };
+        setSchedule(updated);
+        return { ...prev, schedule: updated };
+      });
     }
   };
 
   function goNext() {
-    console.log(wizardState);
     setWizardState((s) => ({ ...s, step: Math.min(s.step + 1, 2) }));
   }
 
-  /* ---------- render ---------- */
   return (
-    <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'space-between' }}>
+    <ScrollView
+      contentContainerStyle={{ flexGrow: 1, justifyContent: "space-between" }}
+    >
       <View style={styles(theme).container}>
         <View>
           <Title>Choose your Fasting Schedule</Title>
@@ -117,7 +117,6 @@ function ScheduleSlide({ wizardState, setWizardState }) {
             </CarouselButton>
           ))}
 
-          {/* ---------------- Custom option ---------------- */}
           <CarouselButton onPress={selectCustom}>Custom</CarouselButton>
 
           {showCustom && (

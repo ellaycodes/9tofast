@@ -8,7 +8,6 @@ import ProgressDots from "../components/Carousel/ProgressDots";
 
 function OnboardingCarousel({ route }) {
   const { token } = route.params;
-  console.log(token);
 
   const theme = Colors[useContext(AppThemeContext)];
   const [wizardState, setWizardState] = useState({

@@ -8,8 +8,6 @@ import {
 } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const STORAGE_KEY = "fastingState_v1";
-
 export const FastingContext = createContext({
   loading: true, // while AsyncStorage loads
   schedule: null, // { label, start, end } | null
@@ -27,12 +25,12 @@ export default function FastingContextProvider({ children }) {
   useEffect(() => {
     (async () => {
       try {
-        const raw = await AsyncStorage.getItem(STORAGE_KEY);
-        if (raw) {
-          const { schedule, fastStartTime } = JSON.parse(raw);
-          if (schedule) setSchedule(schedule);
-          if (fastStartTime) setFastStartTime(fastStartTime);
-        }
+        // const raw = await AsyncStorage.getItem("fastingState_v1");
+        // if (raw) {
+        // const { schedule, fastStartTime } = JSON.parse(raw);
+        if (schedule) setSchedule(schedule);
+        if (fastStartTime) setFastStartTime(fastStartTime);
+        // }
       } catch (err) {
         console.warn("Failed to load fasting state", err);
       } finally {
@@ -43,10 +41,10 @@ export default function FastingContextProvider({ children }) {
 
   useEffect(() => {
     if (loading) return;
-    AsyncStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({ schedule, fastStartTime })
-    ).catch((err) => console.warn("Failed to persist fasting state", err));
+    // AsyncStorage.setItem(
+    //   "fastingState_v1",
+    //   JSON.stringify({ schedule, fastStartTime })
+    // ).catch((err) => console.warn("Failed to persist fasting state", err));
   }, [schedule, fastStartTime, loading]);
 
   const memoSetSchedule = useCallback((schedule) => setSchedule(schedule), []);
@@ -64,6 +62,8 @@ export default function FastingContextProvider({ children }) {
     startFast,
     clearFast,
   };
+
+  console.log(value.schedule, value.fastStartTime);
 
   return (
     <FastingContext.Provider value={value}>{children}</FastingContext.Provider>

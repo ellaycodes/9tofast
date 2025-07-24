@@ -33,7 +33,6 @@ function PreAuthScreen({ navigation }) {
       navigation.navigate("OnboardingCarousel", {
         token,
       });
-      console.log(authCxt);
     } catch (err) {
       Alert.alert("Authentication Failed", "Could not log you in!");
       setIsAuthing(false);
