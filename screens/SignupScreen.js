@@ -13,7 +13,6 @@ function SignupScreen({ navigation }) {
     setIsAuthing(true);
     try {
       const token = await createUser(authDetails.email, authDetails.password);
-      //authCxt.authenticate(token);
       navigation.navigate("OnboardingCarousel", {
         token
       });
