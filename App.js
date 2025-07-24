@@ -8,6 +8,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import AppTabs from "./navigation/AppTabs";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import LoadingOverlay from "./components/ui/LoadingOverlay";
+import FastingContextProvider from "./store/fasting-context";
 
 function Navigator() {
   const authCxt = useContext(AuthContext);
@@ -43,12 +44,16 @@ export default function App() {
     <>
       <AuthContextProvider>
         <AppThemeContext.Provider value={theme}>
-          <SafeAreaProvider>
-            <StatusBar style="light" />
-            <Navigator />
-          </SafeAreaProvider>
+          <FastingContextProvider>
+            <SafeAreaProvider>
+              <StatusBar style="light" />
+              <Navigator />
+            </SafeAreaProvider>
+          </FastingContextProvider>
         </AppThemeContext.Provider>
       </AuthContextProvider>
     </>
   );
 }
+
+// estheryekini@hotmail.com

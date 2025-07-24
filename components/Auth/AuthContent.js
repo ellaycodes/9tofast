@@ -10,7 +10,7 @@ import { AppThemeContext } from "../../store/app-theme-context";
 
 function AuthContent({ isLogin, authenticate }) {
   const navigation = useNavigation();
-  const theme = Colors[useContext(AppThemeContext)]
+  const theme = Colors[useContext(AppThemeContext)];
 
   function switchAuthModeHandler() {
     if (isLogin) {
@@ -21,7 +21,7 @@ function AuthContent({ isLogin, authenticate }) {
   }
 
   function signInDifferently() {
-    navigation.goBack();
+    navigation.replace("PreAuthScreen");
   }
 
   function submitHandler(authDetails) {
@@ -46,9 +46,7 @@ function AuthContent({ isLogin, authenticate }) {
       });
       return;
     }
-    isLogin
-      ? authenticate({ email, password })
-      : navigation.navigate("OnboardingCarousel");
+    authenticate({ email, password });
   }
 
   return (
@@ -59,11 +57,17 @@ function AuthContent({ isLogin, authenticate }) {
         <FlatButton onPress={switchAuthModeHandler}>
           {isLogin ? "Create Account" : "I already have an account"}
         </FlatButton>
-        <Text style={{color: theme.muted}}> | </Text>
-        <FlatButton onPress={signInDifferently}>Sign in a different way</FlatButton>
+        <Text style={{ color: theme.muted }}> | </Text>
+        <FlatButton onPress={signInDifferently}>
+          Sign in a different way
+        </FlatButton>
       </View>
       <View>
-        <FlatButton>Forgotten Password?</FlatButton>
+        {isLogin && (
+          <FlatButton onPress={() => navigation.navigate("ForgottenPassword")}>
+            Forgotten Password?
+          </FlatButton>
+        )}
       </View>
     </View>
   );
@@ -73,11 +77,11 @@ export default AuthContent;
 
 const styles = StyleSheet.create({
   flatbuttonContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center'
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
   },
   container: {
-    margin: 16
-  }
-})
+    margin: 16,
+  },
+});

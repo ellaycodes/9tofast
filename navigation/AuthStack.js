@@ -6,6 +6,7 @@ import { Colors } from "../constants/Colors";
 import { useContext } from "react";
 import { AppThemeContext } from "../store/app-theme-context";
 import PreAuthScreen from "../screens/PreAuthScreen";
+import ForgottenPassword from "../screens/ForgottenPasswordScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -56,6 +57,13 @@ function AuthStack() {
           headerTitleStyle: {
             fontSize: 20,
           },
+        }}
+      />
+      <Stack.Screen
+        name="ForgottenPassword"
+        component={ForgottenPassword}
+        options={{
+          title: 'Forgotten Password'
         }}
       />
     </Stack.Navigator>

@@ -144,11 +144,9 @@ export default function StartTimerSlide({
       contentContainerStyle={styles(theme).container}
       showsVerticalScrollIndicator={false}
     >
-      {/* TOP half */}
       <View style={styles(theme).contentWrap}>
         <Title>Start your fasting schedule</Title>
 
-        {/* Replace the source with whatever image asset lives in your project */}
         {/* <Image
           source={require("../../assets/clock.png")}
           style={styles(theme).image}
