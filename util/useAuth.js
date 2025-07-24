@@ -1,8 +1,11 @@
 import axios from "axios";
 import Constants from "expo-constants";
 
+const authDomain = Constants.expoConfig.extra.firebaseAuthDomain;
+const apiKey = Constants.expoConfig.extra.firebaseApiKey;
+
 export async function useAuth(anonymous, mode, email, password) {
-  const url = `${Constants.expoConfig.extra.firebaseAuthDomain}${mode}?key=${Constants.expoConfig.extra.firebaseApiKey}`;
+  const url = `${authDomain}${mode}?key=${apiKey}`;
 
   let res;
 
@@ -14,7 +17,7 @@ export async function useAuth(anonymous, mode, email, password) {
     });
   } else {
     res = await axios.post(url, {
-      returnSecureToken: true
+      returnSecureToken: true,
     });
   }
 
@@ -32,4 +35,13 @@ export function login(email, password) {
 
 export function anonymousUser() {
   return useAuth(true, "signUp");
+}
+
+export async function forgottenPassword(email) {
+  const url = `${authDomain}sendOobCode?key=${apiKey}`;
+
+  const res = await axios.post(url, {
+    requestType: "PASSWORD_RESET",
+    email: email,
+  });
 }

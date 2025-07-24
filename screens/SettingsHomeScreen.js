@@ -1,7 +1,7 @@
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { useContext } from "react";
 import { Pressable, View, Text } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { AuthContext } from "../store/auth-context";
 
 function SettingsHomeScreen() {
@@ -12,16 +12,13 @@ function SettingsHomeScreen() {
   }
 
   return (
+    <View>
       <Pressable onPress={logoutHandler}>
-        <View>
-          <View>
-            <MaterialIcons name="logout" size={30} color="black" />
-          </View>
-          <View>
-            <Text>Logout</Text>
-          </View>
-        </View>
+      <Text>Text</Text>
+      <Ionicons name="exit-outline" size={40} color="black" />
+      <Text>Logout</Text>
       </Pressable>
+    </View>
   );
 }
 

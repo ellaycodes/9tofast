@@ -7,7 +7,8 @@ import StatsIntroSlide from "../components/Carousel/StatsIntroSlide";
 import { StyleSheet, View } from "react-native";
 import ProgressDots from "../components/Carousel/ProgressDots";
 
-function OnboardingCarousel() {
+function OnboardingCarousel({ route }) {
+  const { token } = route.params;
   const theme = Colors[useContext(AppThemeContext)];
   const [wizardState, setWizardState] = useState({
     step: 0,
@@ -17,8 +18,8 @@ function OnboardingCarousel() {
 
   const slides = [
     <ScheduleSlide {...{ wizardState, setWizardState }} />,
-    <StartTimerSlide {...{ wizardState, setWizardState }} />,
-    <StatsIntroSlide {...{ wizardState, setWizardState }} />,
+    <StartTimerSlide {...{ wizardState, setWizardState, token }} />,
+    // <StatsIntroSlide {...{ wizardState, setWizardState }} />,
   ];
 
   return (
