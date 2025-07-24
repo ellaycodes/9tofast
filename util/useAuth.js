@@ -44,4 +44,5 @@ export async function forgottenPassword(email) {
     requestType: "PASSWORD_RESET",
     email: email,
   });
+  return res;
 }

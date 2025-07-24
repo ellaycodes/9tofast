@@ -46,24 +46,18 @@ function PreAuthScreen({ navigation }) {
 
   return (
     <View>
-      <Title>Welcome to 9ToFast</Title>;
+      <Title>Welcome to 9ToFast</Title>
       <SubtitleText size={"xl"}>
         Track your Intermittent Fasting Schedule and stay on top of your health
         goals.
       </SubtitleText>
       <View style={styles.buttonContainer}>
-        {/* <PrimaryButton onPress={googleHandler}>
-          Continue with Google
-        </PrimaryButton> */}
         <PrimaryButton onPress={emailHandler}>
           Continue with Email
         </PrimaryButton>
         <PrimaryButton lowlight onPress={signInAnonymouslyHandler}>
           Continue without signing up
         </PrimaryButton>
-        {/* <FlatButton onPress={signInAnonymouslyHandler}>
-          Continue without signing up
-        </FlatButton> */}
       </View>
       <SubtitleText size={"m"} muted>
         By continuing, you agree to our{" "}

@@ -3,12 +3,13 @@ import { useContext, useState } from "react";
 import { AppThemeContext } from "../store/app-theme-context";
 import ScheduleSlide from "../components/Carousel/ScheduleSlide";
 import StartTimerSlide from "../components/Carousel/StartTimerSlide";
-import StatsIntroSlide from "../components/Carousel/StatsIntroSlide";
 import { StyleSheet, View } from "react-native";
 import ProgressDots from "../components/Carousel/ProgressDots";
 
 function OnboardingCarousel({ route }) {
   const { token } = route.params;
+  console.log(token);
+
   const theme = Colors[useContext(AppThemeContext)];
   const [wizardState, setWizardState] = useState({
     step: 0,
@@ -19,7 +20,6 @@ function OnboardingCarousel({ route }) {
   const slides = [
     <ScheduleSlide {...{ wizardState, setWizardState }} />,
     <StartTimerSlide {...{ wizardState, setWizardState, token }} />,
-    // <StatsIntroSlide {...{ wizardState, setWizardState }} />,
   ];
 
   return (
