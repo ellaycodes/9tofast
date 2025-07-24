@@ -4,7 +4,7 @@ import { useContext, useState } from "react";
 import { AuthContext } from "../store/auth-context";
 import LoadingOverlay from "../components/ui/LoadingOverlay";
 
-function SignupScreen() {
+function SignupScreen({ navigation }) {
   const [isAuthing, setIsAuthing] = useState(false);
 
   const authCxt = useContext(AuthContext);
@@ -13,7 +13,10 @@ function SignupScreen() {
     setIsAuthing(true);
     try {
       const token = await createUser(authDetails.email, authDetails.password);
-      authCxt.authenticate(token);
+      //authCxt.authenticate(token);
+      navigation.navigate("OnboardingCarousel", {
+        token
+      });
     } catch (err) {
       Alert.alert("Authentication Failed", "Could not sign you in!");
       setIsAuthing(false);
@@ -24,9 +27,7 @@ function SignupScreen() {
     return <LoadingOverlay>Signing you in</LoadingOverlay>;
   }
 
-  return (
-      <AuthContent authenticate={signUpHandler} />
-  );
+  return <AuthContent authenticate={signUpHandler} />;
 }
 
 export default SignupScreen;

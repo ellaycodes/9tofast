@@ -62,6 +62,9 @@ function AuthContent({ isLogin, authenticate }) {
         <Text style={{color: theme.muted}}> | </Text>
         <FlatButton onPress={signInDifferently}>Sign in a different way</FlatButton>
       </View>
+      <View>
+        <FlatButton>Forgotten Password?</FlatButton>
+      </View>
     </View>
   );
 }

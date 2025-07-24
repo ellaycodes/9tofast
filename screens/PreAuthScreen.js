@@ -30,7 +30,9 @@ function PreAuthScreen({ navigation }) {
     setIsAuthing(true);
     try {
       const token = await anonymousUser();
-      authCxt.authenticate(token);
+      navigation.navigate("OnboardingCarousel", {
+        token,
+      });
       console.log(authCxt);
     } catch (err) {
       Alert.alert("Authentication Failed", "Could not log you in!");
@@ -56,7 +58,9 @@ function PreAuthScreen({ navigation }) {
         <PrimaryButton onPress={emailHandler}>
           Continue with Email
         </PrimaryButton>
-        <PrimaryButton lowlight onPress={signInAnonymouslyHandler}>Continue without signing up</PrimaryButton>
+        <PrimaryButton lowlight onPress={signInAnonymouslyHandler}>
+          Continue without signing up
+        </PrimaryButton>
         {/* <FlatButton onPress={signInAnonymouslyHandler}>
           Continue without signing up
         </FlatButton> */}
