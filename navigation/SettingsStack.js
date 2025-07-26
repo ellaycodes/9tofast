@@ -4,12 +4,23 @@ import ManageAccountScreen from "../screens/ManageAccountScreen";
 import PremiumPaywallScreen from "../screens/PremiumPaywallScreen";
 import AboutSupportScreen from "../screens/AboutSupportScreen";
 import SchedulePickerModal from "../modals/SchedulePickerModal";
+import { Colors } from "../constants/Colors";
+import { useContext } from "react";
+import { AppThemeContext } from "../store/app-theme-context";
 
 const Stack = createNativeStackNavigator();
 
 function SettingsStack() {
+  const theme = Colors[useContext(AppThemeContext)];
+  
   return (
-    <Stack.Navigator>
+    <Stack.Navigator
+      screenOptions={{
+        contentStyle: {
+          backgroundColor: theme.background,
+        },
+      }}
+    >
       <Stack.Screen
         name="SettingsHomeScreen"
         component={SettingsHomeScreen}

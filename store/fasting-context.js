@@ -63,8 +63,6 @@ export default function FastingContextProvider({ children }) {
     clearFast,
   };
 
-  console.log(value.schedule, value.fastStartTime);
-
   return (
     <FastingContext.Provider value={value}>{children}</FastingContext.Provider>
   );
