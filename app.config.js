@@ -37,6 +37,7 @@ export default ({ config }) => ({
     firebaseAppId: process.env.FIREBASE_APP_ID,
   },
   plugins: [
+    "expo-font",
     [
       "expo-splash-screen",
       {

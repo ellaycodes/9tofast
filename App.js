@@ -9,12 +9,14 @@ import AppTabs from "./navigation/AppTabs";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import LoadingOverlay from "./components/ui/LoadingOverlay";
 import FastingContextProvider from "./store/fasting-context";
+import { Ionicons } from "@expo/vector-icons";
 
 function Navigator() {
   const authCxt = useContext(AuthContext);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    Ionicons.loadFont();
     (async () => {
       const storedToken = await AsyncStorage.getItem("token");
 
@@ -32,7 +34,8 @@ function Navigator() {
 
   return (
     <NavigationContainer>
-      {authCxt.isAuthed ? <AppTabs /> : <AuthStack />}
+      <AppTabs />
+      {/* {authCxt.isAuthed ? <AppTabs /> : <AuthStack />} */}
     </NavigationContainer>
   );
 }
