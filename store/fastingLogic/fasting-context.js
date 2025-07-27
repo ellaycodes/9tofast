@@ -6,10 +6,11 @@ import * as session from "./fasting-session";
 export const FastingContext = createContext({
   loading: true,
   schedule: null,
-  fastStartTime: null,
+  events: [],
   hoursFastedToday: null,
   setSchedule: () => {},
   startFast: () => {},
+  endFast: () => {},
   clearFast: () => {},
 });
 
@@ -22,7 +23,11 @@ function reducer(state, action) {
       return session.setSchedule(state, action.payload);
 
     case "START_FAST":
+      console.log("🤜 START_FAST reducer, previous events:", state.events);
       return session.startFast(state);
+
+    case "END_FAST":
+      return session.endFast(state);
 
     case "CLEAR_ALL":
       return session.clearAll();
@@ -46,21 +51,30 @@ export default function FastingContextProvider({ children }) {
     };
   }, []);
 
-  console.log('context', state);
-
   useEffect(() => {
     if (state.loading) return;
-    persist({ schedule: state.schedule, fastStartTime: state.fastStartTime });
-  }, [state.schedule, state.fastStartTime, state.loading]);
+    state.hours = session.hoursFastedToday(state);
+    persist(state);
+  }, [state.schedule, state.events, state.loading]);
 
   const value = {
     loading: state.loading,
     schedule: state.schedule,
-    fastStartTime: state.fastStartTime,
+    events: state.events,
+    hoursFastedToday: state.hours,
     setSchedule: (data) => dispatch({ type: "SET_SCHEDULE", payload: data }),
     startFast: () => dispatch({ type: "START_FAST" }),
+    endFast: () => dispatch({ type: "END_FAST" }),
     clearFast: () => dispatch({ type: "CLEAR_ALL" }),
   };
+
+
+  console.log(
+    "\n\ncontext value:\n\n",
+    JSON.stringify(value, null, 2),
+    "\n\nstate:\n\n",
+    JSON.stringify(state, null, 2)
+  );
 
   return (
     <FastingContext.Provider value={value}>{children}</FastingContext.Provider>

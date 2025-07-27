@@ -8,8 +8,7 @@ function OnboardingCarousel({ route }) {
   const { token } = route.params;
   const [wizardState, setWizardState] = useState({
     step: 0,
-    schedule: null,
-    fastStartedAt: null,
+    events: [],
   });
 
   const slides = [

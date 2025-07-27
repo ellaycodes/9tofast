@@ -7,21 +7,20 @@ import { Colors } from "../../constants/Colors";
 import { AppThemeContext } from "../../store/app-theme-context";
 import { AuthContext } from "../../store/auth-context";
 import { useFasting } from "../../store/fastingLogic/fasting-context";
-import { calcReadout, todayWindow, msToHms, formatTime } from "../../util/formatTime";
+import {
+  calcReadout,
+  todayWindow,
+  msToHms,
+  formatTime,
+} from "../../util/formatTime";
 
-export default function StartTimerSlide({
-  wizardState,
-  setWizardState,
-  token,
-}) {
-  const themeName = useContext(AppThemeContext);
-  const theme = Colors[themeName];
+export default function StartTimerSlide({ setWizardState, token }) {
+  const theme = Colors[useContext(AppThemeContext)];
   const authCxt = useContext(AuthContext);
-  const { setSchedule, startFast } = useFasting();
+  const { setSchedule, startFast, schedule, endFast } = useFasting();
+  console.log("\nschedule", schedule);
 
-  const { schedule } = wizardState;
-
-  const [started, setStarted] = useState(!!wizardState.fastStartedAt);
+  const [started, setStarted] = useState(false);
   const [readout, setReadout] = useState("\u00A0"); // non‑breaking space as placeholder
 
   useEffect(() => {
@@ -43,15 +42,19 @@ export default function StartTimerSlide({
   }, [started, schedule]);
 
   const startFastHandler = () => {
-    const { label, end, start } = wizardState.schedule;
     if (started) return;
-    setWizardState((prev) => ({
-      ...prev,
-      fastStartedAt: Date.now(),
-    }));
+
+    const now = Date.now();
+    const startTs = new Date(schedule.start).getTime();
+    const endTs = new Date(schedule.end).getTime();
+
+    if (now >= startTs && now < endTs) {
+      endFast(now);
+    } else {
+      startFast(now);
+    }
+    setSchedule(schedule);
     setStarted(true);
-    setSchedule({ label: label, start: start, end: end });
-    startFast(wizardState.fastStartedAt);
   };
 
   const { start, end } = todayWindow(schedule);
@@ -76,9 +79,9 @@ export default function StartTimerSlide({
         /> */}
 
         <Text style={styles(theme).scheduleLabel}>{schedule.label}</Text>
-        <Text style={styles(theme).window}>{`${formatTime(start)}  -  ${formatTime(
-          end
-        )}`}</Text>
+        <Text style={styles(theme).window}>{`${formatTime(
+          start
+        )}  -  ${formatTime(end)}`}</Text>
 
         {started && <Text style={styles(theme).countdown}>{readout}</Text>}
       </View>

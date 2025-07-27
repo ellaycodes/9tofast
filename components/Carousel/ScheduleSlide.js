@@ -4,43 +4,36 @@ import { useState } from "react";
 import Title from "../ui/Title";
 import CarouselButton from "../ui/CarouselButton";
 import PrimaryButton from "../ui/PrimaryButton";
-import { numberToHour } from "../../util/formatTime";
 import { useFasting } from "../../store/fastingLogic/fasting-context";
 import { PRESET_SCHEDULES } from "../../store/fastingLogic/data/fasting-presets";
 import CustomContainer from "./CustomContainer";
 import SchedulePickerModal from "../../modals/SchedulePickerModal";
 
-function ScheduleSlide({ wizardState, setWizardState }) {
-  const { setSchedule } = useFasting();
+function ScheduleSlide({ setWizardState }) {
+  const { setSchedule, schedule } = useFasting();
 
-  const [showCustom, setShowCustom] = useState(
-    wizardState.schedule?.label === "Custom"
-  );
-
+  const [showCustom, setShowCustom] = useState(schedule?.label === "Custom");
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
 
-  const startTime =
-    wizardState.schedule?.start ?? new Date(Date.now() + 60 * 60 * 1000);
-  const endTime =
-    wizardState.schedule?.end ?? new Date(Date.now() + 5 * 60 * 60 * 1000);
+  const startTime = schedule?.start ?? new Date(Date.now() + 60 * 60 * 1000);
+  const endTime = schedule?.end ?? new Date(Date.now() + 5 * 60 * 60 * 1000);
 
   function selectPreset(schedule) {
     const chosenPreset = {
       label: schedule.label,
-      start: numberToHour(schedule.start),
-      end: numberToHour(schedule.end),
+      start: schedule.start,
+      end: schedule.end,
     };
 
-    setWizardState((s) => ({ ...s, schedule: chosenPreset }));
     setSchedule(chosenPreset);
     setShowCustom(false);
   }
 
   function selectCustom() {
     const chosen = { label: "Custom", start: startTime, end: endTime };
+
     setShowCustom(true);
-    setWizardState((s) => ({ ...s, schedule: chosen }));
     setSchedule(chosen);
   }
 
@@ -51,22 +44,16 @@ function ScheduleSlide({ wizardState, setWizardState }) {
   const onChangeStart = (_e, date) => {
     if (Platform.OS !== "ios") setShowStartPicker(false);
     if (date) {
-      setWizardState((prev) => {
-        const updated = { ...prev.schedule, start: date };
-        setSchedule(updated);
-        return { ...prev, schedule: updated };
-      });
+      const updated = { ...schedule, start: date };
+      setSchedule(updated);
     }
   };
 
   const onChangeEnd = (_e, date) => {
     if (Platform.OS !== "ios") setShowEndPicker(false);
     if (date) {
-      setWizardState((prev) => {
-        const updated = { ...prev.schedule, end: date };
-        setSchedule(updated);
-        return { ...prev, schedule: updated };
-      });
+      const updated = { ...schedule, end: date };
+      setSchedule(updated);
     }
   };
 
@@ -85,14 +72,14 @@ function ScheduleSlide({ wizardState, setWizardState }) {
             <CarouselButton
               key={preset.label}
               onPress={() => selectPreset(preset)}
-              highlight={wizardState.schedule?.label === preset.label}
+              highlight={schedule?.label === preset.label}
             >
               {preset.label}
             </CarouselButton>
           ))}
 
           <CarouselButton onPress={selectCustom}>Custom</CarouselButton>
-          {showCustom && (
+          {showCustom && schedule && (
             <CustomContainer
               startTime={startTime}
               onStartTimePress={() => onTimePress("start")}

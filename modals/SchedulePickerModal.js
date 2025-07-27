@@ -12,7 +12,6 @@ function SchedulePickerModal({
   onChange,
 }) {
   const theme = Colors[useContext(AppThemeContext)];
-  console.log(timeDate);
   
   return (
     <Modal

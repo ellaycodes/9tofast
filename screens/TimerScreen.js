@@ -1,22 +1,18 @@
 import { useContext, useEffect, useState } from "react";
-import { Text, View } from "react-native";
-import { AuthContext } from "../store/auth-context";
+import { View } from "react-native";
 import { useFasting } from "../store/fastingLogic/fasting-context";
 import Countdown from "../components/ui/Countdown";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { StyleSheet } from "react-native";
 import { Colors } from "../constants/Colors";
 import { AppThemeContext } from "../store/app-theme-context";
-import { calcReadout, todayWindow, utcToUkLabel } from "../util/formatTime";
+import { calcReadout, utcToUkLabel } from "../util/formatTime";
 import Title from "../components/ui/Title";
 import SubtitleText from "../components/ui/SubtitleText";
-import PrimaryButton from "../components/ui/PrimaryButton";
 import ButtonsContainer from "../components/ui/ButtonsContainer";
-import { AntDesign } from "@expo/vector-icons";
 import Ads from "../components/monetising/Ads";
 
 function TimerScreen() {
-  const { schedule, fastStartTime } = useFasting();
+  const { schedule } = useFasting();
   const theme = Colors[useContext(AppThemeContext)];
   const [readout, setReadout] = useState(null);
 
@@ -51,11 +47,11 @@ function TimerScreen() {
       </View>
       {readout && readout.fast ? (
         <SubtitleText>
-          Starts {schedule && utcToUkLabel(schedule.start)}
+          Eating Starts {schedule && utcToUkLabel(schedule.start)}
         </SubtitleText>
       ) : (
         <SubtitleText muted>
-          Ends {schedule && utcToUkLabel(schedule.end)}
+          Eating Ends {schedule && utcToUkLabel(schedule.end)}
         </SubtitleText>
       )}
       <View>
