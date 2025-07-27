@@ -1,22 +1,24 @@
 import { StyleSheet, View } from "react-native";
 import PrimaryButton from "./PrimaryButton";
 import { useFasting } from "../../store/fastingLogic/fasting-context";
-import { msToHms } from "../../util/formatTime";
 
 function ButtonsContainer({ fast }) {
-  const { fastStartTime, startFast } = useFasting();
+  const { startFast, endFast } = useFasting();
 
-  function startFastHandler() {
-    startFast()
+  function toggleFastHandler() {
+    if (fast) {
+      endFast();
+      fast = false;
+    } else {
+      startFast();
+      fast = true;
+    }
   }
 
   return (
     <View style={styles.container}>
-      <PrimaryButton style={styles.button} onPress={startFastHandler}>
-        {fast ? "End Fast" : "Start Fast"}
-      </PrimaryButton>
-      <PrimaryButton style={styles.button} lowlight>
-        Pause
+      <PrimaryButton style={styles.button} onPress={toggleFastHandler}>
+        {fast ? "End Fast" : "Start Fast Early"}
       </PrimaryButton>
       <PrimaryButton style={styles.button} lowlight>
         Desk Mode

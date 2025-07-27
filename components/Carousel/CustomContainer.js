@@ -6,7 +6,6 @@ import CustomSelector from "../ui/CustomSelector";
 
 function CustomContainer({ startTime, endTime, onStartTimePress, onEndTimePress }) {
   const theme = Colors[useContext(AppThemeContext)];
-console.log(startTime);
 
   function onStartTimeSelect() {
     onStartTimePress();

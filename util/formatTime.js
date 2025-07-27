@@ -46,7 +46,10 @@ export const msToHms = (ms) => {
  *   // returns "09:05" if the Date is already in your local timezone
  */
 export function formatTime(date) {
-  return date.toLocaleTimeString("en-GB", {
+  if (!date) return "";
+  const d = date instanceof Date ? date : new Date(date);
+
+  return d.toLocaleTimeString("en-GB", {
     hour: "2-digit",
     hour12: true,
     minute: "2-digit",
@@ -151,7 +154,7 @@ export function calcReadout(schedule, now = new Date()) {
     target = new Date(start);
     target.setDate(target.getDate() + 1);
     label = "Eating window opens in";
-    fast = false;
+    fast = true;
   }
 
   const diffMs = Math.max(0, target.getTime() - now.getTime());
