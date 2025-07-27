@@ -1,11 +1,9 @@
 import { View, StyleSheet } from "react-native";
-import { Colors } from "../../constants/Colors";
-import { useContext } from "react";
-import { AppThemeContext } from "../../store/app-theme-context";
+import { useAppTheme } from "../../store/app-theme-context";
 import CustomSelector from "../ui/CustomSelector";
 
 function CustomContainer({ startTime, endTime, onStartTimePress, onEndTimePress }) {
-  const theme = Colors[useContext(AppThemeContext)];
+  const { theme } = useAppTheme();
 
   function onStartTimeSelect() {
     onStartTimePress();

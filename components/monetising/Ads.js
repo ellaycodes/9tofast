@@ -1,11 +1,9 @@
 import { AntDesign } from "@expo/vector-icons";
 import { Text, View } from "react-native";
-import { Colors } from "../../constants/Colors";
-import { useContext } from "react";
-import { AppThemeContext } from "../../store/app-theme-context";
+import { useAppTheme } from "../../store/app-theme-context";
 
 function Ads() {
-  const theme = Colors[useContext(AppThemeContext)];
+  const { theme } = useAppTheme();
   return (
     <View
       style={{

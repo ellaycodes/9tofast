@@ -4,13 +4,11 @@ import { useNavigation } from "@react-navigation/native";
 import Header from "./Header";
 import { Text, View } from "react-native";
 import { StyleSheet } from "react-native";
-import { Colors } from "../../constants/Colors";
-import { useContext } from "react";
-import { AppThemeContext } from "../../store/app-theme-context";
+import { useAppTheme } from "../../store/app-theme-context";
 
 function AuthContent({ isLogin, authenticate }) {
   const navigation = useNavigation();
-  const theme = Colors[useContext(AppThemeContext)];
+  const { theme } = useAppTheme();
 
   function switchAuthModeHandler() {
     if (isLogin) {

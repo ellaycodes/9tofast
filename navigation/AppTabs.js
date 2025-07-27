@@ -2,15 +2,13 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import TimerScreen from "../screens/TimerScreen";
 import ProgressScreen from "../screens/ProgressScreen";
 import SettingsStack from "./SettingsStack";
-import { Colors } from "../constants/Colors";
-import { useContext } from "react";
-import { AppThemeContext } from "../store/app-theme-context";
+import { useAppTheme } from "../store/app-theme-context";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 
 const Tab = createBottomTabNavigator();
 
 function AppTabs() {
-  const theme = Colors[useContext(AppThemeContext)];
+  const { theme } = useAppTheme();
 
   return (
     <Tab.Navigator

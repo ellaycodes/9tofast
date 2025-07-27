@@ -2,12 +2,11 @@ import { useContext } from "react";
 import { Pressable, View, Text } from "react-native";
 import { AuthContext } from "../store/auth-context";
 import { MaterialIcons } from "@expo/vector-icons";
-import { Colors } from "../constants/Colors";
-import { AppThemeContext } from "../store/app-theme-context";
+import { useAppTheme } from "../store/app-theme-context";
 import { useFasting } from "../store/fastingLogic/fasting-context";
 
 function SettingsHomeScreen() {
-  const theme = Colors[useContext(AppThemeContext)];
+  const { theme } = useAppTheme();
   const authCxt = useContext(AuthContext);
   const { schedule } = useFasting();
 

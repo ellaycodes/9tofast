@@ -2,16 +2,14 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import LoginScreen from "../screens/LoginScreen";
 import SignupScreen from "../screens/SignupScreen";
 import OnboardingCarousel from "../screens/OnboardingCarousel";
-import { Colors } from "../constants/Colors";
-import { useContext } from "react";
-import { AppThemeContext } from "../store/app-theme-context";
+import { useAppTheme } from "../store/app-theme-context";
 import PreAuthScreen from "../screens/PreAuthScreen";
 import ForgottenPassword from "../screens/ForgottenPasswordScreen";
 
 const Stack = createNativeStackNavigator();
 
 function AuthStack() {
-  const theme = Colors[useContext(AppThemeContext)];
+  const { theme } = useAppTheme();
 
   return (
     <Stack.Navigator

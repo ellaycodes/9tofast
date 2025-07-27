@@ -1,11 +1,9 @@
 import { Text, Pressable, StyleSheet, View } from "react-native";
-import { Colors } from "../../constants/Colors";
-import { useContext } from "react";
-import { AppThemeContext } from "../../store/app-theme-context";
+import { useAppTheme } from "../../store/app-theme-context";
 import { formatTime } from "../../util/formatTime";
 
 function CustomSelector({ label, time, onPress }) {
-  const theme = Colors[useContext(AppThemeContext)];
+  const { theme } = useAppTheme();
   
   return (
     <View>

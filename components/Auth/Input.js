@@ -1,11 +1,9 @@
-import { AppThemeContext } from "../../store/app-theme-context";
-import { useContext } from "react";
+import { useAppTheme } from "../../store/app-theme-context";
 import { StyleSheet } from "react-native";
 import { TextInput, View, Text } from "react-native";
-import { Colors } from "../../constants/Colors";
 
 function Input({ label, value, secure, onUpdateText, keyboardType }) {
-  const theme = Colors[useContext(AppThemeContext)];
+  const { theme } = useAppTheme();
 
   return (
     <View style={styles(theme).inputContainer}>

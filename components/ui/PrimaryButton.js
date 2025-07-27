@@ -1,10 +1,8 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { Colors } from "../../constants/Colors";
-import { useContext } from "react";
-import { AppThemeContext } from "../../store/app-theme-context";
+import { useAppTheme } from "../../store/app-theme-context";
 
 function PrimaryButton({ children, onPress, lowlight, style }) {
-  const theme = Colors[useContext(AppThemeContext)];
+  const { theme } = useAppTheme();
   return (
     <Pressable
       style={({ pressed }) => [
