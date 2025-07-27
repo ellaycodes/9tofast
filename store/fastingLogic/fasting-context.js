@@ -12,6 +12,7 @@ export const FastingContext = createContext({
   startFast: () => {},
   endFast: () => {},
   clearFast: () => {},
+  isFasting: () => false,
 });
 
 function reducer(state, action) {
@@ -23,7 +24,6 @@ function reducer(state, action) {
       return session.setSchedule(state, action.payload);
 
     case "START_FAST":
-      console.log("🤜 START_FAST reducer, previous events:", state.events);
       return session.startFast(state);
 
     case "END_FAST":
@@ -55,7 +55,7 @@ export default function FastingContextProvider({ children }) {
     if (state.loading) return;
     state.hours = session.hoursFastedToday(state);
     persist(state);
-  }, [state.schedule, state.events, state.loading]);
+  }, [state]);
 
   const value = {
     loading: state.loading,
@@ -66,15 +66,16 @@ export default function FastingContextProvider({ children }) {
     startFast: () => dispatch({ type: "START_FAST" }),
     endFast: () => dispatch({ type: "END_FAST" }),
     clearFast: () => dispatch({ type: "CLEAR_ALL" }),
+    isFasting: () => session.isFasting(state.events),
   };
 
-
-  console.log(
-    "\n\ncontext value:\n\n",
-    JSON.stringify(value, null, 2),
-    "\n\nstate:\n\n",
-    JSON.stringify(state, null, 2)
-  );
+  
+  // console.log(
+  //   "\n\ncontext value:\n\n",
+  //   JSON.stringify(value, null, 2),
+  //   "\n\nstate:\n\n",
+  //   JSON.stringify(state, null, 2)
+  // );
 
   return (
     <FastingContext.Provider value={value}>{children}</FastingContext.Provider>

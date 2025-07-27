@@ -1,20 +1,26 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, useMemo } from "react";
 import { View } from "react-native";
 import { useFasting } from "../store/fastingLogic/fasting-context";
 import Countdown from "../components/ui/Countdown";
 import { StyleSheet } from "react-native";
 import { Colors } from "../constants/Colors";
 import { AppThemeContext } from "../store/app-theme-context";
-import { calcReadout, utcToUkLabel } from "../util/formatTime";
+import {
+  calcReadout,
+  decimalHoursToHms,
+  utcToUkLabel,
+} from "../util/formatTime";
 import Title from "../components/ui/Title";
 import SubtitleText from "../components/ui/SubtitleText";
 import ButtonsContainer from "../components/ui/ButtonsContainer";
 import Ads from "../components/monetising/Ads";
+import { getRandomOffScheduleTitle } from "../util/offScheduleTitles";
 
 function TimerScreen() {
-  const { schedule } = useFasting();
+  const { schedule, isFasting, hoursFastedToday } = useFasting();
   const theme = Colors[useContext(AppThemeContext)];
   const [readout, setReadout] = useState(null);
+  const [offScheduleTitle, setOffScheduleTitle] = useState("");
 
   useEffect(() => {
     if (!schedule) return;
@@ -24,38 +30,69 @@ function TimerScreen() {
 
     const id = setInterval(update, 100);
 
-    return () => clearInterval(id);
+    return () => {
+      clearInterval(id);
+    };
   }, [schedule]);
+
+  const withinFasting = useMemo(() => {
+    if (!schedule) return false;
+    const now = Date.now();
+    const startTs = new Date(schedule.start).getTime();
+    const endTs = new Date(schedule.end).getTime();
+    return now < startTs || now >= endTs;
+  }, [schedule]);
+
+  const offSchedule =
+    (isFasting() && !withinFasting) || (!isFasting() && withinFasting);
+
+  useEffect(() => {
+    if (offSchedule) {
+      setOffScheduleTitle(
+        getRandomOffScheduleTitle(
+          !isFasting() && withinFasting ? "eating" : "fasting"
+        )
+      );
+    }
+  }, [offSchedule, isFasting, withinFasting]);
 
   const timeUnits = readout ? Object.keys(readout.units).slice(0, -1) : [];
 
   return (
     <View style={styles(theme).container}>
-      {readout && readout.fast ? (
+      {isFasting() && !offSchedule ? (
         <Title style={[styles(theme).title, styles(theme).fasting]}>
           Fasting Window
         </Title>
-      ) : (
+      ) : !isFasting() && !offSchedule ? (
         <Title style={[styles(theme).title, styles(theme).eating]}>
           Eating Window
         </Title>
+      ) : (
+        <Title style={[styles(theme).title, styles(theme).eating]}>
+          {offScheduleTitle}
+        </Title>
       )}
-      <View style={styles(theme).countdownContainer}>
-        {timeUnits.map((u) => (
-          <Countdown key={u} label={u} time={readout.units[u]} />
-        ))}
-      </View>
-      {readout && readout.fast ? (
+      {offSchedule ? null : (
+        <View style={styles(theme).countdownContainer}>
+          {timeUnits.map((u) => (
+            <Countdown key={u} label={u} time={readout.units[u]} />
+          ))}
+        </View>
+      )}
+      {!isFasting() && withinFasting ? (
+        <SubtitleText muted>Allowed Snack Time 🍪</SubtitleText>
+      ) : isFasting() ? (
         <SubtitleText>
-          Eating Starts {schedule && utcToUkLabel(schedule.start)}
+          Ends {schedule && utcToUkLabel(schedule.start)}
         </SubtitleText>
       ) : (
         <SubtitleText muted>
-          Eating Ends {schedule && utcToUkLabel(schedule.end)}
+          Fasting Starts {schedule && utcToUkLabel(schedule.end)}
         </SubtitleText>
       )}
       <View>
-        <ButtonsContainer fast={readout && readout.fast} />
+        <ButtonsContainer fast={isFasting()} withinFasting={withinFasting} />
       </View>
       <Ads />
     </View>
@@ -82,5 +119,10 @@ const styles = (theme) =>
     },
     eating: {
       color: theme.success,
+    },
+    fastedContainer: {
+      flexDirection: "row",
+      margin: 16,
+      gap: "10%",
     },
   });
