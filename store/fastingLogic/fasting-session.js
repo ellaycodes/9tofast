@@ -114,8 +114,6 @@ export function hoursFastedToday(state, now = Date.now()) {
   // Merge and sort all events
   const all = [...baseline, ...userEvents].sort((a, b) => a.ts - b.ts);
 
-  // console.log("🔄 Merged timeline:", all);
-
   const todayStart = new Date(now);
   todayStart.setHours(0, 0, 0, 0);
   const midnight = todayStart.getTime();

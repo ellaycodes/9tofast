@@ -3,38 +3,39 @@ import { Colors } from "../../constants/Colors";
 import { useContext } from "react";
 import { AppThemeContext } from "../../store/app-theme-context";
 
-function Countdown({ label, time }) {
+function Countdown({ label, time, small}) {
   const theme = Colors[useContext(AppThemeContext)];
+  
   return (
-    <View style={styles(theme).container}>
-      <View style={styles(theme).timeContainer}>
-        <Text style={[styles(theme).time, styles(theme).text]}>{time}</Text>
+    <View style={styles(theme, small).container}>
+      <View style={styles(theme, small).timeContainer}>
+        <Text style={[styles(theme, small).time, styles(theme, small).text]}>{time}</Text>
       </View>
-      <Text style={[styles(theme).label, styles(theme).text]}>{label.charAt(0).toUpperCase() + label.slice(1)}</Text>
+      <Text style={[styles(theme, small).label, styles(theme, small).text]}>{label.charAt(0).toUpperCase() + label.slice(1)}</Text>
     </View>
   );
 }
 
 export default Countdown;
 
-const styles = (theme) =>
+const styles = (theme, small) =>
   StyleSheet.create({
     container: {
         flex: 1
     },
     timeContainer: {
-      paddingVertical: 24,
-      paddingHorizontal: 16,
-      borderRadius: 16,
+      paddingVertical: small ? 12: 24,
+      paddingHorizontal: small ? 8: 16,
+      borderRadius: small ? 8: 16,
       backgroundColor: theme.secondary100,
     },
     time: {
-      fontSize: 24,
+      fontSize: small? 12 : 24,
       fontWeight: "bold",
     },
     label: {
-      fontSize: 20,
-      paddingVertical: 16,
+      fontSize: small ? 10: 20,
+      paddingVertical: small ? 8: 16,
     },
     text: {
       color: theme.text,
