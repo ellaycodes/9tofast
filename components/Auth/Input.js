@@ -16,6 +16,10 @@ function Input({ label, value, secure, onUpdateText, keyboardType }) {
         secureTextEntry={secure}
         onChangeText={onUpdateText}
         keyboardType={keyboardType}
+        autoComplete="off"
+        importantForAutofill="no"
+        textContentType="none"
+        disableFullscreenUI={true}
       />
     </View>
   );

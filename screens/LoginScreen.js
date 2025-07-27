@@ -2,8 +2,9 @@ import { login } from "../util/useAuth";
 import { useContext, useState } from "react";
 import AuthContent from "../components/Auth/AuthContent";
 import { AuthContext } from "../store/auth-context";
-import { Alert } from "react-native";
+import { Alert, KeyboardAvoidingView, ScrollView } from "react-native";
 import LoadingOverlay from "../components/ui/LoadingOverlay";
+import { Platform } from "react-native";
 
 function LoginScreen() {
   const [isAuthing, setIsAuthing] = useState(false);
@@ -26,7 +27,18 @@ function LoginScreen() {
   }
 
   return (
-      <AuthContent isLogin authenticate={loginHandler} />
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 50 : 0}
+    >
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <AuthContent isLogin authenticate={loginHandler} />
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 

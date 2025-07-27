@@ -3,11 +3,11 @@ import { Colors } from "../../constants/Colors";
 import { useContext } from "react";
 import { AppThemeContext } from "../../store/app-theme-context";
 
-function SubtitleText({ children, size, muted }) {
+function SubtitleText({ children, size, muted, style }) {
   const theme = Colors[useContext(AppThemeContext)];
 
   return (
-    <View style={styles(theme).textContainer}>
+    <View style={[styles(theme).textContainer, style]}>
       <Text style={styles(theme, size, muted).text}>{children}</Text>
     </View>
   );
@@ -26,7 +26,7 @@ export default SubtitleText;
 const styles = (theme, size, muted) =>
   StyleSheet.create({
     text: {
-      color: muted ? theme.primary200 : theme.text,
+      color: muted ? theme.muted : theme.text,
       textAlign: 'center',
       fontSize: FONT_SIZE[size] || 16,
       lineHeight: 26

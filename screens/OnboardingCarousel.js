@@ -1,6 +1,4 @@
-import { Colors } from "../constants/Colors";
-import { useContext, useState } from "react";
-import { AppThemeContext } from "../store/app-theme-context";
+import { useState } from "react";
 import ScheduleSlide from "../components/Carousel/ScheduleSlide";
 import StartTimerSlide from "../components/Carousel/StartTimerSlide";
 import { StyleSheet, View } from "react-native";
@@ -8,8 +6,6 @@ import ProgressDots from "../components/Carousel/ProgressDots";
 
 function OnboardingCarousel({ route }) {
   const { token } = route.params;
-
-  const theme = Colors[useContext(AppThemeContext)];
   const [wizardState, setWizardState] = useState({
     step: 0,
     schedule: null,

@@ -4,10 +4,12 @@ import { AuthContext } from "../store/auth-context";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Colors } from "../constants/Colors";
 import { AppThemeContext } from "../store/app-theme-context";
+import { useFasting } from "../store/fastingLogic/fasting-context";
 
 function SettingsHomeScreen() {
   const theme = Colors[useContext(AppThemeContext)];
   const authCxt = useContext(AuthContext);
+  const { schedule } = useFasting();
 
   function logoutHandler() {
     return authCxt.logout();
@@ -15,11 +17,11 @@ function SettingsHomeScreen() {
 
   return (
     <View style={{ padding: 16 }}>
-    <Pressable onPress={logoutHandler} style={{ flexDirection: "row" }}>
-      <MaterialIcons name="logout" size={24} color={theme.text} />
-      <Text style={{ color: theme.text, fontSize: 24 }}>Logout</Text>
-    </Pressable>
-   </View>
+      <Pressable onPress={logoutHandler} style={{ flexDirection: "row" }}>
+        <MaterialIcons name="logout" size={24} color={theme.text} />
+        <Text style={{ color: theme.text, fontSize: 24 }}>Logout</Text>
+      </Pressable>
+    </View>
   );
 }
 

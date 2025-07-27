@@ -1,9 +1,12 @@
-import { Text } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Text, View } from "react-native";
+import Ads from "../components/monetising/Ads";
 
 function ProgressScreen() {
   return (
+    <View>
       <Text>This is the ProgressScreen</Text>
+      <Ads />
+    </View>
   );
 }
 
