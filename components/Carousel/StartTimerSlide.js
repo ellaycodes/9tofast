@@ -6,8 +6,8 @@ import PrimaryButton from "../ui/PrimaryButton";
 import { Colors } from "../../constants/Colors";
 import { AppThemeContext } from "../../store/app-theme-context";
 import { AuthContext } from "../../store/auth-context";
-import { useFasting } from "../../store/fasting-context";
-import { asHms, fmt, todayWindow } from "../../util/formatTime";
+import { useFasting } from "../../store/fastingLogic/fasting-context";
+import { calcReadout, todayWindow, msToHms, formatTime } from "../../util/formatTime";
 
 export default function StartTimerSlide({
   wizardState,
@@ -25,31 +25,19 @@ export default function StartTimerSlide({
   const [readout, setReadout] = useState("\u00A0"); // non‑breaking space as placeholder
 
   useEffect(() => {
-    if (!started) return;
+    if (!started) {
+      setReadout(null);
+      return;
+    }
 
-    const id = setInterval(() => {
-      const now = new Date();
-      const { start, end } = todayWindow(schedule);
+    const update = () => {
+      const c = calcReadout(schedule);
+      setReadout(`${c.label} ${msToHms(c.diffMs)}`);
+    };
 
-      let target;
-      let label;
+    update();
 
-      if (now < start) {
-
-        target = start;
-        label = "Eating window opens in";
-      } else if (now >= start && now < end) {
-        target = end;
-        label = "Fasting resumes in";
-      } else {
-        target = new Date(start);
-        target.setDate(target.getDate() + 1);
-        label = "Eating window opens in";
-      }
-
-      const diff = target - now;
-      setReadout(`${label}  ${asHms(diff)}`);
-    }, 1000);
+    const id = setInterval(update, 1000);
 
     return () => clearInterval(id);
   }, [started, schedule]);
@@ -88,7 +76,7 @@ export default function StartTimerSlide({
         /> */}
 
         <Text style={styles(theme).scheduleLabel}>{schedule.label}</Text>
-        <Text style={styles(theme).window}>{`${fmt(start)}  -  ${fmt(
+        <Text style={styles(theme).window}>{`${formatTime(start)}  -  ${formatTime(
           end
         )}`}</Text>
 

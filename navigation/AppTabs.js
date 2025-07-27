@@ -22,6 +22,11 @@ function AppTabs() {
           backgroundColor: theme.background,
         },
         headerTintColor: theme.text,
+        tabBarActiveTintColor: theme.text,
+        tabBarInactiveTintColor: theme.muted,
+        tabBarStyle: {
+          backgroundColor: theme.secondary100,
+        },
       }}
     >
       <Tab.Screen
@@ -30,8 +35,9 @@ function AppTabs() {
         options={{
           title: "Timer",
           tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="timer" color={color} size={size} />
+            <MaterialIcons name="home" color={color} size={size} />
           ),
+          tabBarLabel: 'Home',
         }}
       />
       <Tab.Screen

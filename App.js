@@ -8,7 +8,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import AppTabs from "./navigation/AppTabs";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import LoadingOverlay from "./components/ui/LoadingOverlay";
-import FastingContextProvider from "./store/fasting-context";
+import FastingContextProvider from "./store/fastingLogic/fasting-context";
 import { Ionicons } from "@expo/vector-icons";
 
 function Navigator() {
@@ -34,8 +34,7 @@ function Navigator() {
 
   return (
     <NavigationContainer>
-      <AppTabs />
-      {/* {authCxt.isAuthed ? <AppTabs /> : <AuthStack />} */}
+      {authCxt.isAuthed ? <AppTabs /> : <AuthStack />}
     </NavigationContainer>
   );
 }

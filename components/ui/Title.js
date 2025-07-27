@@ -3,11 +3,12 @@ import { Colors } from "../../constants/Colors";
 import { useContext } from "react";
 import { AppThemeContext } from "../../store/app-theme-context";
 
-function Title({ children }) {
+function Title({ children, style }) {
   const theme = Colors[useContext(AppThemeContext)]
+  
   return (
-    <View style={styles(theme).container}>
-      <Text style={styles(theme).titleText}>{children}</Text>
+    <View style={[styles(theme).container, style]}>
+      <Text style={[styles(theme).titleText, style]}>{children}</Text>
     </View>
   );
 }

@@ -4,7 +4,6 @@ import Input from "./Input";
 import PrimaryButton from "../ui/PrimaryButton";
 
 function AuthForm({ isLogin, onSubmit }) {
-
   const [authDetails, setAuthDetails] = useState({
     email: "",
     confirmEmail: "",
@@ -58,6 +57,7 @@ function AuthForm({ isLogin, onSubmit }) {
           value={authDetails.email}
           secure={false}
           onUpdateText={handleInputs.bind(this, "email")}
+          keyboardType="email-address"
         />
         {!isLogin && (
           <Input
@@ -65,6 +65,7 @@ function AuthForm({ isLogin, onSubmit }) {
             value={authDetails.confirmEmail}
             secure={false}
             onUpdateText={handleInputs.bind(this, "confirmEmail")}
+            keyboardType="email-address"
           />
         )}
         <Input

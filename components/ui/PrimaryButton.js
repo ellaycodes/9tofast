@@ -3,13 +3,14 @@ import { Colors } from "../../constants/Colors";
 import { useContext } from "react";
 import { AppThemeContext } from "../../store/app-theme-context";
 
-function PrimaryButton({ children, onPress, lowlight }) {
+function PrimaryButton({ children, onPress, lowlight, style }) {
   const theme = Colors[useContext(AppThemeContext)];
   return (
     <Pressable
       style={({ pressed }) => [
         styles(theme, lowlight).buttonContainer,
         pressed && styles(theme).pressed,
+        style,
       ]}
       onPress={onPress}
     >
@@ -26,10 +27,12 @@ const styles = (theme, lowlight) =>
   StyleSheet.create({
     buttonContainer: {
       backgroundColor: lowlight ? theme.secondary100 : theme.primary100,
-      padding: 18,
+      paddingVertical: 18,
       borderRadius: 50,
-      marginHorizontal: 8,
+      marginHorizontal: 4,
       marginVertical: 8,
+      alignContent: "center",
+      justifyContent: "center",
     },
     pressed: {
       opacity: 0.75,
