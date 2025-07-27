@@ -1,9 +1,7 @@
 import { Modal, Pressable, View, Platform, StyleSheet } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import PrimaryButton from "../components/ui/PrimaryButton";
-import { Colors } from "../constants/Colors";
-import { useContext } from "react";
-import { AppThemeContext } from "../store/app-theme-context";
+import { useAppTheme } from "../store/app-theme-context";
 
 function SchedulePickerModal({
   showPicker,
@@ -11,7 +9,7 @@ function SchedulePickerModal({
   timeDate,
   onChange,
 }) {
-  const theme = Colors[useContext(AppThemeContext)];
+  const { theme } = useAppTheme();
   
   return (
     <Modal

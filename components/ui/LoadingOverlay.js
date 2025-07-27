@@ -1,10 +1,8 @@
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
-import { Colors } from "../../constants/Colors";
-import { useContext } from "react";
-import { AppThemeContext } from "../../store/app-theme-context";
+import { useAppTheme } from "../../store/app-theme-context";
 
 function LoadingOverlay({ children }) {
-  const theme = Colors[useContext(AppThemeContext)];
+  const { theme } = useAppTheme();
   return (
     <View style={styles(theme).container}>
       <ActivityIndicator size={"large"} color={theme.primary100} />
@@ -25,6 +23,6 @@ const styles = (theme) =>
     text: {
       color: theme.text,
       marginVertical: 16,
-      fontSize: 16
+      fontSize: 16,
     },
   });

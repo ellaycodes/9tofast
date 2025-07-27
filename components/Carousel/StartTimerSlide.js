@@ -3,8 +3,7 @@ import { View, Text, StyleSheet, Image, ScrollView } from "react-native";
 
 import Title from "../ui/Title";
 import PrimaryButton from "../ui/PrimaryButton";
-import { Colors } from "../../constants/Colors";
-import { AppThemeContext } from "../../store/app-theme-context";
+import { useAppTheme } from "../../store/app-theme-context";
 import { AuthContext } from "../../store/auth-context";
 import { useFasting } from "../../store/fastingLogic/fasting-context";
 import {
@@ -15,7 +14,7 @@ import {
 } from "../../util/formatTime";
 
 export default function StartTimerSlide({ setWizardState, token }) {
-  const theme = Colors[useContext(AppThemeContext)];
+  const { theme } = useAppTheme();
   const authCxt = useContext(AuthContext);
   const { setSchedule, startFast, schedule, endFast } = useFasting();
   console.log("\nschedule", schedule);

@@ -1,10 +1,8 @@
-import { StyleSheet, Text, View } from "react-native";
-import { Colors } from "../../constants/Colors";
-import { useContext } from "react";
-import { AppThemeContext } from "../../store/app-theme-context";
+import { StyleSheet, View } from "react-native";
+import { useAppTheme } from "../../store/app-theme-context";
 
 function ProgressDots({ step, total }) {
-  const theme = Colors[useContext(AppThemeContext)];
+  const { theme } = useAppTheme();
   return (
     <View style={styles.container}>
       {Array.from({ length: total }).map((_, i) => (

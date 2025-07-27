@@ -1,15 +1,10 @@
-import { useContext, useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { View } from "react-native";
 import { useFasting } from "../store/fastingLogic/fasting-context";
 import Countdown from "../components/ui/Countdown";
 import { StyleSheet } from "react-native";
-import { Colors } from "../constants/Colors";
-import { AppThemeContext } from "../store/app-theme-context";
-import {
-  calcReadout,
-  decimalHoursToHms,
-  utcToUkLabel,
-} from "../util/formatTime";
+import { useAppTheme } from "../store/app-theme-context";
+import { calcReadout, utcToUkLabel } from "../util/formatTime";
 import Title from "../components/ui/Title";
 import SubtitleText from "../components/ui/SubtitleText";
 import ButtonsContainer from "../components/ui/ButtonsContainer";
@@ -17,8 +12,8 @@ import Ads from "../components/monetising/Ads";
 import { getRandomOffScheduleTitle } from "../util/offScheduleTitles";
 
 function TimerScreen() {
-  const { schedule, isFasting, hoursFastedToday } = useFasting();
-  const theme = Colors[useContext(AppThemeContext)];
+  const { schedule, isFasting } = useFasting();
+  const { theme } = useAppTheme();
   const [readout, setReadout] = useState(null);
   const [offScheduleTitle, setOffScheduleTitle] = useState("");
 

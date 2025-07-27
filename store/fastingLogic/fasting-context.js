@@ -69,14 +69,6 @@ export default function FastingContextProvider({ children }) {
     isFasting: () => session.isFasting(state.events),
   };
 
-  
-  // console.log(
-  //   "\n\ncontext value:\n\n",
-  //   JSON.stringify(value, null, 2),
-  //   "\n\nstate:\n\n",
-  //   JSON.stringify(state, null, 2)
-  // );
-
   return (
     <FastingContext.Provider value={value}>{children}</FastingContext.Provider>
   );

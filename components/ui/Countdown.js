@@ -1,10 +1,8 @@
 import { StyleSheet, Text, View } from "react-native";
-import { Colors } from "../../constants/Colors";
-import { useContext } from "react";
-import { AppThemeContext } from "../../store/app-theme-context";
+import { useAppTheme } from "../../store/app-theme-context";
 
 function Countdown({ label, time, small}) {
-  const theme = Colors[useContext(AppThemeContext)];
+  const { theme } = useAppTheme();
   
   return (
     <View style={styles(theme, small).container}>
