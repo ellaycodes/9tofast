@@ -1,9 +1,9 @@
-import { login } from "../util/useAuth";
+import { login } from "../../util/useAuth";
 import { useContext, useState } from "react";
-import AuthContent from "../components/Auth/AuthContent";
-import { AuthContext } from "../store/auth-context";
+import AuthContent from "../../components/Auth/AuthContent";
+import { AuthContext } from "../../store/auth-context";
 import { Alert, KeyboardAvoidingView, ScrollView } from "react-native";
-import LoadingOverlay from "../components/ui/LoadingOverlay";
+import LoadingOverlay from "../../components/ui/LoadingOverlay";
 import { Platform } from "react-native";
 
 function LoginScreen() {

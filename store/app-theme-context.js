@@ -3,14 +3,14 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { Colors } from "../constants/Colors";
 
 export const AppThemeContext = createContext({
-  themeName: "original",
-  theme: Colors.original,
+  themeName: "Original",
+  theme: Colors.Original,
   setThemeName: () => {},
 });
 
 export default function AppThemeContextProvider({ children }) {
-  const [theme, setTheme] = useState(Colors.original);
-  const [themeName, setThemeNameState] = useState("original");
+  const [theme, setTheme] = useState(Colors.Original);
+  const [themeName, setThemeNameState] = useState("Original");
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -33,7 +33,7 @@ export default function AppThemeContextProvider({ children }) {
   async function setThemeName(name) {
     if (!Colors[name]) {
       console.warn(`Unknown theme "${name}". Using original.`);
-      name = "original";
+      name = "Original";
     }
     setTheme(Colors[name]);
     setThemeNameState(name);

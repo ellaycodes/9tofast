@@ -1,8 +1,8 @@
-import AuthContent from "../components/Auth/AuthContent";
-import { createUser } from "../util/useAuth";
+import AuthContent from "../../components/Auth/AuthContent";
+import { createUser } from "../../util/useAuth";
 import { useContext, useState } from "react";
-import { AuthContext } from "../store/auth-context";
-import LoadingOverlay from "../components/ui/LoadingOverlay";
+import { AuthContext } from "../../store/auth-context";
+import LoadingOverlay from "../../components/ui/LoadingOverlay";
 import { KeyboardAvoidingView, ScrollView } from "react-native";
 import { Platform } from "react-native";
 

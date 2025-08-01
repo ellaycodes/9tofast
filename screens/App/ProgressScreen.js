@@ -1,5 +1,5 @@
 import { Text, View } from "react-native";
-import Ads from "../components/monetising/Ads";
+import Ads from "../../components/monetising/Ads";
 
 function ProgressScreen() {
   return (

@@ -35,11 +35,11 @@ function ButtonsContainer({ fast, withinFasting }) {
       <PrimaryButton style={styles.button} onPress={toggleFastHandler}>
         {buttonLabel}
       </PrimaryButton>
-      {themeName === "desk" ? (
+      {themeName === "Desk" ? (
         <PrimaryButton
           style={styles.button}
           lowlight
-          onPress={() => onAppThemeChange("original")}
+          onPress={() => onAppThemeChange("Original")}
         >
           Revert
         </PrimaryButton>
@@ -47,7 +47,7 @@ function ButtonsContainer({ fast, withinFasting }) {
         <PrimaryButton
           style={styles.button}
           lowlight
-          onPress={() => onAppThemeChange("desk")}
+          onPress={() => onAppThemeChange("Desk")}
         >
           Desk Mode
         </PrimaryButton>

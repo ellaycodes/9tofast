@@ -1,6 +1,6 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import TimerScreen from "../screens/TimerScreen";
-import ProgressScreen from "../screens/ProgressScreen";
+import TimerScreen from "../screens/App/TimerScreen";
+import ProgressScreen from "../screens/App/ProgressScreen";
 import SettingsStack from "./SettingsStack";
 import { useAppTheme } from "../store/app-theme-context";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
@@ -49,12 +49,13 @@ function AppTabs() {
         }}
       />
       <Tab.Screen
-        name="settings"
+        name="Settings"
         component={SettingsStack}
         options={{
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="settings-sharp" color={color} size={size} />
           ),
+          headerShown: false
         }}
       />
     </Tab.Navigator>
