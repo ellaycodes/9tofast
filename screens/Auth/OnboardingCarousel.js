@@ -1,8 +1,8 @@
 import { useState } from "react";
-import ScheduleSlide from "../components/Carousel/ScheduleSlide";
-import StartTimerSlide from "../components/Carousel/StartTimerSlide";
+import ScheduleSlide from "../../components/Carousel/ScheduleSlide";
+import StartTimerSlide from "../../components/Carousel/StartTimerSlide";
 import { StyleSheet, View } from "react-native";
-import ProgressDots from "../components/Carousel/ProgressDots";
+import ProgressDots from "../../components/Carousel/ProgressDots";
 
 function OnboardingCarousel({ route }) {
   const { token } = route.params;

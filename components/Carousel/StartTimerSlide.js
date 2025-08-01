@@ -17,7 +17,6 @@ export default function StartTimerSlide({ setWizardState, token }) {
   const { theme } = useAppTheme();
   const authCxt = useContext(AuthContext);
   const { setSchedule, startFast, schedule, endFast } = useFasting();
-  console.log("\nschedule", schedule);
 
   const [started, setStarted] = useState(false);
   const [readout, setReadout] = useState("\u00A0"); // non‑breaking space as placeholder

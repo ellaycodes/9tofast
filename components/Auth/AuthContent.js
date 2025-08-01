@@ -5,6 +5,7 @@ import Header from "./Header";
 import { Text, View } from "react-native";
 import { StyleSheet } from "react-native";
 import { useAppTheme } from "../../store/app-theme-context";
+import { Alert } from "react-native";
 
 function AuthContent({ isLogin, authenticate }) {
   const navigation = useNavigation();

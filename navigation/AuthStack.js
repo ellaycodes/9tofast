@@ -1,16 +1,16 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import LoginScreen from "../screens/LoginScreen";
-import SignupScreen from "../screens/SignupScreen";
-import OnboardingCarousel from "../screens/OnboardingCarousel";
+import LoginScreen from "../screens/Auth/LoginScreen";
+import SignupScreen from "../screens/Auth/SignupScreen";
+import OnboardingCarousel from "../screens/Auth/OnboardingCarousel";
+
 import { useAppTheme } from "../store/app-theme-context";
-import PreAuthScreen from "../screens/PreAuthScreen";
-import ForgottenPassword from "../screens/ForgottenPasswordScreen";
+import PreAuthScreen from "../screens/Auth/PreAuthScreen";
+import ForgottenPassword from "../screens/Auth/ForgottenPasswordScreen";
 
 const Stack = createNativeStackNavigator();
 
 function AuthStack() {
   const { theme } = useAppTheme();
-
   return (
     <Stack.Navigator
       screenOptions={{
@@ -61,7 +61,7 @@ function AuthStack() {
         name="ForgottenPassword"
         component={ForgottenPassword}
         options={{
-          title: 'Forgotten Password'
+          title: "Forgotten Password",
         }}
       />
     </Stack.Navigator>

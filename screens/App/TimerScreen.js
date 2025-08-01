@@ -1,15 +1,15 @@
 import { useEffect, useState, useMemo } from "react";
 import { View } from "react-native";
-import { useFasting } from "../store/fastingLogic/fasting-context";
-import Countdown from "../components/ui/Countdown";
+import { useFasting } from "../../store/fastingLogic/fasting-context";
+import Countdown from "../../components/ui/Countdown";
 import { StyleSheet } from "react-native";
-import { useAppTheme } from "../store/app-theme-context";
-import { calcReadout, utcToUkLabel } from "../util/formatTime";
-import Title from "../components/ui/Title";
-import SubtitleText from "../components/ui/SubtitleText";
-import ButtonsContainer from "../components/ui/ButtonsContainer";
-import Ads from "../components/monetising/Ads";
-import { getRandomOffScheduleTitle } from "../util/offScheduleTitles";
+import { useAppTheme } from "../../store/app-theme-context";
+import { calcReadout, utcToUkLabel } from "../../util/formatTime";
+import Title from "../../components/ui/Title";
+import SubtitleText from "../../components/ui/SubtitleText";
+import ButtonsContainer from "../../components/ui/ButtonsContainer";
+import Ads from "../../components/monetising/Ads";
+import { getRandomOffScheduleTitle } from "../../util/offScheduleTitles";
 
 function TimerScreen() {
   const { schedule, isFasting } = useFasting();
@@ -28,16 +28,40 @@ function TimerScreen() {
     return () => {
       clearInterval(id);
     };
-  }, [schedule]);
+  }, [schedule, isFasting]);
 
   const withinFasting = useMemo(() => {
     if (!schedule) return false;
     const now = Date.now();
-    const startTs = new Date(schedule.start).getTime();
-    const endTs = new Date(schedule.end).getTime();
-    return now < startTs || now >= endTs;
-  }, [schedule]);
 
+    // parse the eating‑window times from your ISO schedule
+    const startTOD = new Date(schedule.start);
+    const endTOD = new Date(schedule.end);
+
+    // build two timestamps for *today* at those times
+    const today = new Date(now);
+    const eatStartTs = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+      startTOD.getHours(),
+      startTOD.getMinutes(),
+      startTOD.getSeconds()
+    ).getTime();
+
+    const eatEndTs = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+      endTOD.getHours(),
+      endTOD.getMinutes(),
+      endTOD.getSeconds()
+    ).getTime();
+
+    // fasting is any time before eating starts or after eating ends
+    return now < eatStartTs || now >= eatEndTs;
+  }, [schedule]);
+  
   const offSchedule =
     (isFasting() && !withinFasting) || (!isFasting() && withinFasting);
 
@@ -55,13 +79,16 @@ function TimerScreen() {
 
   return (
     <View style={styles(theme).container}>
-      {isFasting() && !offSchedule ? (
-        <Title style={[styles(theme).title, styles(theme).fasting]}>
-          Fasting Window
-        </Title>
-      ) : !isFasting() && !offSchedule ? (
-        <Title style={[styles(theme).title, styles(theme).eating]}>
-          Eating Window
+      {!offSchedule ? (
+        <Title
+          style={[
+            styles(theme).title,
+            withinFasting === offSchedule
+              ? styles(theme).eating
+              : styles(theme).fasting,
+          ]}
+        >
+          {withinFasting ? "Fasting Window" : "Eating Window"}
         </Title>
       ) : (
         <Title style={[styles(theme).title, styles(theme).eating]}>
@@ -75,9 +102,7 @@ function TimerScreen() {
           ))}
         </View>
       )}
-      {!isFasting() && withinFasting ? (
-        <SubtitleText muted>Allowed Snack Time 🍪</SubtitleText>
-      ) : isFasting() ? (
+      {offSchedule ? null : withinFasting ? (
         <SubtitleText>
           Ends {schedule && utcToUkLabel(schedule.start)}
         </SubtitleText>

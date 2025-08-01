@@ -1,12 +1,12 @@
 import { SafeAreaView } from "react-native-safe-area-context";
-import Input from "../components/Auth/Input";
-import Title from "../components/ui/Title";
-import SubtitleText from "../components/ui/SubtitleText";
-import PrimaryButton from "../components/ui/PrimaryButton";
+import Input from "../../components/Auth/Input";
+import Title from "../../components/ui/Title";
+import SubtitleText from "../../components/ui/SubtitleText";
+import PrimaryButton from "../../components/ui/PrimaryButton";
 import { Alert, StyleSheet, View } from "react-native";
 import { useState } from "react";
-import { forgottenPassword } from "../util/useAuth";
-import LoadingOverlay from "../components/ui/LoadingOverlay";
+import { forgottenPassword } from "../../util/useAuth";
+import LoadingOverlay from "../../components/ui/LoadingOverlay";
 
 function ForgottenPassword({ navigation }) {
   const [emailAddress, setEmailAddress] = useState("");

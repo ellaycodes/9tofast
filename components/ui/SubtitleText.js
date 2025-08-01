@@ -6,7 +6,7 @@ function SubtitleText({ children, size, muted, style }) {
 
   return (
     <View style={[styles(theme).textContainer, style]}>
-      <Text style={styles(theme, size, muted).text}>{children}</Text>
+      <Text style={[styles(theme, size, muted, ).text, style]}>{children}</Text>
     </View>
   );
 }

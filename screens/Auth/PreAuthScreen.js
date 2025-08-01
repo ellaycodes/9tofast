@@ -1,13 +1,13 @@
 import { StyleSheet, View } from "react-native";
-import Title from "../components/ui/Title";
-import PrimaryButton from "../components/ui/PrimaryButton";
-import SubtitleText from "../components/ui/SubtitleText";
-import FlatButton from "../components/ui/FlatButton";
+import Title from "../../components/ui/Title";
+import PrimaryButton from "../../components/ui/PrimaryButton";
+import SubtitleText from "../../components/ui/SubtitleText";
+import FlatButton from "../../components/ui/FlatButton";
 import { useContext, useState } from "react";
-import { AuthContext } from "../store/auth-context";
-import { anonymousUser } from "../util/useAuth";
+import { AuthContext } from "../../store/auth-context";
+import { anonymousUser } from "../../util/useAuth";
 import { Alert } from "react-native";
-import LoadingOverlay from "../components/ui/LoadingOverlay";
+import LoadingOverlay from "../../components/ui/LoadingOverlay";
 
 function PreAuthScreen({ navigation }) {
   const [isAuthing, setIsAuthing] = useState();

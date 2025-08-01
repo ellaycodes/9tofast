@@ -46,3 +46,12 @@ export async function forgottenPassword(email) {
   });
   return res;
 }
+
+export async function getAccountInfo(idToken) {
+  const url = `${authDomain}lookup?key=${apiKey}`;
+  const res = await axios.post(url, {
+    idToken: idToken,
+  });
+
+  return res;
+}

@@ -1,5 +1,5 @@
 export const Colors = {
-  original: {
+  Original: {
     primary100: "#10CACA",
     primary200: "#0FB2B2",
     primary300: "#0E9A9A",
@@ -18,7 +18,7 @@ export const Colors = {
     error: "#FF6B6B",
     card: "#225553"
   },
-  light: {
+  Light: {
     primary100: "#38C5B9",
     primary200: "#27B3A7",
     primary300: "#129287",
@@ -37,7 +37,7 @@ export const Colors = {
     error: "#E03131",
     card: "#FFF7ED"
   },
-  dark: {
+  Dark: {
     primary100: "#38D7E0",
     primary200: "#2CB2B9",
     primary300: "#1F8C91",
@@ -56,7 +56,7 @@ export const Colors = {
     error: "#FF8787",
     card: "#243A72"
   },
-  desk: {
+  Desk: {
     primary100: "#F2F2F2",
     primary200: "#D9D9D9",
     primary300: "#BFBFBF",
@@ -75,7 +75,7 @@ export const Colors = {
     error: "#D9534F",
     card: "#4D4D4D"
   },
-  pink: {
+  Pink: {
     primary100: "#F25CA2",
     primary200: "#D64589",
     primary300: "#B63172",
@@ -94,7 +94,7 @@ export const Colors = {
     error: "#F05D5E",
     card: "#FFCCE0"
   },
-  quiet: {
+  Quiet: {
     primary100: "#B0C4FF",
     primary200: "#8CA4FF",
     primary300: "#657CF4",
