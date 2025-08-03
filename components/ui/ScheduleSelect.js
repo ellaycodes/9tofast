@@ -1,5 +1,6 @@
-import { View, Platform } from "react-native";
+import { View, Platform, StyleSheet, ScrollView } from "react-native";
 import { useState } from "react";
+import { format, addHours, startOfHour } from "date-fns";
 
 import Title from "../../components/ui/Title";
 import CarouselButton from "../../components/ui/CarouselButton";
@@ -10,7 +11,7 @@ import CustomContainer from "../Carousel/CustomContainer";
 import SchedulePickerModal from "../../modals/SchedulePickerModal";
 import { useNavigation } from "@react-navigation/native";
 
-function ScheduleSelect() {
+function ScheduleSelect({ settings, setWizardState }) {
   const { schedule, setSchedule } = useFasting();
   const navigate = useNavigation();
 
@@ -18,15 +19,12 @@ function ScheduleSelect() {
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
   const [chosenSchedule, setChosenSchedule] = useState({
-    start: new Date(schedule.start),
-    end: new Date(schedule.end),
+    start:
+      schedule?.start ?? format(addHours(startOfHour(new Date()), 2), "HH:mm"),
+    end:
+      schedule?.end ?? format(addHours(startOfHour(new Date()), 10), "HH:mm"),
   });
   const [highlightedLabel, setHighlightedLabel] = useState(null);
-
-  const startTime =
-    new Date(schedule?.start) ?? new Date(Date.now() + 60 * 60 * 1000);
-  const endTime =
-    new Date(schedule?.end) ?? new Date(Date.now() + 5 * 60 * 60 * 1000);
 
   function selectPreset(schedule) {
     const chosenPreset = {
@@ -40,14 +38,10 @@ function ScheduleSelect() {
     setHighlightedLabel(chosenPreset.label);
   }
 
-  console.log(schedule);
-
   function selectCustom() {
-    const chosen = { label: "Custom", start: startTime, end: endTime };
-
     setShowCustom(true);
-    setChosenSchedule(chosen);
-    setHighlightedLabel(chosen.label);
+    setChosenSchedule({ ...chosenSchedule, label: "Custom" });
+    setHighlightedLabel("Custom");
   }
 
   function onTimePress(time) {
@@ -56,6 +50,9 @@ function ScheduleSelect() {
 
   const onChangeStart = (_e, date) => {
     if (Platform.OS !== "ios") setShowStartPicker(false);
+    if (date instanceof Date) {
+      date = format(date, "HH:mm");
+    }
     if (date) {
       const updated = { ...chosenSchedule, start: date };
       setChosenSchedule(updated);
@@ -64,6 +61,9 @@ function ScheduleSelect() {
 
   const onChangeEnd = (_e, date) => {
     if (Platform.OS !== "ios") setShowEndPicker(false);
+    if (date instanceof Date) {
+      date = format(date, "HH:mm");
+    }
     if (date) {
       const updated = { ...chosenSchedule, end: date };
       setChosenSchedule(updated);
@@ -75,9 +75,16 @@ function ScheduleSelect() {
     navigate.goBack();
   }
 
+  function goNext() {
+    setWizardState((s) => ({ ...s, step: Math.min(s.step + 1, 2) }));
+    setSchedule(chosenSchedule);
+  }
+
   return (
-    <>
-      <View>
+    <ScrollView
+      contentContainerStyle={{ flexGrow: 1, justifyContent: "space-between" }}
+    >
+      <View style={styles.container}>
         <View>
           <Title>Choose your Fasting Schedule</Title>
           {PRESET_SCHEDULES.map((preset) => (
@@ -96,33 +103,46 @@ function ScheduleSelect() {
           >
             Custom
           </CarouselButton>
-          {showCustom && schedule && (
+
+          {showCustom && (
             <CustomContainer
-              startTime={chosenSchedule?.start || startTime}
+              startTime={chosenSchedule?.start}
               onStartTimePress={() => onTimePress("start")}
               onEndTimePress={() => onTimePress("end")}
-              endTime={chosenSchedule?.end || endTime}
+              endTime={chosenSchedule?.end}
             />
           )}
         </View>
-        <PrimaryButton onPress={onSave}>Save</PrimaryButton>
+        {settings ? (
+          <PrimaryButton onPress={onSave}>Save</PrimaryButton>
+        ) : (
+          <PrimaryButton onPress={goNext}>Next</PrimaryButton>
+        )}
       </View>
 
       <SchedulePickerModal
         showPicker={showStartPicker}
         onRequestClose={() => setShowStartPicker(false)}
-        timeDate={chosenSchedule?.start || startTime}
+        timeDate={chosenSchedule?.start}
         onChange={onChangeStart}
       />
 
       <SchedulePickerModal
         showPicker={showEndPicker}
         onRequestClose={() => setShowEndPicker(false)}
-        timeDate={chosenSchedule?.end || endTime}
+        timeDate={chosenSchedule?.end}
         onChange={onChangeEnd}
       />
-    </>
+    </ScrollView>
   );
 }
 
 export default ScheduleSelect;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "space-between",
+    margin: 16,
+  },
+});

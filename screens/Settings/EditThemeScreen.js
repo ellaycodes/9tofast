@@ -15,6 +15,7 @@ function EditThemeScreen() {
     <View style={styles.container}>
       {themes.map((t) => (
         <SettingsPressable
+          key={t}
           label={t}
           icon="123"
           style={{ justifyContent: "space-between" }}

@@ -2,6 +2,7 @@ import { Modal, Pressable, View, Platform, StyleSheet } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import PrimaryButton from "../components/ui/PrimaryButton";
 import { useAppTheme } from "../store/app-theme-context";
+import { timeStringToDate } from "../util/formatTime";
 
 function SchedulePickerModal({
   showPicker,
@@ -10,7 +11,9 @@ function SchedulePickerModal({
   onChange,
 }) {
   const { theme } = useAppTheme();
-  
+
+  const dateTimeValue = timeStringToDate(timeDate);
+
   return (
     <Modal
       visible={showPicker}
@@ -22,13 +25,14 @@ function SchedulePickerModal({
       <View style={styles(theme).modalSheet}>
         <DateTimePicker
           mode="time"
-          value={timeDate}
+          value={dateTimeValue}
           display={Platform.OS === "ios" ? "spinner" : "default"}
           textColor={Platform.OS === "ios" ? theme.text : undefined}
-            onChange={(e, d) => {
-              onChange(e, d);
-              if (Platform.OS !== "ios") onRequestClose();
-            }}
+          onChange={(e, d) => {
+            console.log('onchange', d);
+            onChange(e, d);
+            if (Platform.OS !== "ios") onRequestClose();
+          }}
         />
         <PrimaryButton onPress={onRequestClose}>Done</PrimaryButton>
       </View>

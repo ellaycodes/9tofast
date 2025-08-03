@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { View, Text, StyleSheet, Image, ScrollView } from "react-native";
+import { parse } from "date-fns";
 
 import Title from "../ui/Title";
 import PrimaryButton from "../ui/PrimaryButton";
@@ -43,19 +44,26 @@ export default function StartTimerSlide({ setWizardState, token }) {
     if (started) return;
 
     const now = Date.now();
-    const startTs = new Date(schedule.start).getTime();
-    const endTs = new Date(schedule.end).getTime();
+    const todayMidnight = startOfDay(new Date());
+    const startTs = parse(schedule.start, "HH:mm", todayMidnight).getTime();
+    const endTs = parse(schedule.end, "HH:mm", todayMidnight).getTime();
 
-    if (now >= startTs && now < endTs) {
+    let inEatingWindow;
+    if (startTs < endTs) {
+      inEatingWindow = now >= startTs && now < endTs;
+    } else {
+      inEatingWindow = now >= startTs || now < endTs;
+    }
+
+    if (inEatingWindow) {
       endFast(now);
     } else {
       startFast(now);
     }
+
     setSchedule(schedule);
     setStarted(true);
   };
-
-  const { start, end } = todayWindow(schedule);
 
   function goNext() {
     setWizardState((s) => ({ ...s, step: Math.min(s.step + 1, 2) }));
@@ -77,9 +85,9 @@ export default function StartTimerSlide({ setWizardState, token }) {
         /> */}
 
         <Text style={styles(theme).scheduleLabel}>{schedule.label}</Text>
-        <Text style={styles(theme).window}>{`${formatTime(
-          start
-        )}  -  ${formatTime(end)}`}</Text>
+        <Text
+          style={styles(theme).window}
+        >{`${schedule.start}  -  ${schedule.end}`}</Text>
 
         {started && <Text style={styles(theme).countdown}>{readout}</Text>}
       </View>
