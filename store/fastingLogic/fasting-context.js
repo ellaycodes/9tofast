@@ -57,6 +57,9 @@ export default function FastingContextProvider({ children }) {
     persist(state);
   }, [state]);
 
+  console.log('Context Schedule', state.schedule);
+  
+
   const value = {
     loading: state.loading,
     schedule: state.schedule,

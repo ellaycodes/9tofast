@@ -1,10 +1,11 @@
 import { useEffect, useState, useMemo } from "react";
 import { View } from "react-native";
+import * as dt from "date-fns";
 import { useFasting } from "../../store/fastingLogic/fasting-context";
 import Countdown from "../../components/ui/Countdown";
 import { StyleSheet } from "react-native";
 import { useAppTheme } from "../../store/app-theme-context";
-import { calcReadout, utcToUkLabel } from "../../util/formatTime";
+import { calcReadout } from "../../util/formatTime";
 import Title from "../../components/ui/Title";
 import SubtitleText from "../../components/ui/SubtitleText";
 import ButtonsContainer from "../../components/ui/ButtonsContainer";
@@ -61,7 +62,7 @@ function TimerScreen() {
     // fasting is any time before eating starts or after eating ends
     return now < eatStartTs || now >= eatEndTs;
   }, [schedule]);
-  
+
   const offSchedule =
     (isFasting() && !withinFasting) || (!isFasting() && withinFasting);
 
@@ -104,11 +105,15 @@ function TimerScreen() {
       )}
       {offSchedule ? null : withinFasting ? (
         <SubtitleText>
-          Ends {schedule && utcToUkLabel(schedule.start)}
+          Ends{" "}
+          {schedule &&
+            dt.format(dt.parse(schedule.start, "HH:mm", new Date()), "p")}
         </SubtitleText>
       ) : (
         <SubtitleText muted>
-          Fasting Starts {schedule && utcToUkLabel(schedule.end)}
+          Fasting Starts{" "}
+          {schedule &&
+            dt.format(dt.parse(schedule.end, "HH:mm", new Date()), "p")}
         </SubtitleText>
       )}
       <View>

@@ -15,7 +15,7 @@ function CustomSelector({ label, time, onPress }) {
         ]}
         onPress={onPress}
       >
-        <Text style={styles(theme).timeText}>{formatTime(time)}</Text>
+        <Text style={styles(theme).timeText}>{time}</Text>
       </Pressable>
     </View>
   );

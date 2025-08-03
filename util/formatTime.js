@@ -1,3 +1,4 @@
+import * as dt from "date-fns";
 /**
  * Pads a number with leading zeros to two digits.
  *
@@ -76,8 +77,8 @@ export function formatTime(date) {
 export const todayWindow = (schedule) => {
   const now = new Date();
 
-  const start = new Date(schedule.start);
-  const end = new Date(schedule.end);
+  const start = dt.parse(schedule.start, "HH:mm", new Date());
+  const end = dt.parse(schedule.end, "HH:mm", new Date());
 
   start.setFullYear(now.getFullYear(), now.getMonth(), now.getDate());
   end.setFullYear(now.getFullYear(), now.getMonth(), now.getDate());
@@ -133,30 +134,30 @@ export const todayWindow = (schedule) => {
  *   fast: boolean            // true if next phase is fasting
  * }} Countdown details including label, time difference, split units, and fasting flag.
  */
-export function calcReadout(schedule, now = new Date()) {
+export function calcReadout(schedule) {
   if (!schedule) return;
 
-  const { start, end } = todayWindow(schedule);
+  const startDate = timeStringToDate(schedule.start);
+  const endDate = timeStringToDate(schedule.end);
 
-  let target;
-  let label;
-  let fast;
+  const now = new Date();
 
-  if (now < start) {
-    target = start;
+  let target, label, fast;
+
+  if (now < startDate) {
+    target = startDate;
     label = "Eating window opens in";
     fast = true;
-  } else if (now >= start && now < end) {
-    target = end;
+  } else if (now >= startDate && now < endDate) {
+    target = endDate;
     label = "Fasting resumes in";
     fast = false;
   } else {
-    target = new Date(start);
+    target = new Date(startDate);
     target.setDate(target.getDate() + 1);
     label = "Eating window opens in";
     fast = true;
   }
-
   const diffMs = Math.max(0, target.getTime() - now.getTime());
   return { label, diffMs, units: splitMs(diffMs), fast };
 }
@@ -202,9 +203,15 @@ export function numberToHour(num) {
 
 export function decimalHoursToHms(decimalHours) {
   const totalSeconds = Math.round(decimalHours * 3600);
-  const hours   = Math.floor(totalSeconds / 3600);
+  const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
 
   return { hours, minutes, seconds };
+}
+
+export function timeStringToDate(timeString, base = new Date()) {
+  const [h, m] = timeString.split(":").map(Number);
+  base.setHours(h, m, 0, 0);
+  return base;
 }
