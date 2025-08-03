@@ -1,6 +1,6 @@
-import { View, Platform, StyleSheet, ScrollView } from "react-native";
+import { View, Platform, StyleSheet, ScrollView, Text } from "react-native";
 import { useState } from "react";
-import { format, addHours, startOfHour } from "date-fns";
+import * as dt from "date-fns";
 
 import Title from "../../components/ui/Title";
 import CarouselButton from "../../components/ui/CarouselButton";
@@ -10,6 +10,7 @@ import { PRESET_SCHEDULES } from "../../store/fastingLogic/data/fasting-presets"
 import CustomContainer from "../Carousel/CustomContainer";
 import SchedulePickerModal from "../../modals/SchedulePickerModal";
 import { useNavigation } from "@react-navigation/native";
+import ErrorText from "./ErrorText";
 
 function ScheduleSelect({ settings, setWizardState }) {
   const { schedule, setSchedule } = useFasting();
@@ -20,9 +21,12 @@ function ScheduleSelect({ settings, setWizardState }) {
   const [showEndPicker, setShowEndPicker] = useState(false);
   const [chosenSchedule, setChosenSchedule] = useState({
     start:
-      schedule?.start ?? format(addHours(startOfHour(new Date()), 2), "HH:mm"),
+      schedule?.start ??
+      dt.format(dt.addHours(dt.startOfHour(new Date()), 2), "HH:mm"),
     end:
-      schedule?.end ?? format(addHours(startOfHour(new Date()), 10), "HH:mm"),
+      schedule?.end ??
+      dt.format(dt.addHours(dt.startOfHour(new Date()), 10), "HH:mm"),
+    fastingHours: schedule?.fastingHours ?? 8,
   });
   const [highlightedLabel, setHighlightedLabel] = useState(null);
 
@@ -48,36 +52,73 @@ function ScheduleSelect({ settings, setWizardState }) {
     time === "start" ? setShowStartPicker(true) : setShowEndPicker(true);
   }
 
+  function calcDuration({ start: startStr, end: endStr }) {
+    const midnight = dt.startOfDay(new Date());
+    const endDate = dt.parse(endStr, "HH:mm", midnight);
+    const startDate = dt.parse(startStr, "HH:mm", midnight);
+
+    if (endDate <= startDate) {
+      endDate = addDays(endDate, 1);
+    }
+
+    const durObj = dt.intervalToDuration({ start: startDate, end: endDate });
+
+    const totalEatingHours = durObj.hours + (durObj.minutes / 60 || 0);
+
+    const eatingHours = Number(totalEatingHours.toFixed(2));
+
+    const fastingHours = Number((24 - totalEatingHours).toFixed(2));
+
+    return { eatingHours, fastingHours };
+  }
+
   const onChangeStart = (_e, date) => {
     if (Platform.OS !== "ios") setShowStartPicker(false);
-    if (date instanceof Date) {
-      date = format(date, "HH:mm");
-    }
-    if (date) {
-      const updated = { ...chosenSchedule, start: date };
-      setChosenSchedule(updated);
-    }
+    if (!(date instanceof Date)) return;
+
+    const timeStr = dt.format(date, "HH:mm");
+    const fastingDuration = calcDuration({
+      start: timeStr,
+      end: chosenSchedule.end,
+    }).fastingHours;
+    console.log(fastingDuration);
+    const updated = {
+      ...chosenSchedule,
+      start: timeStr,
+      fastingHours: fastingDuration,
+    };
+    setChosenSchedule(updated);
   };
 
   const onChangeEnd = (_e, date) => {
     if (Platform.OS !== "ios") setShowEndPicker(false);
-    if (date instanceof Date) {
-      date = format(date, "HH:mm");
-    }
-    if (date) {
-      const updated = { ...chosenSchedule, end: date };
-      setChosenSchedule(updated);
-    }
+    if (!(date instanceof Date)) return;
+
+    const timeStr = dt.format(date, "HH:mm");
+    const fastingDuration = calcDuration({
+      start: chosenSchedule.start,
+      end: timeStr,
+    }).fastingHours;
+    const updated = {
+      ...chosenSchedule,
+      end: timeStr,
+      fastingHours: fastingDuration,
+    };
+    setChosenSchedule(updated);
   };
 
-  function onSave() {
-    setSchedule(chosenSchedule);
-    navigate.goBack();
+  function isFastingTooLong({ fastingHours }) {
+    return fastingHours > 18;
   }
 
-  function goNext() {
-    setWizardState((s) => ({ ...s, step: Math.min(s.step + 1, 2) }));
+  function onSave(settings) {
     setSchedule(chosenSchedule);
+
+    if (settings) {
+      navigate.goBack();
+    } else {
+      setWizardState((s) => ({ ...s, step: Math.min(s.step + 1, 2) }));
+    }
   }
 
   return (
@@ -113,10 +154,26 @@ function ScheduleSelect({ settings, setWizardState }) {
             />
           )}
         </View>
+        {isFastingTooLong(chosenSchedule) && (
+          <ErrorText>
+            Please choose a longer eating window
+          </ErrorText>
+        )}
         {settings ? (
-          <PrimaryButton onPress={onSave}>Save</PrimaryButton>
+          <PrimaryButton
+            onPress={() => onSave(settings)}
+            disabled={chosenSchedule.fastingHours > 18}
+            style={{marginTop: 0}}
+          >
+            Save
+          </PrimaryButton>
         ) : (
-          <PrimaryButton onPress={goNext}>Next</PrimaryButton>
+          <PrimaryButton
+            onPress={() => onSave(false)}
+            disabled={chosenSchedule.fastingHours > 18}
+          >
+            Next
+          </PrimaryButton>
         )}
       </View>
 

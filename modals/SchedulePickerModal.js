@@ -29,7 +29,6 @@ function SchedulePickerModal({
           display={Platform.OS === "ios" ? "spinner" : "default"}
           textColor={Platform.OS === "ios" ? theme.text : undefined}
           onChange={(e, d) => {
-            console.log('onchange', d);
             onChange(e, d);
             if (Platform.OS !== "ios") onRequestClose();
           }}

@@ -36,8 +36,8 @@ function TimerScreen() {
     const now = Date.now();
 
     // parse the eating‑window times from your ISO schedule
-    const startTOD = new Date(schedule.start);
-    const endTOD = new Date(schedule.end);
+    const startTOD = dt.parse(schedule.start, 'HH:mm', new Date());
+    const endTOD = dt.parse(schedule.end, 'HH:mm', new Date());
 
     // build two timestamps for *today* at those times
     const today = new Date(now);
