@@ -40,7 +40,7 @@ function SettingsHomeScreen({ navigation }) {
         <SettingsPressable
           profile
           icon="person-outline"
-          label="Username"
+          label="Create Account"
           subtitle={emailAddress}
         />
         <SettingsPressable
