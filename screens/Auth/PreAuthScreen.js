@@ -29,9 +29,13 @@ function PreAuthScreen({ navigation }) {
   async function signInAnonymouslyHandler() {
     setIsAuthing(true);
     try {
-      const token = await anonymousUser();
+      // TODO: When App is finished
+      // const token = await anonymousUser();
+      // navigation.navigate("OnboardingCarousel", {
+      //   token,
+      // });
       navigation.navigate("OnboardingCarousel", {
-        token,
+        token: "3Axe0ORnk9WzGpuEJb5F3UmptC23",
       });
     } catch (err) {
       Alert.alert("Authentication Failed", "Could not log you in!");

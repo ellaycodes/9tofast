@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { View, Text, StyleSheet, Image, ScrollView } from "react-native";
-import { parse } from "date-fns";
+import { parse, startOfDay } from "date-fns";
 
 import Title from "../ui/Title";
 import PrimaryButton from "../ui/PrimaryButton";
