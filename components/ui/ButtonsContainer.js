@@ -1,12 +1,13 @@
 import { StyleSheet, View } from "react-native";
 import PrimaryButton from "./PrimaryButton";
 import { useFasting } from "../../store/fastingLogic/fasting-context";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useAppTheme } from "../../store/app-theme-context";
 
 function ButtonsContainer({ fast, withinFasting }) {
   const { startFast, endFast } = useFasting();
   const { setThemeName, themeName } = useAppTheme();
+  const [tempTheme, setTempTheme] = useState(null);
 
   function toggleFastHandler() {
     fast ? endFast() : startFast();
@@ -26,8 +27,14 @@ function ButtonsContainer({ fast, withinFasting }) {
     return "Start Fast Early";
   }, [fast, withinFasting]);
 
-  function onAppThemeChange(themeName) {
-    setThemeName(themeName);
+  function onAppThemeChange() {
+    if (themeName !== "Desk") {
+      setTempTheme(themeName);
+      setThemeName("Desk");
+    } else {
+      setThemeName(tempTheme || "Original");
+      setTempTheme(null);
+    }
   }
 
   return (
@@ -39,7 +46,7 @@ function ButtonsContainer({ fast, withinFasting }) {
         <PrimaryButton
           style={styles.button}
           lowlight
-          onPress={() => onAppThemeChange("Original")}
+          onPress={() => onAppThemeChange(themeName)}
         >
           Revert
         </PrimaryButton>
