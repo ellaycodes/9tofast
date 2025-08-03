@@ -13,7 +13,7 @@ function EditThemeScreen() {
 
   return (
     <View style={styles.container}>
-      {themes.map((t) => (
+      {themes.map((t) => ( t !== 'Desk' &&
         <SettingsPressable
           key={t}
           label={t}
