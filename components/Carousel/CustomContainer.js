@@ -13,9 +13,6 @@ function CustomContainer({ startTime, endTime, onStartTimePress, onEndTimePress 
     onEndTimePress();
   }
 
-  console.log('date in custom Container', startTime);
-  
-
   return (
     <View style={styles(theme).customContainer}>
       <CustomSelector
