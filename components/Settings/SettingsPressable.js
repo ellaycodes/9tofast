@@ -3,13 +3,13 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useAppTheme } from "../../store/app-theme-context";
 import SubtitleText from "../ui/SubtitleText";
 
-function SettingsPressable({ profile = false, label, icon, onPress, subtitle, style, backgroundColor }) {
+function SettingsPressable({ profile = false, label, icon, onPress, subtitle, style, backgroundColor, iconColour }) {
   const { theme } = useAppTheme();
   
   return (
     <Pressable onPress={onPress} style={[styles(theme).container, style]}>
       <View style={[styles(theme, profile).iconContainer, backgroundColor]}>
-        <MaterialIcons name={icon} size={profile ? 50 : 24} color={theme.text} />
+        <MaterialIcons name={icon} size={profile ? 50 : 24} color={iconColour || theme.text} />
       </View>
       <View>
         <Text style={styles(theme).label}>{label}</Text>

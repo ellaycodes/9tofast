@@ -9,7 +9,7 @@ export function getInitialState() {
   return {
     schedule: null,
     events: [],
-    overrideFast: null
+    hours: 0
   };
 }
 
@@ -104,7 +104,7 @@ export function generateBaselineEvents(schedule, now = Date.now()) {
 // → 2.0 hours
 export function hoursFastedToday(state, now = Date.now()) {
   const { schedule, events: userEvents = [] } = state;
-
+  
   // If there's no schedule and no events, nothing to calculate
   if (!schedule && !userEvents.length) return 0;
 

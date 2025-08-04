@@ -29,7 +29,7 @@ const styles = (theme, highlight) =>
       transform: highlight ? [{ scale: 1.05 }] : 'none', 
     },
     text: {
-      color: highlight ? theme.background : theme.text,
+      color: highlight ? theme.darkText : theme.text,
       fontSize: 16,
     },
   });

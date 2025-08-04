@@ -7,7 +7,7 @@ export const FastingContext = createContext({
   loading: true,
   schedule: null,
   events: [],
-  hoursFastedToday: null,
+  hoursFastedToday: 0,
   setSchedule: () => {},
   startFast: () => {},
   endFast: () => {},
@@ -56,10 +56,7 @@ export default function FastingContextProvider({ children }) {
     state.hours = session.hoursFastedToday(state);
     persist(state);
   }, [state]);
-
-  console.log('Context Schedule', state.schedule);
   
-
   const value = {
     loading: state.loading,
     schedule: state.schedule,

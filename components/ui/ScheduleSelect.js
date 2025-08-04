@@ -54,11 +54,11 @@ function ScheduleSelect({ settings, setWizardState }) {
 
   function calcDuration({ start: startStr, end: endStr }) {
     const midnight = dt.startOfDay(new Date());
-    const endDate = dt.parse(endStr, "HH:mm", midnight);
+    let endDate = dt.parse(endStr, "HH:mm", midnight);
     const startDate = dt.parse(startStr, "HH:mm", midnight);
 
     if (endDate <= startDate) {
-      endDate = addDays(endDate, 1);
+      endDate = dt.addDays(endDate, 1);
     }
 
     const durObj = dt.intervalToDuration({ start: startDate, end: endDate });
@@ -81,7 +81,6 @@ function ScheduleSelect({ settings, setWizardState }) {
       start: timeStr,
       end: chosenSchedule.end,
     }).fastingHours;
-    console.log(fastingDuration);
     const updated = {
       ...chosenSchedule,
       start: timeStr,

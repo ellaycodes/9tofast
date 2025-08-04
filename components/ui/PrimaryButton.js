@@ -38,7 +38,7 @@ const styles = (theme, lowlight) =>
       opacity: 0.75,
     },
     buttonText: {
-      color: lowlight ? theme.text : theme.background,
+      color: lowlight ? theme.text : theme.darkText,
       textAlign: "center",
       fontSize: 18,
       fontWeight: "bold",
