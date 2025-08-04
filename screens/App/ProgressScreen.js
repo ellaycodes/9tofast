@@ -21,7 +21,7 @@ function ProgressScreen() {
 
   const percent = (hoursFastedToday / schedule.fastingHours) * 100;
 
-  console.log(hoursFastedToday, percent);
+
   return (
     <ScrollView>
       <View style={styles(theme).container}>

@@ -33,6 +33,22 @@ function SettingsHomeScreen({ navigation }) {
     navigation.navigate("EditThemeScreen");
   }
 
+  function profileHandler() {
+    navigation.navigate("ProfileScreen");
+  }
+
+  function premiumHandler() {
+    navigation.navigate("PremiumPaywallScreen");
+  }
+
+  function aboutScreenHandler() {
+    navigation.navigate("AboutScreen");
+  }
+
+  function supportScreenHandler() {
+    navigation.navigate("SupportScreen");
+  }
+
   return (
     <ScrollView style={{ padding: 16 }}>
       <View>
@@ -42,6 +58,7 @@ function SettingsHomeScreen({ navigation }) {
           icon="person-outline"
           label="Create Account"
           subtitle={emailAddress}
+          onPress={profileHandler}
         />
         <SettingsPressable
           icon="mode-edit-outline"
@@ -69,12 +86,16 @@ function SettingsHomeScreen({ navigation }) {
       </View>
       <View>
         <SectionTitle>Premium</SectionTitle>
-        <SettingsPressable label="Upgrade to Premium" icon="star-border" />
+        <SettingsPressable
+          label="Upgrade to Premium"
+          icon="star-border"
+          onPress={premiumHandler}
+        />
       </View>
       <View>
         <SectionTitle>About & Support</SectionTitle>
-        <SettingsPressable label="About" icon="info-outline" />
-        <SettingsPressable label="Support" icon="help-outline" />
+        <SettingsPressable label="About" icon="info-outline" onPress={aboutScreenHandler}/>
+        <SettingsPressable label="Support" icon="help-outline" onPress={supportScreenHandler}/>
       </View>
     </ScrollView>
   );

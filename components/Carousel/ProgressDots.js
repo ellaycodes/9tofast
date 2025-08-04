@@ -11,7 +11,7 @@ function ProgressDots({ step, total }) {
           style={[
             styles.dots,
             {
-              backgroundColor: i === step ? theme.primary100 : theme.primary500,
+              backgroundColor: i === step ? theme.primary100 : theme.secondary100,
             },
           ]}
         />

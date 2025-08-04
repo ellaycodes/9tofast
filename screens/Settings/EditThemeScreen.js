@@ -19,8 +19,9 @@ function EditThemeScreen() {
           label={t}
           icon="123"
           style={{ justifyContent: "space-between" }}
-          backgroundColor={{ backgroundColor: Colors[t].primary300 }}
+          backgroundColor={{ backgroundColor: Colors[t].secondary100 }}
           onPress={() => selectThemeHandler(t)}
+          iconColour={Colors[t].primary100}
         />
       ))}
     </View>

@@ -22,8 +22,6 @@ function ManageAccountScreen() {
           justifyContent: "space-between",
           padding: 10,
           borderRadius: 10,
-          borderBottomColor: theme.secondary400,
-          borderBottomWidth: 1,
           marginBottom: 20,
         }}
       />
