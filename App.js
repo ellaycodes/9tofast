@@ -1,6 +1,8 @@
 import { StatusBar } from "expo-status-bar";
 import AuthStack from "./navigation/AuthStack";
-import AppThemeContextProvider from "./store/app-theme-context";
+import AppThemeContextProvider, {
+  useAppTheme,
+} from "./store/app-theme-context";
 import { useContext, useEffect, useState } from "react";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import AuthContextProvider, { AuthContext } from "./store/auth-context";
@@ -44,14 +46,21 @@ export default function App() {
     <>
       <AuthContextProvider>
         <AppThemeContextProvider>
-          <FastingContextProvider>
-            <SafeAreaProvider>
-              <StatusBar style="light" />
-              <Navigator />
-            </SafeAreaProvider>
-          </FastingContextProvider>
+          <InnerApp />
         </AppThemeContextProvider>
       </AuthContextProvider>
     </>
+  );
+}
+
+function InnerApp() {
+  const { theme } = useAppTheme();
+  return (
+    <FastingContextProvider>
+      <SafeAreaProvider>
+        <StatusBar style={theme.statusbar} />
+        <Navigator />
+      </SafeAreaProvider>
+    </FastingContextProvider>
   );
 }

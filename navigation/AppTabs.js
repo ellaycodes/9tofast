@@ -55,7 +55,7 @@ function AppTabs() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="settings-sharp" color={color} size={size} />
           ),
-          headerShown: false
+          headerShown: false,
         }}
       />
     </Tab.Navigator>

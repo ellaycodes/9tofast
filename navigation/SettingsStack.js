@@ -47,12 +47,20 @@ function SettingsStack() {
           title: "Premium",
         }}
       />
-      <Stack.Screen name="AboutScreen" component={AboutScreen} options={{
+      <Stack.Screen
+        name="AboutScreen"
+        component={AboutScreen}
+        options={{
           title: "About 9ToFast",
-        }}/>
-        <Stack.Screen name="SupportScreen" component={SupportScreen} options={{
+        }}
+      />
+      <Stack.Screen
+        name="SupportScreen"
+        component={SupportScreen}
+        options={{
           title: "Support",
-        }}/>
+        }}
+      />
       <Stack.Screen
         name="EditScheduleScreen"
         component={EditScheduleScreen}

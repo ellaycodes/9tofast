@@ -78,10 +78,17 @@ function SettingsHomeScreen({ navigation }) {
           onPress={editScheduleHandler}
           label="Edit Fasting Schedule"
           icon="access-time"
-          subtitle={`${dt.format(
-            dt.parse(schedule?.start, "HH:mm", new Date()),
-            "p"
-          )} - ${dt.format(dt.parse(schedule?.end, "HH:mm", new Date()), "p")}`}
+          subtitle={
+            schedule
+              ? `${dt.format(
+                  dt.parse(schedule.start, "HH:mm", new Date()),
+                  "p"
+                )} - ${dt.format(
+                  dt.parse(schedule.end, "HH:mm", new Date()),
+                  "p"
+                )}`
+              : undefined
+          }
         />
       </View>
       <View>
@@ -94,8 +101,16 @@ function SettingsHomeScreen({ navigation }) {
       </View>
       <View>
         <SectionTitle>About & Support</SectionTitle>
-        <SettingsPressable label="About" icon="info-outline" onPress={aboutScreenHandler}/>
-        <SettingsPressable label="Support" icon="help-outline" onPress={supportScreenHandler}/>
+        <SettingsPressable
+          label="About"
+          icon="info-outline"
+          onPress={aboutScreenHandler}
+        />
+        <SettingsPressable
+          label="Support"
+          icon="help-outline"
+          onPress={supportScreenHandler}
+        />
       </View>
     </ScrollView>
   );
