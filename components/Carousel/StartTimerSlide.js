@@ -9,9 +9,7 @@ import { AuthContext } from "../../store/auth-context";
 import { useFasting } from "../../store/fastingLogic/fasting-context";
 import {
   calcReadout,
-  todayWindow,
   msToHms,
-  formatTime,
 } from "../../util/formatTime";
 
 export default function StartTimerSlide({ setWizardState, token }) {

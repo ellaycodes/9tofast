@@ -1,5 +1,5 @@
 import { View, Platform, StyleSheet, ScrollView, Text } from "react-native";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import * as dt from "date-fns";
 
 import Title from "../../components/ui/Title";
@@ -11,9 +11,11 @@ import CustomContainer from "../Carousel/CustomContainer";
 import SchedulePickerModal from "../../modals/SchedulePickerModal";
 import { CommonActions, useNavigation } from "@react-navigation/native";
 import ErrorText from "./ErrorText";
+import { AuthContext } from "../../store/auth-context";
 
-function ScheduleSelect({ settings, setWizardState }) {
+function ScheduleSelect({ settings, setWizardState, token }) {
   const { schedule, setSchedule } = useFasting();
+  const authCxt = useContext(AuthContext);
   const navigate = useNavigation();
 
   const [showCustom, setShowCustom] = useState(schedule?.label === "Custom");
@@ -136,6 +138,10 @@ function ScheduleSelect({ settings, setWizardState }) {
     }
   }
 
+  function onSkip() {
+    authCxt.authenticate(token);
+  }
+
   return (
     <ScrollView
       contentContainerStyle={{ flexGrow: 1, justifyContent: "space-between" }}
@@ -172,22 +178,29 @@ function ScheduleSelect({ settings, setWizardState }) {
         {isFastingTooLong(chosenSchedule) && (
           <ErrorText>Please choose a longer eating window</ErrorText>
         )}
-        {settings ? (
-          <PrimaryButton
-            onPress={() => onSave(settings)}
-            disabled={chosenSchedule.fastingHours > 18}
-            style={{ marginTop: 0 }}
-          >
-            Save
-          </PrimaryButton>
-        ) : (
-          <PrimaryButton
-            onPress={() => onSave(false)}
-            disabled={chosenSchedule.fastingHours > 18}
-          >
-            Next
-          </PrimaryButton>
-        )}
+        <View>
+          {settings ? null : (
+            <PrimaryButton lowlight onPress={onSkip}>
+              Skip
+            </PrimaryButton>
+          )}
+          {settings ? (
+            <PrimaryButton
+              onPress={() => onSave(settings)}
+              disabled={chosenSchedule.fastingHours > 18}
+              style={{ marginTop: 0 }}
+            >
+              Save
+            </PrimaryButton>
+          ) : (
+            <PrimaryButton
+              onPress={() => onSave(false)}
+              disabled={chosenSchedule.fastingHours > 18}
+            >
+              Next
+            </PrimaryButton>
+          )}
+        </View>
       </View>
 
       <SchedulePickerModal
