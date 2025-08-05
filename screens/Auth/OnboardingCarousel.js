@@ -12,7 +12,7 @@ function OnboardingCarousel({ route }) {
   });
 
   const slides = [
-    <ScheduleSlide {...{ wizardState, setWizardState }} />,
+    <ScheduleSlide {...{ wizardState, setWizardState, token }} />,
     <StartTimerSlide {...{ wizardState, setWizardState, token }} />,
   ];
 
