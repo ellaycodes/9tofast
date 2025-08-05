@@ -3,13 +3,20 @@ import SettingsPressable from "../../components/Settings/SettingsPressable";
 import { AuthContext } from "../../store/auth-context";
 import { ScrollView, StyleSheet } from "react-native";
 import { useAppTheme } from "../../store/app-theme-context";
+import { useFasting } from "../../store/fastingLogic/fasting-context";
 
-function ManageAccountScreen() {
+function ManageAccountScreen({ navigation }) {
   const authCxt = useContext(AuthContext);
   const { theme } = useAppTheme();
+  const { clearFast } = useFasting();
 
   function logoutHandler() {
     return authCxt.logout();
+  }
+
+  function clearAllHandler() {
+    clearFast();
+    navigation.navigate("TimerScreen");
   }
 
   return (
@@ -18,6 +25,17 @@ function ManageAccountScreen() {
         icon="logout"
         onPress={logoutHandler}
         label="Logout"
+        style={{
+          justifyContent: "space-between",
+          padding: 10,
+          borderRadius: 10,
+          marginBottom: 20,
+        }}
+      />
+      <SettingsPressable
+        icon="clear"
+        onPress={clearAllHandler}
+        label="Clear All"
         style={{
           justifyContent: "space-between",
           padding: 10,

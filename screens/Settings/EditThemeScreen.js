@@ -22,6 +22,7 @@ function EditThemeScreen() {
           backgroundColor={{ backgroundColor: Colors[t].secondary100 }}
           onPress={() => selectThemeHandler(t)}
           iconColour={Colors[t].primary100}
+          profile
         />
       ))}
     </View>

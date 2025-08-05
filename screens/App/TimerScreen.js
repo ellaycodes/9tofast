@@ -11,8 +11,9 @@ import SubtitleText from "../../components/ui/SubtitleText";
 import ButtonsContainer from "../../components/ui/ButtonsContainer";
 import Ads from "../../components/monetising/Ads";
 import { getRandomOffScheduleTitle } from "../../util/offScheduleTitles";
+import PrimaryButton from "../../components/ui/PrimaryButton";
 
-function TimerScreen() {
+function TimerScreen({ navigation }) {
   const { schedule, isFasting } = useFasting();
   const { theme } = useAppTheme();
   const [readout, setReadout] = useState(null);
@@ -36,8 +37,8 @@ function TimerScreen() {
     const now = Date.now();
 
     // parse the eating‑window times from your ISO schedule
-    const startTOD = dt.parse(schedule.start, 'HH:mm', new Date());
-    const endTOD = dt.parse(schedule.end, 'HH:mm', new Date());
+    const startTOD = dt.parse(schedule.start, "HH:mm", new Date());
+    const endTOD = dt.parse(schedule.end, "HH:mm", new Date());
 
     // build two timestamps for *today* at those times
     const today = new Date(now);
@@ -78,7 +79,7 @@ function TimerScreen() {
 
   const timeUnits = readout ? Object.keys(readout.units).slice(0, -1) : [];
 
-  return (
+  return schedule ? (
     <View style={styles(theme).container}>
       {!offSchedule ? (
         <Title
@@ -120,6 +121,18 @@ function TimerScreen() {
         <ButtonsContainer fast={isFasting()} withinFasting={withinFasting} />
       </View>
       <Ads />
+    </View>
+  ) : (
+    <View style={[styles(theme).container, { justifyContent: "center" }]}>
+      <PrimaryButton
+        lowlight
+        style={{ height: "50%" }}
+        onPress={() =>
+          navigation.navigate("Settings", { screen: "EditScheduleScreen" })
+        }
+      >
+        Choose a Fasting Schedule
+      </PrimaryButton>
     </View>
   );
 }

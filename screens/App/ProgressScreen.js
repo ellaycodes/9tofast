@@ -19,7 +19,7 @@ function ProgressScreen() {
     return () => clearInterval(timer);
   }, []);
 
-  const percent = (hoursFastedToday / schedule.fastingHours) * 100;
+  const percent = (hoursFastedToday / schedule?.fastingHours) * 100;
 
 
   return (
@@ -49,7 +49,7 @@ function ProgressScreen() {
           <Text style={styles(theme).hours}>
             {Math.round(hoursFastedToday)}
             <Text style={styles(theme).slashAndTotal}>
-              /{schedule.fastingHours}
+              /{schedule?.fastingHours}
             </Text>
             <Text style={styles(theme).unit}> HOURS</Text>
           </Text>

@@ -9,7 +9,7 @@ import { useFasting } from "../../store/fastingLogic/fasting-context";
 import { PRESET_SCHEDULES } from "../../store/fastingLogic/data/fasting-presets";
 import CustomContainer from "../Carousel/CustomContainer";
 import SchedulePickerModal from "../../modals/SchedulePickerModal";
-import { useNavigation } from "@react-navigation/native";
+import { CommonActions, useNavigation } from "@react-navigation/native";
 import ErrorText from "./ErrorText";
 
 function ScheduleSelect({ settings, setWizardState }) {
@@ -114,7 +114,23 @@ function ScheduleSelect({ settings, setWizardState }) {
     setSchedule(chosenSchedule);
 
     if (settings) {
-      navigate.goBack();
+      navigate.dispatch(
+        CommonActions.reset({
+          index: 1,
+          routes: [
+            {
+              name: "Settings",
+              state: {
+                index: 0,
+                routes: [{ name: "SettingsHomeScreen" }],
+              },
+            },
+            {
+              name: "TimerScreen",
+            },
+          ],
+        })
+      );
     } else {
       setWizardState((s) => ({ ...s, step: Math.min(s.step + 1, 2) }));
     }
@@ -154,15 +170,13 @@ function ScheduleSelect({ settings, setWizardState }) {
           )}
         </View>
         {isFastingTooLong(chosenSchedule) && (
-          <ErrorText>
-            Please choose a longer eating window
-          </ErrorText>
+          <ErrorText>Please choose a longer eating window</ErrorText>
         )}
         {settings ? (
           <PrimaryButton
             onPress={() => onSave(settings)}
             disabled={chosenSchedule.fastingHours > 18}
-            style={{marginTop: 0}}
+            style={{ marginTop: 0 }}
           >
             Save
           </PrimaryButton>
