@@ -19,7 +19,7 @@ const styles = (theme) =>
       justifyContent: "center",
       padding: 18,
       alignItems: "center",
-      marginBottom: 4,
+      marginBottom: 4
     },
     titleText: {
       fontSize: 30,

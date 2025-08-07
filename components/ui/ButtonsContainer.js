@@ -4,28 +4,29 @@ import { useFasting } from "../../store/fastingLogic/fasting-context";
 import { useMemo, useState } from "react";
 import { useAppTheme } from "../../store/app-theme-context";
 
-function ButtonsContainer({ fast, withinFasting }) {
-  const { startFast, endFast } = useFasting();
+function ButtonsContainer({ withinFasting }) {
+  const { startFast, endFast, isFasting } = useFasting();
   const { setThemeName, themeName } = useAppTheme();
   const [tempTheme, setTempTheme] = useState(null);
 
   function toggleFastHandler() {
-    fast ? endFast() : startFast();
+    isFasting() ? endFast('manual') : startFast('manual');
   }
+  
 
   const buttonLabel = useMemo(() => {
-    if (fast && withinFasting) {
+    if (isFasting() && withinFasting) {
       return "Pause Fast";
     }
-    if (fast && !withinFasting) {
+    if (isFasting() && !withinFasting) {
       return "Resume Eating";
     }
-    if (!fast && withinFasting) {
+    if (!isFasting() && withinFasting) {
       return "Resume Fasting";
     }
 
     return "Start Fast Early";
-  }, [fast, withinFasting]);
+  }, [isFasting(), withinFasting]);
 
   function onAppThemeChange() {
     if (themeName !== "Desk") {

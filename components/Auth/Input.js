@@ -7,7 +7,7 @@ function Input({ label, value, secure, onUpdateText, keyboardType }) {
 
   return (
     <View style={styles(theme).inputContainer}>
-      <Text style={styles(theme).text}>{label}</Text>
+      {/* <Text style={styles(theme).text}>{label}</Text> */}
       <TextInput
         value={value}
         style={styles(theme).textInput}
@@ -18,6 +18,9 @@ function Input({ label, value, secure, onUpdateText, keyboardType }) {
         importantForAutofill="no"
         textContentType="none"
         disableFullscreenUI={true}
+        placeholder={label}
+        placeholderTextColor={theme.muted}
+        returnKeyType="next"
       />
     </View>
   );
@@ -31,12 +34,13 @@ const styles = (theme) =>
       marginVertical: 8,
     },
     textInput: {
-      padding: 16,
-      borderColor: theme.border,
-      borderWidth: 2,
-      borderRadius: 30,
+      padding: 20,
+      // borderColor: theme.border,
+      // borderWidth: 2,
+      borderRadius: 10,
       margin: 8,
       color: theme.text,
+      backgroundColor: theme.secondary200,
     },
     text: {
       color: theme.text,

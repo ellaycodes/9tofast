@@ -9,7 +9,7 @@ function SettingsPressable({ profile = false, label, icon, onPress, subtitle, st
   return (
     <Pressable onPress={onPress} style={[styles(theme).container, style]}>
       <View style={[styles(theme, profile).iconContainer, backgroundColor]}>
-        <MaterialIcons name={icon} size={profile ? 50 : 24} color={iconColour || theme.text} />
+        <MaterialIcons name={icon} size={profile ? 50 : 24} color={iconColour || theme.muted} />
       </View>
       <View>
         <Text style={styles(theme).label}>{label}</Text>
