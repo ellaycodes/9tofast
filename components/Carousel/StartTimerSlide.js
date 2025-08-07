@@ -54,9 +54,9 @@ export default function StartTimerSlide({ setWizardState, token }) {
     }
 
     if (inEatingWindow) {
-      endFast(now);
+      endFast('manual');
     } else {
-      startFast(now);
+      startFast('manual');
     }
 
     setSchedule(schedule);

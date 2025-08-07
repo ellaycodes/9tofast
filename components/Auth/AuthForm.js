@@ -84,7 +84,7 @@ function AuthForm({ isLogin, onSubmit }) {
         )}
         <View>
           <PrimaryButton onPress={onSubmitHandler}>
-            {isLogin ? "Log In" : "Sign Up"}
+            {isLogin ? "Log In" : "Create Account"}
           </PrimaryButton>
         </View>
       </View>

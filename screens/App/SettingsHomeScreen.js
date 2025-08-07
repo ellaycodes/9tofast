@@ -34,7 +34,7 @@ function SettingsHomeScreen({ navigation }) {
   }
 
   function profileHandler() {
-    navigation.navigate("ProfileScreen");
+    navigation.navigate("ProfileScreen", { emailAddress });
   }
 
   function premiumHandler() {

@@ -1,18 +1,26 @@
 // /store/fasting-context.js
-import { createContext, useEffect, useContext, useReducer } from "react";
+import {
+  createContext,
+  useEffect,
+  useContext,
+  useReducer,
+  useCallback,
+} from "react";
 import { load, persist } from "./fasting-storage";
 import * as session from "./fasting-session";
+import * as events from "./events";
+import useBaselineScheduler from "./scheduler";
 
 export const FastingContext = createContext({
   loading: true,
   schedule: null,
   events: [],
-  hoursFastedToday: 0,
+  hoursFastedToday: null,
   setSchedule: () => {},
-  startFast: () => {},
-  endFast: () => {},
+  startFast: (trigger) => {},
+  endFast: (trigger) => {},
   clearFast: () => {},
-  isFasting: () => false,
+  isFasting: false,
 });
 
 function reducer(state, action) {
@@ -24,10 +32,10 @@ function reducer(state, action) {
       return session.setSchedule(state, action.payload);
 
     case "START_FAST":
-      return session.startFast(state);
+      return events.startFast(state, action.trigger);
 
     case "END_FAST":
-      return session.endFast(state);
+      return events.endFast(state, action.trigger);
 
     case "CLEAR_ALL":
       return session.clearAll();
@@ -56,6 +64,13 @@ export default function FastingContextProvider({ children }) {
     state.hours = session.hoursFastedToday(state);
     persist(state);
   }, [state]);
+
+  const isFasting = useCallback(
+    () => session.isFasting(state.events),
+    [state.events]
+  );
+
+  useBaselineScheduler(state.schedule, state.events, dispatch);
   
   const value = {
     loading: state.loading,
@@ -63,10 +78,10 @@ export default function FastingContextProvider({ children }) {
     events: state.events,
     hoursFastedToday: state.hours,
     setSchedule: (data) => dispatch({ type: "SET_SCHEDULE", payload: data }),
-    startFast: () => dispatch({ type: "START_FAST" }),
-    endFast: () => dispatch({ type: "END_FAST" }),
+    startFast: (trigger) => dispatch({ type: "START_FAST", trigger }),
+    endFast: (trigger) => dispatch({ type: "END_FAST", trigger }),
     clearFast: () => dispatch({ type: "CLEAR_ALL" }),
-    isFasting: () => session.isFasting(state.events),
+    isFasting: () => isFasting(),
   };
 
   return (

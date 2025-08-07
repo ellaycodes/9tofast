@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { View } from "react-native";
 import * as dt from "date-fns";
 import { useFasting } from "../../store/fastingLogic/fasting-context";
@@ -18,6 +18,7 @@ function TimerScreen({ navigation }) {
   const { theme } = useAppTheme();
   const [readout, setReadout] = useState(null);
   const [offScheduleTitle, setOffScheduleTitle] = useState("");
+  const [tick, setTick] = useState(Date.now());
 
   useEffect(() => {
     if (!schedule) return;
@@ -30,52 +31,41 @@ function TimerScreen({ navigation }) {
     return () => {
       clearInterval(id);
     };
-  }, [schedule, isFasting]);
+  }, [schedule, isFasting()]);
 
-  const withinFasting = useMemo(() => {
+  const withinFasting = useCallback(() => {
     if (!schedule) return false;
-    const now = Date.now();
 
-    // parse the eating‑window times from your ISO schedule
-    const startTOD = dt.parse(schedule.start, "HH:mm", new Date());
-    const endTOD = dt.parse(schedule.end, "HH:mm", new Date());
+    const toMin = (h, m) => h * 60 + m;
+    const [sh, sm] = schedule.start.split(":").map(Number);
+    const [eh, em] = schedule.end.split(":").map(Number);
 
-    // build two timestamps for *today* at those times
-    const today = new Date(now);
-    const eatStartTs = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate(),
-      startTOD.getHours(),
-      startTOD.getMinutes(),
-      startTOD.getSeconds()
-    ).getTime();
+    const start = toMin(sh, sm);
+    const end = toMin(eh, em);
+    const now = toMin(new Date().getHours(), new Date().getMinutes());
 
-    const eatEndTs = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate(),
-      endTOD.getHours(),
-      endTOD.getMinutes(),
-      endTOD.getSeconds()
-    ).getTime();
+    if (start < end) return now < start || now >= end;
 
-    // fasting is any time before eating starts or after eating ends
-    return now < eatStartTs || now >= eatEndTs;
+    return now < start || now >= end;
   }, [schedule]);
 
-  const offSchedule =
-    (isFasting() && !withinFasting) || (!isFasting() && withinFasting);
+  const offSchedule = isFasting() !== withinFasting();
 
   useEffect(() => {
     if (offSchedule) {
       setOffScheduleTitle(
         getRandomOffScheduleTitle(
-          !isFasting() && withinFasting ? "eating" : "fasting"
+          !isFasting() && withinFasting() ? "eating" : "fasting"
         )
       );
     }
-  }, [offSchedule, isFasting, withinFasting]);
+
+    const id = setInterval(() => setTick(Date.now()), 100);
+
+    return () => {
+      clearInterval(id);
+    };
+  }, [offSchedule, isFasting(), withinFasting()]);
 
   const timeUnits = readout ? Object.keys(readout.units).slice(0, -1) : [];
 
@@ -85,12 +75,12 @@ function TimerScreen({ navigation }) {
         <Title
           style={[
             styles(theme).title,
-            withinFasting === offSchedule
+            withinFasting() === offSchedule
               ? styles(theme).eating
               : styles(theme).fasting,
           ]}
         >
-          {withinFasting ? "Fasting Window" : "Eating Window"}
+          {withinFasting() ? "Fasting Window" : "Eating Window"}
         </Title>
       ) : (
         <Title style={[styles(theme).title, styles(theme).eating]}>
@@ -104,7 +94,7 @@ function TimerScreen({ navigation }) {
           ))}
         </View>
       )}
-      {offSchedule ? null : withinFasting ? (
+      {offSchedule ? null : withinFasting() ? (
         <SubtitleText>
           Ends{" "}
           {schedule &&
@@ -118,7 +108,7 @@ function TimerScreen({ navigation }) {
         </SubtitleText>
       )}
       <View>
-        <ButtonsContainer fast={isFasting()} withinFasting={withinFasting} />
+        <ButtonsContainer fast={isFasting()} withinFasting={withinFasting()} />
       </View>
       <Ads />
     </View>

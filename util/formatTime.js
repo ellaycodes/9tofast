@@ -52,7 +52,7 @@ export function formatTime(date) {
 
   return d.toLocaleTimeString("en-GB", {
     hour: "2-digit",
-    hour12: true,
+    hour12: false,
     minute: "2-digit",
   });
 }
@@ -134,13 +134,19 @@ export const todayWindow = (schedule) => {
  *   fast: boolean            // true if next phase is fasting
  * }} Countdown details including label, time difference, split units, and fasting flag.
  */
-export function calcReadout(schedule) {
+export function calcReadout(schedule, now = new Date()) {
   if (!schedule) return;
 
-  const startDate = timeStringToDate(schedule.start);
-  const endDate = timeStringToDate(schedule.end);
+  const startDate = timeStringToDate(schedule.start, new Date(now));
+  const endDate = timeStringToDate(schedule.end, new Date(now));
 
-  const now = new Date();
+  if (endDate <= startDate) {
+    if (now < endDate) {
+      startDate.setDate(startDate.getDate() - 1);
+    } else {
+      endDate.setDate(endDate.getDate() + 1);
+    }
+  }
 
   let target, label, fast;
 
