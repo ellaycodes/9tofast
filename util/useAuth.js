@@ -55,3 +55,14 @@ export async function getAccountInfo(idToken) {
 
   return res;
 }
+
+export async function updateProfile(idToken, displayName, photoUrl) {
+  const url = `${authDomain}update?key=${apiKey}`;
+  const res = await axios.post(url, {
+    idToken: idToken,
+    displayName: displayName,
+    photoUrl: photoUrl,
+  });
+
+  return res;
+}
