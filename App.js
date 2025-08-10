@@ -21,9 +21,11 @@ function Navigator() {
     Ionicons.loadFont();
     (async () => {
       const storedToken = await AsyncStorage.getItem("token");
+      const storedRefreshToken = await AsyncStorage.getItem("refreshToken");
+      const storedUsername = await AsyncStorage.getItem("username");
 
       if (storedToken) {
-        authCxt.authenticate(storedToken);
+        authCxt.authenticate(storedToken, storedRefreshToken, storedUsername);
       }
 
       setLoading(false);

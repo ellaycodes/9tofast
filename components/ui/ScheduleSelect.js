@@ -13,7 +13,7 @@ import { CommonActions, useNavigation } from "@react-navigation/native";
 import ErrorText from "./ErrorText";
 import { AuthContext } from "../../store/auth-context";
 
-function ScheduleSelect({ settings, setWizardState, token, userName }) {
+function ScheduleSelect({ settings, setWizardState, token, refreshToken, userName }) {
   const { schedule, setSchedule } = useFasting();
   const authCxt = useContext(AuthContext);
   const navigate = useNavigation();
@@ -139,7 +139,7 @@ function ScheduleSelect({ settings, setWizardState, token, userName }) {
   }
 
   function onSkip() {
-    authCxt.authenticate(token, userName);
+    authCxt.authenticate(token, refreshToken, userName);
   }
 
   return (

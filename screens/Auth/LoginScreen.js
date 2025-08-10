@@ -1,4 +1,4 @@
-import { login } from "../../util/useAuth";
+import { getAccountInfo, login } from "../../util/useAuth";
 import { useContext, useState } from "react";
 import AuthContent from "../../components/Auth/AuthContent";
 import { AuthContext } from "../../store/auth-context";
@@ -14,8 +14,14 @@ function LoginScreen() {
   async function loginHandler(authDetails) {
     setIsAuthing(true);
     try {
-      const token = await login(authDetails.email, authDetails.password);
-      authCxt.authenticate(token);
+      const { token, refreshToken } = await login(
+        authDetails.email,
+        authDetails.password
+      );
+      const res = await getAccountInfo(token);
+      const username = res.data.users[0].displayName;
+
+      authCxt.authenticate(token, refreshToken, username);
     } catch (err) {
       Alert.alert("Authentication Failed", "Could not log you in!");
       setIsAuthing(false);

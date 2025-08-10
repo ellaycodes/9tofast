@@ -1,16 +1,41 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Alert, StyleSheet, View } from "react-native";
 import Title from "../../components/ui/Title";
 import AuthForm from "../../components/Auth/AuthForm";
 import { MaterialIcons } from "@expo/vector-icons";
 import SubtitleText from "../../components/ui/SubtitleText";
 import { useAppTheme } from "../../store/app-theme-context";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { AuthContext } from "../../store/auth-context";
+import { createUser, deleteAnon, updateProfile } from "../../util/useAuth";
+import LoadingOverlay from "../../components/ui/LoadingOverlay";
 
-function ProfileScreen({ route }) {
+function ProfileScreen({ route, navigation }) {
   const { emailAddress } = route.params;
   const { theme } = useAppTheme();
   const authCxt = useContext(AuthContext);
+  const [isAuthing, setIsAuthing] = useState(false);
+
+  async function createAccount({ email, password }) {
+    setIsAuthing(true);
+    try {
+      const { token, refreshToken } = await createUser(email, password);
+
+      if (authCxt.username) {
+        await updateProfile(token, authCxt.username);
+      }
+
+      deleteAnon(authCxt.token);
+
+      authCxt.authenticate(token, refreshToken, authCxt.username);
+
+      navigation.navigate("TimerScreen");
+    } catch (err) {
+      const msg = err?.error?.message || "Sign up failed";
+      Alert.alert("Authentication Failed", msg);
+      console.error(err);
+      setIsAuthing(false);
+    }
+  }
 
   function submitHandler(authDetails) {
     let { email, confirmEmail, password, confirmPassword } = authDetails;
@@ -23,7 +48,8 @@ function ProfileScreen({ route }) {
     if (
       !emailIsValid ||
       !passwordIsValid ||
-      ((!emailsAreEqual || !passwordsAreEqual))
+      !emailsAreEqual ||
+      !passwordsAreEqual
     ) {
       Alert.alert("Invalid input", "Please check your entered credentials.");
       setCredentialsInvalid({
@@ -34,8 +60,12 @@ function ProfileScreen({ route }) {
       });
       return;
     }
-    
-    authCxt.authenticate({ email, password });
+
+    createAccount({ email, password });
+  }
+
+  if (isAuthing) {
+    return <LoadingOverlay>Creating Account</LoadingOverlay>;
   }
 
   return (
@@ -43,6 +73,7 @@ function ProfileScreen({ route }) {
       {emailAddress ? (
         <View>
           <Title>{emailAddress}</Title>
+          <SubtitleText>{authCxt.username}</SubtitleText>
         </View>
       ) : (
         <View>
