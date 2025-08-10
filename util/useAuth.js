@@ -22,7 +22,8 @@ export async function useAuth(anonymous, mode, email, password) {
   }
 
   const token = res?.data.idToken;
-  return token;
+  const refreshToken = res?.data.refreshToken;
+  return { token, refreshToken };
 }
 
 export function createUser(email, password) {
@@ -57,12 +58,67 @@ export async function getAccountInfo(idToken) {
 }
 
 export async function updateProfile(idToken, displayName, photoUrl) {
-  const url = `${authDomain}update?key=${apiKey}`;
+  try {
+    const url = `${authDomain}update?key=${apiKey}`;
+    const res = await axios.post(url, {
+      idToken: idToken,
+      displayName: displayName,
+      photoUrl: photoUrl,
+    });
+
+    return res;
+  } catch (err) {
+    console.error("Update Profile Err", err.response.data);
+  }
+}
+
+export async function linkAnonymous(idToken, email, password) {
+  try {
+    const url = `${authDomain}update?key=${apiKey}`;
+
+    const res = await axios.post(url, {
+      idToken: idToken,
+      email: email,
+      password: password,
+      returnSecureToken: true,
+    });
+    console.log("linkanonymous", res);
+
+    return res;
+  } catch (err) {
+    console.error(err.response.data.error);
+  }
+}
+
+export async function refreshIdToken(refreshToken) {
+  const url = `https://securetoken.googleapis.com/v1/token?key=${apiKey}`;
+
   const res = await axios.post(url, {
-    idToken: idToken,
-    displayName: displayName,
-    photoUrl: photoUrl,
+    grant_type: "refresh_token",
+    refresh_token: refreshToken,
   });
 
   return res;
+}
+
+export async function verifyEmail(idToken) {
+  const url = `${authDomain}sendOobCode?key=${apiKey}`;
+
+  const res = await axios.post(url, {
+    requestType: "VERIFY_EMAIL",
+    idToken: idToken,
+  });
+
+  return res;
+}
+
+export async function deleteAnon(idToken) {
+  try {
+    const url = `${authDomain}delete?key=${apiKey}`;
+    await axios.post(url, {
+      idToken: idToken,
+    });
+  } catch (err) {
+    console.warn("deleteAnon failed", err.response?.data || err.message);
+  }
 }

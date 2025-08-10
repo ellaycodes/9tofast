@@ -19,7 +19,7 @@ function SettingsHomeScreen({ navigation }) {
       const res = await getAccountInfo(authCxt.token);
       setEmailAddress(res.data.users[0].email);
     })();
-  }, []);
+  }, [emailAddress, authCxt]);
 
   function editScheduleHandler() {
     navigation.navigate("EditScheduleScreen");
@@ -59,7 +59,7 @@ function SettingsHomeScreen({ navigation }) {
         <SettingsPressable
           profile
           icon="person-outline"
-          label="Create Account"
+          label={authCxt.token ? authCxt.username : "Create Account"}
           subtitle={emailAddress != undefined ? emailAddress : authCxt.username}
           onPress={profileHandler}
         />

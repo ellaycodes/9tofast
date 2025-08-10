@@ -5,7 +5,7 @@ import { useAppTheme } from "../../store/app-theme-context";
 
 function EditThemeScreen() {
   const themes = Object.keys(Colors);
-  const { theme, setThemeName } = useAppTheme();
+  const { setThemeName } = useAppTheme();
 
   function selectThemeHandler(theme) {
     setThemeName(theme);

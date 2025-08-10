@@ -31,17 +31,15 @@ function PreAuthScreen({ navigation }) {
     setIsAuthing(true);
     try {
       // TODO: When App is finished
-      // const token = await anonymousUser();
-      // navigation.navigate("OnboardingCarousel", {
-      //   token,
-      // });
-      const token = "3Axe0ORnk9WzGpuEJb5F3UmptC23";
+      const { token, refreshToken } = await anonymousUser();
       const userName = randomUsername();
-
       updateProfile(token, userName);
+
+      // const token = "3Axe0ORnk9WzGpuEJb5F3UmptC23";
       navigation.navigate("OnboardingCarousel", {
-        token: token,
-        userName: userName
+        token,
+        refreshToken,
+        userName,
       });
     } catch (err) {
       Alert.alert("Authentication Failed", `Could not log you in! ${err}`);

@@ -5,6 +5,7 @@ import { AuthContext } from "../../store/auth-context";
 import LoadingOverlay from "../../components/ui/LoadingOverlay";
 import { KeyboardAvoidingView, ScrollView } from "react-native";
 import { Platform } from "react-native";
+import randomUsername from "../../util/randomUsername";
 
 function SignupScreen({ navigation }) {
   const [isAuthing, setIsAuthing] = useState(false);
@@ -14,11 +15,16 @@ function SignupScreen({ navigation }) {
   async function signUpHandler(authDetails) {
     setIsAuthing(true);
     try {
-      const token = await createUser(authDetails.email, authDetails.password);
+      const { token, refreshToken } = await createUser(
+        authDetails.email,
+        authDetails.password
+      );
+      const userName = randomUsername();
       navigation.navigate("OnboardingCarousel", {
         token,
+        refreshToken,
+        userName
       });
-
     } catch (err) {
       Alert.alert("Authentication Failed", "Could not sign you in!");
       setIsAuthing(false);

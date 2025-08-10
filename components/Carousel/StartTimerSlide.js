@@ -12,7 +12,7 @@ import {
   msToHms,
 } from "../../util/formatTime";
 
-export default function StartTimerSlide({ setWizardState, token, userName }) {
+export default function StartTimerSlide({ setWizardState, token, refreshToken, userName }) {
   const { theme } = useAppTheme();
   const authCxt = useContext(AuthContext);
   const { setSchedule, startFast, schedule, endFast } = useFasting();
@@ -65,7 +65,7 @@ export default function StartTimerSlide({ setWizardState, token, userName }) {
 
   function goNext() {
     setWizardState((s) => ({ ...s, step: Math.min(s.step + 1, 2) }));
-    authCxt.authenticate(token, userName);
+    authCxt.authenticate(token, refreshToken, userName);
   }
 
   return (

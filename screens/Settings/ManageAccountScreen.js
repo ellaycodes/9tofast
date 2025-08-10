@@ -2,12 +2,10 @@ import { useContext } from "react";
 import SettingsPressable from "../../components/Settings/SettingsPressable";
 import { AuthContext } from "../../store/auth-context";
 import { ScrollView, StyleSheet } from "react-native";
-import { useAppTheme } from "../../store/app-theme-context";
 import { useFasting } from "../../store/fastingLogic/fasting-context";
 
 function ManageAccountScreen({ navigation }) {
   const authCxt = useContext(AuthContext);
-  const { theme } = useAppTheme();
   const { clearFast } = useFasting();
 
   function logoutHandler() {
