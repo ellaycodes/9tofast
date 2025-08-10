@@ -34,7 +34,10 @@ function SettingsHomeScreen({ navigation }) {
   }
 
   function profileHandler() {
-    navigation.navigate("ProfileScreen", { emailAddress });
+    navigation.navigate("ProfileScreen", {
+      emailAddress,
+      username: authCxt.username,
+    });
   }
 
   function premiumHandler() {
@@ -57,7 +60,7 @@ function SettingsHomeScreen({ navigation }) {
           profile
           icon="person-outline"
           label="Create Account"
-          subtitle={emailAddress}
+          subtitle={emailAddress != undefined ? emailAddress : authCxt.username}
           onPress={profileHandler}
         />
         <SettingsPressable

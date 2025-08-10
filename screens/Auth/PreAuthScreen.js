@@ -5,9 +5,10 @@ import SubtitleText from "../../components/ui/SubtitleText";
 import FlatButton from "../../components/ui/FlatButton";
 import { useContext, useState } from "react";
 import { AuthContext } from "../../store/auth-context";
-import { anonymousUser } from "../../util/useAuth";
+import { anonymousUser, updateProfile } from "../../util/useAuth";
 import { Alert } from "react-native";
 import LoadingOverlay from "../../components/ui/LoadingOverlay";
+import randomUsername from "../../util/randomUsername";
 
 function PreAuthScreen({ navigation }) {
   const [isAuthing, setIsAuthing] = useState();
@@ -34,11 +35,16 @@ function PreAuthScreen({ navigation }) {
       // navigation.navigate("OnboardingCarousel", {
       //   token,
       // });
+      const token = "3Axe0ORnk9WzGpuEJb5F3UmptC23";
+      const userName = randomUsername();
+
+      updateProfile(token, userName);
       navigation.navigate("OnboardingCarousel", {
-        token: "3Axe0ORnk9WzGpuEJb5F3UmptC23",
+        token: token,
+        userName: userName
       });
     } catch (err) {
-      Alert.alert("Authentication Failed", "Could not log you in!");
+      Alert.alert("Authentication Failed", `Could not log you in! ${err}`);
       setIsAuthing(false);
     }
   }
