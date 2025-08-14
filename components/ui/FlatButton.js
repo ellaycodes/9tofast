@@ -1,10 +1,10 @@
 import { Text, StyleSheet } from "react-native";
 import { useAppTheme } from "../../store/app-theme-context";
 
-function FlatButton({ children, onPress, inline, size = "m" }) {
+function FlatButton({ children, onPress, inline, size = "m", style }) {
   const { theme } = useAppTheme();
   return (
-    <Text onPress={onPress} style={styles(theme, inline, size).text}>
+    <Text onPress={onPress} style={[styles(theme, inline, size).text, style]}>
       {children}
     </Text>
   );

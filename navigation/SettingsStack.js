@@ -51,7 +51,7 @@ function SettingsStack() {
         name="AboutScreen"
         component={AboutScreen}
         options={{
-          title: "About 9ToFast",
+          title: "",
         }}
       />
       <Stack.Screen
