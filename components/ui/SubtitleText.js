@@ -6,31 +6,31 @@ function SubtitleText({ children, size, muted, style }) {
 
   return (
     <View style={[styles(theme).textContainer, style]}>
-      <Text style={[styles(theme, size, muted, ).text, style]}>{children}</Text>
+      <Text style={[styles(theme, size, muted).text, style]}>{children}</Text>
     </View>
   );
 }
 
 export default SubtitleText;
 
-  const FONT_SIZE = {
-    'xs': 12,
-    's': 14,
-    'm': 16,
-    'l': 18,
-    'xl': 20
-  }
+const FONT_SIZE = {
+  xs: 12,
+  s: 14,
+  m: 16,
+  l: 18,
+  xl: 20,
+};
 
 const styles = (theme, size, muted) =>
   StyleSheet.create({
     text: {
       color: muted ? theme.muted : theme.text,
-      textAlign: 'center',
+      textAlign: "center",
       fontSize: FONT_SIZE[size] || 16,
-      lineHeight: 26
+      lineHeight: 26,
     },
     textContainer: {
-        padding: 6,
-        marginVertical: 8
-    }
+      padding: 6,
+      marginVertical: 8,
+    },
   });
