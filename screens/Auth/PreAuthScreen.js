@@ -30,12 +30,10 @@ function PreAuthScreen({ navigation }) {
   async function signInAnonymouslyHandler() {
     setIsAuthing(true);
     try {
-      // TODO: When App is finished
       const { token, refreshToken } = await anonymousUser();
       const userName = randomUsername();
       updateProfile(token, userName);
 
-      // const token = "3Axe0ORnk9WzGpuEJb5F3UmptC23";
       navigation.navigate("OnboardingCarousel", {
         token,
         refreshToken,

@@ -40,7 +40,7 @@ export default function StartTimerSlide({ setWizardState, token, refreshToken, u
 
   const startFastHandler = () => {
     if (started) return;
-
+// TODO: Change this so that it starts counting from when the button is pressed and not midnight
     const now = Date.now();
     const todayMidnight = startOfDay(new Date());
     const startTs = parse(schedule.start, "HH:mm", todayMidnight).getTime();

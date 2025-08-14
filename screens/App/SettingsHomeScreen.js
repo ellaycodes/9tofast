@@ -6,20 +6,19 @@ import { useAppTheme } from "../../store/app-theme-context";
 import { useFasting } from "../../store/fastingLogic/fasting-context";
 import SectionTitle from "../../components/Settings/SectionTitle";
 import SettingsPressable from "../../components/Settings/SettingsPressable";
-import { getAccountInfo } from "../../util/useAuth";
+import { getAccountInfo, refreshIdToken } from "../../util/useAuth";
 
 function SettingsHomeScreen({ navigation }) {
   const authCxt = useContext(AuthContext);
   const { schedule } = useFasting();
-  const [emailAddress, setEmailAddress] = useState();
   const { themeName } = useAppTheme();
 
   useEffect(() => {
     (async () => {
       const res = await getAccountInfo(authCxt.token);
-      setEmailAddress(res.data.users[0].email);
+      authCxt.anonymousUser(res.data.users[0].email);
     })();
-  }, [emailAddress, authCxt]);
+  }, [authCxt.emailAddress]);
 
   function editScheduleHandler() {
     navigation.navigate("EditScheduleScreen");
@@ -35,7 +34,7 @@ function SettingsHomeScreen({ navigation }) {
 
   function profileHandler() {
     navigation.navigate("ProfileScreen", {
-      emailAddress,
+      emailAddress: authCxt.emailAddress,
       username: authCxt.username,
     });
   }
@@ -59,15 +58,21 @@ function SettingsHomeScreen({ navigation }) {
         <SettingsPressable
           profile
           icon="person-outline"
-          label={authCxt.token ? authCxt.username : "Create Account"}
-          subtitle={emailAddress != undefined ? emailAddress : authCxt.username}
+          label={authCxt.emailAddress ? authCxt.username : "Create Account"}
+          subtitle={
+            authCxt.emailAddress != undefined
+              ? authCxt.emailAddress
+              : authCxt.username
+          }
           onPress={profileHandler}
         />
-        <SettingsPressable
-          icon="mode-edit-outline"
-          label="Manage Account"
-          onPress={manageAccountHandler}
-        />
+        {authCxt.emailAddress ? null : (
+          <SettingsPressable
+            icon="mode-edit-outline"
+            label="Manage Account"
+            onPress={manageAccountHandler}
+          />
+        )}
       </View>
       <View>
         <SectionTitle>Preferences</SectionTitle>
