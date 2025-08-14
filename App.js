@@ -4,7 +4,7 @@ import AppThemeContextProvider, {
   useAppTheme,
 } from "./store/app-theme-context";
 import { useContext, useEffect, useState } from "react";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import AuthContextProvider, { AuthContext } from "./store/auth-context";
 import { NavigationContainer } from "@react-navigation/native";
 import AppTabs from "./navigation/AppTabs";
@@ -23,9 +23,14 @@ function Navigator() {
       const storedToken = await AsyncStorage.getItem("token");
       const storedRefreshToken = await AsyncStorage.getItem("refreshToken");
       const storedUsername = await AsyncStorage.getItem("username");
+      const storedEmailAddress = await AsyncStorage.getItem("emailAddress");
 
       if (storedToken) {
         authCxt.authenticate(storedToken, storedRefreshToken, storedUsername);
+      }
+
+      if (storedEmailAddress) {
+        authCxt.anonymousUser(storedEmailAddress)
       }
 
       setLoading(false);

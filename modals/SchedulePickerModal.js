@@ -32,6 +32,7 @@ function SchedulePickerModal({
             onChange(e, d);
             if (Platform.OS !== "ios") onRequestClose();
           }}
+          style={{ alignSelf: "center" }}
         />
         <PrimaryButton onPress={onRequestClose}>Done</PrimaryButton>
       </View>
@@ -52,6 +53,6 @@ const styles = (theme) =>
       padding: 16,
       borderTopLeftRadius: 24,
       borderTopRightRadius: 24,
-      alignItems: "center",
+      alignItems: "stretch",
     },
   });

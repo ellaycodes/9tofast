@@ -1,0 +1,127 @@
+import { Alert, ScrollView, StyleSheet, View } from "react-native";
+import SubtitleText from "../../components/ui/SubtitleText";
+import { useContext, useState } from "react";
+import { AuthContext } from "../../store/auth-context";
+import { MaterialIcons } from "@expo/vector-icons";
+import { useAppTheme } from "../../store/app-theme-context";
+import SettingsPressable from "./SettingsPressable";
+import {
+  callAuthWithRefresh,
+  changePassword,
+  deleteUser,
+} from "../../util/useAuth";
+import ChangePasswordModal from "../../modals/ChangePasswordModal";
+import LoadingOverlay from "../ui/LoadingOverlay";
+
+function AuthedProfile({ emailAddress }) {
+  const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const authCxt = useContext(AuthContext);
+  const { theme } = useAppTheme();
+
+  function logoutHandler() {
+    return authCxt.logout();
+  }
+
+  function deleteHandler() {
+    deleteUser(authCxt.token);
+    authCxt.isAuthed = false;
+  }
+
+  async function changePasswordHandler(password) {
+    const passwordIsValid = password.newPassword.length > 6;
+    const passwordsAreEqual =
+      password.newPassword === password.confirmNewPassword;
+
+    setLoading(true);
+    try {
+      if (!passwordIsValid)
+        throw new Error("Password must be at least 7 characters.");
+      if (!passwordsAreEqual) throw new Error("Passwords do not match.");
+
+      await callAuthWithRefresh(
+        (idToken) => changePassword(idToken, password.newPassword),
+        () => ({ idToken: authCxt.token, refreshToken: authCxt.refreshToken }),
+        async ({ idToken, refreshToken }) => {
+          authCxt.setTokens(idToken, refreshToken);
+        }
+      );
+
+      setShowModal(false);
+      Alert.alert("Success", "Password updated.");
+    } catch (err) {
+      const message =
+        err?.response?.data?.error?.message ||
+        err?.message ||
+        "Something went wrong.";
+      console.error(err);
+      Alert.alert("Error", message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function modalToggle(toggle) {
+    toggle === "close" ? setShowModal(false) : setShowModal(true);
+  }
+
+  if (loading) {
+    return <LoadingOverlay>Changing Password</LoadingOverlay>
+  }
+
+  return (
+    <ScrollView>
+      <View>
+        <View style={styles(theme).profilePicContainer}>
+          {/* TODO: Allow changing profile pic to profile pic presets*/}
+          <MaterialIcons name="person-outline" size={100} color={theme.muted} />
+        </View>
+        <SubtitleText muted style={{ marginTop: 2 }} size="m">
+          {authCxt.username}
+        </SubtitleText>
+      </View>
+      <View style={styles(theme).profileInfoContainer}>
+        <SettingsPressable label="Email" icon="email" subtitle={emailAddress} />
+        <SettingsPressable
+          icon="password"
+          onPress={() => modalToggle("open")}
+          label="Change Password"
+        />
+        <SettingsPressable
+          icon="logout"
+          onPress={logoutHandler}
+          label="Logout"
+        />
+        <SettingsPressable
+          icon="delete"
+          onPress={deleteHandler}
+          label="Delete Account"
+          iconColour={theme.error}
+        />
+      </View>
+
+      <ChangePasswordModal
+        showModal={showModal}
+        onRequestClose={() => modalToggle("close")}
+        onSave={changePasswordHandler}
+      />
+    </ScrollView>
+  );
+}
+
+export default AuthedProfile;
+
+const styles = (theme) =>
+  StyleSheet.create({
+    profilePicContainer: {
+      borderRadius: 70,
+      backgroundColor: theme.secondary100,
+      alignSelf: "center",
+      padding: 20,
+      marginTop: 24,
+    },
+    profileInfoContainer: {
+      margin: 24,
+    },
+  });

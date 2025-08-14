@@ -2,12 +2,11 @@ import { useAppTheme } from "../../store/app-theme-context";
 import { StyleSheet } from "react-native";
 import { TextInput, View, Text } from "react-native";
 
-function Input({ label, value, secure, onUpdateText, keyboardType }) {
+function Input({ label, value, secure, onUpdateText, keyboardType, style }) {
   const { theme } = useAppTheme();
 
   return (
-    <View style={styles(theme).inputContainer}>
-      {/* <Text style={styles(theme).text}>{label}</Text> */}
+    <View style={[styles(theme).inputContainer, style]}>
       <TextInput
         value={value}
         style={styles(theme).textInput}
@@ -32,11 +31,10 @@ const styles = (theme) =>
   StyleSheet.create({
     inputContainer: {
       marginVertical: 8,
+      width: "100%",
     },
     textInput: {
       padding: 20,
-      // borderColor: theme.border,
-      // borderWidth: 2,
       borderRadius: 10,
       margin: 8,
       color: theme.text,

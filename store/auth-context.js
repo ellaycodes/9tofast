@@ -1,19 +1,30 @@
 import { createContext, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { anonymousUser } from "../util/useAuth";
 
 export const AuthContext = createContext({
   token: "",
   username: "",
   refreshToken: "",
+  emailAddress: "",
+  anonymousUser: (emailAddress) => {},
   isAuthed: false,
   authenticate: (token, refreshToken, userName) => {},
   logout: () => {},
+  setTokens: (idToken, refreshToken) => {},
 });
 
 function AuthContextProvider({ children }) {
   const [authToken, setAuthToken] = useState();
   const [username, setUsername] = useState();
   const [refreshToken, setRefreshToken] = useState();
+  const [emailAddress, setEmailAddress] = useState();
+
+  function anonymousUser(emailAddress) {
+    setEmailAddress(emailAddress);
+    AsyncStorage.setItem("emailAddress", emailAddress);
+    return true;
+  }
 
   function authenticate(token, refreshToken, userName) {
     setAuthToken(token);
@@ -31,15 +42,26 @@ function AuthContextProvider({ children }) {
     AsyncStorage.removeItem("token");
     AsyncStorage.removeItem("username");
     AsyncStorage.removeItem("refreshToken");
+    AsyncStorage.removeItem("emailAddress");
+  }
+
+  function setTokens(idToken, refreshToken) {
+    setAuthToken(idToken);
+    setRefreshToken(refreshToken);
+    AsyncStorage.setItem("token", idToken);
+    AsyncStorage.setItem("refreshToken", refreshToken);
   }
 
   const value = {
     token: authToken,
     username: username,
     refreshToken: refreshToken,
+    emailAddress: emailAddress,
+    anonymousUser: anonymousUser,
     isAuthed: !!authToken,
     authenticate: authenticate,
     logout: logout,
+    setTokens: setTokens,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

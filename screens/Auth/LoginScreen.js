@@ -20,8 +20,10 @@ function LoginScreen() {
       );
       const res = await getAccountInfo(token);
       const username = res.data.users[0].displayName;
+      const emailAddress = res.data.users[0].email;
 
       authCxt.authenticate(token, refreshToken, username);
+      authCxt.anonymousUser(emailAddress);
     } catch (err) {
       Alert.alert("Authentication Failed", "Could not log you in!");
       setIsAuthing(false);
