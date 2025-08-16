@@ -75,7 +75,7 @@ function PreAuthProfile() {
       <View style={styles(theme).profilePicContainer}>
         <MaterialIcons name="person-outline" size={100} color={theme.muted} />
       </View>
-      <Title style={{ fontSize: 20, paddingBottom: 0, marginBottom: 0 }}>
+      <Title size={20} style={{ paddingBottom: 0, marginBottom: 0 }}>
         Create An Account
       </Title>
       <SubtitleText muted style={{ paddingTop: 0, marginTop: 2 }} size="l">

@@ -12,6 +12,7 @@ import {
 } from "../../util/useAuth";
 import ChangePasswordModal from "../../modals/ChangePasswordModal";
 import LoadingOverlay from "../ui/LoadingOverlay";
+import FlatButton from "../ui/FlatButton";
 
 function AuthedProfile({ emailAddress }) {
   const [showModal, setShowModal] = useState(false);
@@ -67,7 +68,7 @@ function AuthedProfile({ emailAddress }) {
   }
 
   if (loading) {
-    return <LoadingOverlay>Changing Password</LoadingOverlay>
+    return <LoadingOverlay>Changing Password</LoadingOverlay>;
   }
 
   return (
@@ -80,6 +81,12 @@ function AuthedProfile({ emailAddress }) {
         <SubtitleText muted style={{ marginTop: 2 }} size="m">
           {authCxt.username}
         </SubtitleText>
+        <FlatButton
+          onPress={() => console.log("TODO")}
+          style={{ padding: 0, margin: 0 }}
+        >
+          Edit Profile
+        </FlatButton>
       </View>
       <View style={styles(theme).profileInfoContainer}>
         <SettingsPressable label="Email" icon="email" subtitle={emailAddress} />

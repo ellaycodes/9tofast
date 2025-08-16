@@ -11,7 +11,7 @@ function AboutScreen() {
     <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
       <View style={styles.container}>
         <View>
-          <Title style={{ fontSize: 24, paddingBottom: 0 }}>
+          <Title size={24} style={{ paddingBottom: 0 }}>
             About 9ToFast
           </Title>
           <SubtitleText muted style={{ paddingTop: 0, marginTop: 0 }}>
