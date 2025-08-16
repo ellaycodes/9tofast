@@ -21,6 +21,7 @@ export default function Disclaimer() {
       <FlatButton
         size="xs"
         style={{ paddingHorizontal: 0, textAlign: "left", color: theme.primary200 }}
+        onPress={() => console.log('TODO')}
       >
         learn more
       </FlatButton>
