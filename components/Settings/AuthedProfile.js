@@ -13,12 +13,14 @@ import {
 import ChangePasswordModal from "../../modals/ChangePasswordModal";
 import LoadingOverlay from "../ui/LoadingOverlay";
 import FlatButton from "../ui/FlatButton";
+import { useNavigation } from "@react-navigation/native";
 
 function AuthedProfile({ emailAddress }) {
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const authCxt = useContext(AuthContext);
+  const navigation = useNavigation();
   const { theme } = useAppTheme();
 
   function logoutHandler() {
@@ -75,14 +77,13 @@ function AuthedProfile({ emailAddress }) {
     <ScrollView>
       <View>
         <View style={styles(theme).profilePicContainer}>
-          {/* TODO: Allow changing profile pic to profile pic presets*/}
           <MaterialIcons name="person-outline" size={100} color={theme.muted} />
         </View>
         <SubtitleText muted style={{ marginTop: 2 }} size="m">
           {authCxt.username}
         </SubtitleText>
         <FlatButton
-          onPress={() => console.log("TODO")}
+          onPress={() => navigation.navigate("EditProfileScreen")}
           style={{ padding: 0, margin: 0 }}
         >
           Edit Profile

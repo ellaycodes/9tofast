@@ -1,8 +1,9 @@
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import Title from "../../components/ui/Title";
 import SubtitleText from "../../components/ui/SubtitleText";
 import SettingsRow from "../../components/Settings/SettingsRow";
 import FAQDropdown from "../../components/Settings/FAQDropdown";
+import FlatButton from "../../components/ui/FlatButton";
 
 function SupportScreen() {
   return (
@@ -17,8 +18,11 @@ function SupportScreen() {
               Need Help?
             </SubtitleText>
             <SubtitleText style={styles.subtitleText} size="l">
-              Reach out to our support team at support@9tohealthapps.com. We're
-              here to help!
+              Reach out to our support team at{" "}
+              <FlatButton onPress={() => console.log("TODO")}>
+                support@9tohealthapps.com
+              </FlatButton>
+              . We're here to help!
             </SubtitleText>
             <SubtitleText style={styles.subtitleText} size="l">
               We aim to reply to all inquiries within 2 business days. Your
