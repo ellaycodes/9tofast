@@ -13,7 +13,13 @@ import { CommonActions, useNavigation } from "@react-navigation/native";
 import ErrorText from "./ErrorText";
 import { AuthContext } from "../../store/auth-context";
 
-function ScheduleSelect({ settings, setWizardState, token, refreshToken, userName }) {
+function ScheduleSelect({
+  settings,
+  setWizardState,
+  token,
+  refreshToken,
+  userName,
+}) {
   const { schedule, setSchedule } = useFasting();
   const authCxt = useContext(AuthContext);
   const navigate = useNavigation();
@@ -37,6 +43,8 @@ function ScheduleSelect({ settings, setWizardState, token, refreshToken, userNam
       label: schedule.label,
       start: schedule.start,
       end: schedule.end,
+      fastingHours: calcDuration({ start: schedule.start, end: schedule.end })
+        .fastingHours,
     };
 
     setChosenSchedule(chosenPreset);

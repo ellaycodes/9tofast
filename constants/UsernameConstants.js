@@ -25,7 +25,6 @@ export const ADJECTIVES = [
   "Perky",
   "Charming",
   "Noble",
-  "Warm",
   "Bubbly",
   "Glowing",
   "Shiny",

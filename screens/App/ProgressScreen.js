@@ -19,8 +19,8 @@ function ProgressScreen() {
     return () => clearInterval(timer);
   }, []);
 
+  
   const percent = (hoursFastedToday / schedule?.fastingHours) * 100;
-
 
   return (
     <ScrollView>

@@ -9,7 +9,7 @@ import {
 import { load, persist } from "./fasting-storage";
 import * as session from "./fasting-session";
 import * as events from "./events";
-import useBaselineScheduler from "./scheduler";
+import useScheduleBoundaryScheduler from "./scheduler";
 
 export const FastingContext = createContext({
   loading: true,
@@ -17,6 +17,7 @@ export const FastingContext = createContext({
   events: [],
   hoursFastedToday: null,
   setSchedule: () => {},
+  setBaselineAnchor: (ts) => {},
   startFast: (trigger) => {},
   endFast: (trigger) => {},
   clearFast: () => {},
@@ -32,10 +33,13 @@ function reducer(state, action) {
       return session.setSchedule(state, action.payload);
 
     case "START_FAST":
-      return events.startFast(state, action.trigger);
+      return events.startFast(state, action.trigger, action.payload);
 
     case "END_FAST":
-      return events.endFast(state, action.trigger);
+      return events.endFast(state, action.trigger, action.payload);
+
+    case "SET_BASELINE_ANCHOR":
+      return { ...state, baselineAnchorTs: action.payload };
 
     case "CLEAR_ALL":
       return session.clearAll();
@@ -70,8 +74,8 @@ export default function FastingContextProvider({ children }) {
     [state.events]
   );
 
-  useBaselineScheduler(state.schedule, state.events, dispatch);
-  
+  useScheduleBoundaryScheduler(state.schedule, state.events, dispatch, baselineAnchorTs = 0);
+
   const value = {
     loading: state.loading,
     schedule: state.schedule,
@@ -80,6 +84,8 @@ export default function FastingContextProvider({ children }) {
     setSchedule: (data) => dispatch({ type: "SET_SCHEDULE", payload: data }),
     startFast: (trigger) => dispatch({ type: "START_FAST", trigger }),
     endFast: (trigger) => dispatch({ type: "END_FAST", trigger }),
+    setBaselineAnchor: (ts) =>
+      dispatch({ type: "SET_BASELINE_ANCHOR", payload: ts }),
     clearFast: () => dispatch({ type: "CLEAR_ALL" }),
     isFasting: () => isFasting(),
   };

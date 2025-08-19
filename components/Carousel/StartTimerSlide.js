@@ -15,7 +15,7 @@ import {
 export default function StartTimerSlide({ setWizardState, token, refreshToken, userName }) {
   const { theme } = useAppTheme();
   const authCxt = useContext(AuthContext);
-  const { setSchedule, startFast, schedule, endFast } = useFasting();
+  const { setSchedule, startFast, schedule, endFast, events, setBaselineAnchor } = useFasting();
 
   const [started, setStarted] = useState(false);
   const [readout, setReadout] = useState("\u00A0"); // non‑breaking space as placeholder
@@ -39,9 +39,12 @@ export default function StartTimerSlide({ setWizardState, token, refreshToken, u
   }, [started, schedule]);
 
   const startFastHandler = () => {
+    
     if (started) return;
-// TODO: Change this so that it starts counting from when the button is pressed and not midnight
     const now = Date.now();
+    setBaselineAnchor(now);
+
+     // decide current window and flip once
     const todayMidnight = startOfDay(new Date());
     const startTs = parse(schedule.start, "HH:mm", todayMidnight).getTime();
     const endTs = parse(schedule.end, "HH:mm", todayMidnight).getTime();

@@ -12,6 +12,7 @@ const V2KEY = "fastingState_v2";
 export async function load() {
   try {
     const rawV2 = await AsyncStorage.getItem(V2KEY);
+    
     if (rawV2) {
       return JSON.parse(rawV2);
     }

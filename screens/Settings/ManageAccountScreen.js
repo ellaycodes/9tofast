@@ -6,7 +6,7 @@ import { useFasting } from "../../store/fastingLogic/fasting-context";
 
 function ManageAccountScreen({ navigation }) {
   const authCxt = useContext(AuthContext);
-  const { clearFast } = useFasting();
+  const { clearFast, setBaselineAnchor } = useFasting();
 
   function logoutHandler() {
     return authCxt.logout();
@@ -14,6 +14,7 @@ function ManageAccountScreen({ navigation }) {
 
   function clearAllHandler() {
     clearFast();
+    setBaselineAnchor(Date.now());
     navigation.navigate("TimerScreen");
   }
 

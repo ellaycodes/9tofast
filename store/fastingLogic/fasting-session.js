@@ -1,11 +1,12 @@
 import * as ev from "./events";
-import { generateBaselineEvents } from "./scheduler";
+import { baselineSinceAnchor } from "./scheduler";
 
 export function getInitialState() {
   return {
     schedule: null,
     events: [],
     hours: 0,
+    baselineAnchorTs: null,
   };
 }
 
@@ -35,39 +36,59 @@ export function isFasting(events) {
 // })
 // → 2.0 hours
 export function hoursFastedToday(state, now = Date.now()) {
-  const { schedule, events: userEvents = [] } = state;
+  const { schedule, events: userEvents = [], baselineAnchorTs } = state
+  if (!schedule && !userEvents.length) return 0
 
-  // If there's no schedule and no events, nothing to calculate
-  if (!schedule && !userEvents.length) return 0;
+  // helper: are we fasting at a given time?
+  const activeAt = (atTs) => {
+    const base = schedule
+      ? baselineSinceAnchor(schedule, baselineAnchorTs, atTs)
+      : []
+    const allUpTo = [...base, ...userEvents.filter(e => e.ts <= atTs)]
+      .sort((a, b) => a.ts - b.ts)
 
-  // Generate default fasting structure for the day
-  const baseline = schedule ? generateBaselineEvents(schedule) : [];
-
-  // Merge and sort all events
-  const all = [...baseline, ...userEvents].sort((a, b) => a.ts - b.ts);
-
-  const todayStart = new Date(now);
-  todayStart.setHours(0, 0, 0, 0);
-  const midnight = todayStart.getTime();
-
-  let cursor = midnight;
-  let active = false;
-  let totalMs = 0;
-
-  for (const e of all) {
-    if (e.ts < midnight) {
-      // Carry forward fasting state from before today
-      if (e.type === ev.EVENT.START) active = true;
-      if (e.type === ev.EVENT.END) active = false;
-      continue;
+    let active = false
+    for (const e of allUpTo) {
+      if (e.type === ev.EVENT.START || e.type === 'start') active = true
+      if (e.type === ev.EVENT.END   || e.type === 'end')   active = false
     }
-
-    if (active) totalMs += e.ts - cursor;
-    cursor = e.ts;
-
-    if (e.type === ev.EVENT.START) active = true;
-    if (e.type === ev.EVENT.END) active = false;
+    return active
   }
 
-  return +(totalMs / 36e5).toFixed(5); // ms → hours (1 decimal place)
+  // midnight anchor for "today"
+  const midnight = new Date(now)
+  midnight.setHours(0, 0, 0, 0)
+  const dayStart = midnight.getTime()
+
+  // build baseline since anchor, then merge with user events for today onward
+  const baseline = schedule
+    ? baselineSinceAnchor(schedule, baselineAnchorTs, now)
+    : []
+
+  // only today’s events, sorted, and collapse exact dupes
+  const all = [...baseline, ...userEvents]
+    .filter(e => e.ts >= dayStart)
+    .sort((a, b) => a.ts - b.ts)
+    .filter((e, i, arr) => i === 0 || !(e.ts === arr[i - 1].ts && e.type === arr[i - 1].type))
+
+  // starting state at midnight
+  let active = activeAt(dayStart)
+  let cursor = dayStart
+  let totalMs = 0
+
+  for (const e of all) {
+    // accrue up to this event if we are active
+    if (active) totalMs += e.ts - cursor
+    cursor = e.ts
+
+    // flip state on this event
+    if (e.type === ev.EVENT.START || e.type === 'start') active = true
+    if (e.type === ev.EVENT.END   || e.type === 'end')   active = false
+  }
+
+  // tail after last event, up to now
+  if (active) totalMs += now - cursor
+  
+  return +(totalMs / 36e5).toFixed(5)
 }
+

@@ -18,13 +18,13 @@ export default function Disclaimer() {
         professional if you have any medical conditions, are pregnant, or have a
         history of eating disorders.
       </Text>
-      <FlatButton
+      {/* <FlatButton
         size="xs"
         style={{ paddingHorizontal: 0, textAlign: "left", color: theme.primary200 }}
         onPress={() => console.log('TODO')}
       >
         learn more
-      </FlatButton>
+      </FlatButton> */}
     </View>
   );
 }
