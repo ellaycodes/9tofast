@@ -2,7 +2,7 @@ import { Pressable, View, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAppTheme } from "../../store/app-theme-context";
 
-export default function SettingsRow({ label, right, onPress }) {
+export default function SettingsRow({ label, right, onPress, open }) {
   const { theme } = useAppTheme();
   return (
     <Pressable
@@ -20,7 +20,11 @@ export default function SettingsRow({ label, right, onPress }) {
           right
         )}
         {onPress && (
-          <Ionicons name="chevron-forward" size={20} style={s(theme).chev} />
+          <Ionicons
+            name={open ? "chevron-down" : "chevron-forward"}
+            size={20}
+            style={s(theme).chev}
+          />
         )}
       </View>
     </Pressable>

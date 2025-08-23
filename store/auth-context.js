@@ -7,11 +7,12 @@ export const AuthContext = createContext({
   username: "",
   refreshToken: "",
   emailAddress: "",
-  anonymousUser: (emailAddress) => {},
   isAuthed: false,
+  anonymousUser: (emailAddress) => {},
   authenticate: (token, refreshToken, userName) => {},
   logout: () => {},
   setTokens: (idToken, refreshToken) => {},
+  updateUsername: (username) => {},
 });
 
 function AuthContextProvider({ children }) {
@@ -52,16 +53,22 @@ function AuthContextProvider({ children }) {
     AsyncStorage.setItem("refreshToken", refreshToken);
   }
 
+  function updateUsername(username) {
+    setUsername(username);
+    AsyncStorage.setItem("username", username);
+  }
+
   const value = {
     token: authToken,
     username: username,
     refreshToken: refreshToken,
     emailAddress: emailAddress,
-    anonymousUser: anonymousUser,
     isAuthed: !!authToken,
+    anonymousUser: anonymousUser,
     authenticate: authenticate,
     logout: logout,
     setTokens: setTokens,
+    updateUsername: updateUsername,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
