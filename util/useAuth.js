@@ -66,8 +66,8 @@ export async function forgottenPassword(email) {
     });
     return res;
   } catch (err) {
-    const msg = err?.response?.data?.error?.message || "Password reset failed";
-    throw new Error(`[AUTH-FORGOTPASSWORD-001] ${msg}`);
+    err._src = "forgottenPassword";
+    throw err;
   }
 }
 
@@ -78,11 +78,11 @@ export async function getAccountInfo(idToken) {
       idToken: idToken,
     });
 
+    // console.log(res);
     return res;
   } catch (err) {
-    const msg =
-      err?.response?.data?.error?.message || "Error: please contact support";
-    throw new Error(`[AUTH-GETACCOUNTINFO-001] ${msg}`);
+    err._src = "getAccountInfo";
+    throw err;
   }
 }
 
@@ -94,11 +94,10 @@ export async function updateProfile(idToken, displayName, photoUrl) {
       displayName: displayName,
       photoUrl: photoUrl,
     });
-
     return res;
   } catch (err) {
-    const msg = err?.response?.data?.error?.message || "Update Failed";
-    throw new Error(`[AUTH-UPDATEPROFILE-001] ${msg}`);
+    err._src = "updateProfile";
+    throw err;
   }
 }
 
@@ -116,8 +115,8 @@ export async function linkAnonymous(idToken, email, password) {
 
     return res;
   } catch (err) {
-    const msg = err?.response?.data?.error?.message || "Unable to link account";
-    throw new Error(`[AUTH-LINKANONYMOUS-001] ${msg}`);
+    err._src = "linkAnonymous";
+    throw err;
   }
 }
 
@@ -135,7 +134,8 @@ export async function refreshIdToken(refreshToken) {
       refreshToken: res.data.refresh_token || refreshToken,
     };
   } catch (err) {
-    throw new Error(`[AUTH-REFRESHTOKEN-001] Could not refresh token`);
+    err._src = "refreshIdToken";
+    throw err;
   }
 }
 
@@ -156,8 +156,8 @@ export async function verifyEmail(idToken) {
 
     return res;
   } catch (err) {
-    const msg = err?.response?.data?.error?.message || "Could not verify email";
-    throw new Error(`[AUTH-VERIFYEMAIL-001] ${msg}`);
+    err._src = "verifyEmail";
+    throw err;
   }
 }
 
@@ -168,8 +168,8 @@ export async function deleteUser(idToken) {
       idToken: idToken,
     });
   } catch (err) {
-    const msg = err?.response?.data?.error?.message || "Could not delete user";
-    throw new Error(`[AUTH-DELETEUSER-001] ${msg}`);
+    err._src = "deleteUser";
+    throw err;
   }
 }
 
@@ -186,8 +186,8 @@ export async function changePassword(idToken, password) {
 
     return res;
   } catch (err) {
-    const msg = err?.response?.data?.error?.message || "Password change failed";
-    throw new Error(`[AUTH-CHANGEPASSWORD-001] ${msg}`);
+    err._src = "changePassword";
+    throw err;
   }
 }
 
@@ -205,16 +205,22 @@ export async function changePassword(idToken, password) {
 export async function callAuthWithRefresh(authAction, getTokens, setTokens) {
   try {
     const { idToken } = getTokens();
-    console.log("hi");
-    return await authAction(idToken);
+    const res = await authAction(idToken);
+    return res;
   } catch (err) {
+    
     const msg = err?.response?.data?.error?.message;
+
+    console.log(msg);
+
     const msgOptions = [
       "INVALID_ID_TOKEN",
       "TOKEN_EXPIRED",
       "CREDENTIAL_TOO_OLD_LOGIN_AGAIN",
     ];
+
     const shouldRefresh = msgOptions.includes(msg);
+
     if (!shouldRefresh)
       throw new Error(
         `[AUTH-CALLWITHREFRESH-001] ${getFirebaseErrorMessage(err)}`
@@ -228,7 +234,9 @@ export async function callAuthWithRefresh(authAction, getTokens, setTokens) {
     try {
       const fresh = await refreshIdToken(refreshToken);
       await setTokens(fresh);
-      return await authAction(fresh.idToken);
+      const res = await authAction(fresh.idToken);
+
+      return res;
     } catch (err2) {
       throw new Error(
         `[AUTH-CALLWITHREFRESH-003] ${getFirebaseErrorMessage(err2)}`
