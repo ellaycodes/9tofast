@@ -6,9 +6,15 @@ import SubtitleText from "../../components/ui/SubtitleText";
 import { useAppTheme } from "../../store/app-theme-context";
 import { useContext, useState } from "react";
 import { AuthContext } from "../../store/auth-context";
-import { createUser, deleteUser, updateProfile } from "../../util/useAuth";
 import LoadingOverlay from "../../components/ui/LoadingOverlay";
 import { useNavigation } from "@react-navigation/native";
+import {
+  EmailAuthProvider,
+  getIdToken,
+  linkWithCredential,
+  updateProfile,
+} from "firebase/auth";
+import { auth } from "../../firebase/app";
 
 function PreAuthProfile() {
   const navigation = useNavigation();
@@ -19,16 +25,13 @@ function PreAuthProfile() {
   async function createAccount({ email, password }) {
     setIsAuthing(true);
     try {
-      const { token, refreshToken } = await createUser(email, password);
+      const cred = EmailAuthProvider.credential(email, password);
+      const userCredential = await linkWithCredential(auth.currentUser, cred);
+      const token = await getIdToken(userCredential.user, true);
+      await updateProfile(auth.currentUser, { displayName: authCxt.username });
 
-      if (authCxt.username) {
-        await updateProfile(token, authCxt.username);
-      }
-
-      deleteUser(authCxt.token);
-
-      authCxt.authenticate(token, refreshToken, authCxt.username);
-      authCxt.anonymousUser(email);
+      authCxt.authenticate(token, authCxt.username);
+      authCxt.setEmailAddress(email);
 
       navigation.navigate("TimerScreen");
     } catch (err) {

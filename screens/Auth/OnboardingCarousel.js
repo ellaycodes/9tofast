@@ -5,7 +5,7 @@ import { StyleSheet, View } from "react-native";
 import ProgressDots from "../../components/Carousel/ProgressDots";
 
 function OnboardingCarousel({ route }) {
-  const { token, refreshToken, userName } = route.params;
+  const { token, userName, localId } = route.params;
   const [wizardState, setWizardState] = useState({
     step: 0,
     events: [],
@@ -13,10 +13,10 @@ function OnboardingCarousel({ route }) {
 
   const slides = [
     <ScheduleSlide
-      {...{ wizardState, setWizardState, token, refreshToken, userName }}
+      {...{ wizardState, setWizardState, token, userName, localId }}
     />,
     <StartTimerSlide
-      {...{ wizardState, setWizardState, token, refreshToken, userName }}
+      {...{ wizardState, setWizardState, token, userName, localId }}
     />,
   ];
 

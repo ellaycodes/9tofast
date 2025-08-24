@@ -5,15 +5,12 @@ import { AuthContext } from "../../store/auth-context";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useAppTheme } from "../../store/app-theme-context";
 import SettingsPressable from "./SettingsPressable";
-import {
-  callAuthWithRefresh,
-  changePassword,
-  deleteUser,
-} from "../../util/useAuth";
 import ChangePasswordModal from "../../modals/ChangePasswordModal";
 import LoadingOverlay from "../ui/LoadingOverlay";
 import FlatButton from "../ui/FlatButton";
 import { useNavigation } from "@react-navigation/native";
+import { updatePassword, deleteUser } from "firebase/auth";
+import { auth } from "../../firebase/app";
 
 function AuthedProfile({ emailAddress }) {
   const [showModal, setShowModal] = useState(false);
@@ -28,7 +25,7 @@ function AuthedProfile({ emailAddress }) {
   }
 
   function deleteHandler() {
-    deleteUser(authCxt.token);
+    deleteUser(auth.currentUser);
     authCxt.isAuthed = false;
   }
 
@@ -42,14 +39,9 @@ function AuthedProfile({ emailAddress }) {
       if (!passwordIsValid)
         throw new Error("Password must be at least 7 characters.");
       if (!passwordsAreEqual) throw new Error("Passwords do not match.");
+      const user = auth.currentUser;
 
-      await callAuthWithRefresh(
-        (idToken) => changePassword(idToken, password.newPassword),
-        () => ({ idToken: authCxt.token, refreshToken: authCxt.refreshToken }),
-        async ({ idToken, refreshToken }) => {
-          authCxt.setTokens(idToken, refreshToken);
-        }
-      );
+      const res = await updatePassword(user, password.newPassword);
 
       setShowModal(false);
       Alert.alert("Success", "Password updated.");

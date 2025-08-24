@@ -1,56 +1,53 @@
 import { createContext, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { anonymousUser } from "../util/useAuth";
 
 export const AuthContext = createContext({
   token: "",
   username: "",
-  refreshToken: "",
   emailAddress: "",
   isAuthed: false,
-  anonymousUser: (emailAddress) => {},
-  authenticate: (token, refreshToken, userName) => {},
+  uid: "",
+  setEmailAddress: (emailAddress) => {},
+  authenticate: (token, userName, uid) => {},
   logout: () => {},
-  setTokens: (idToken, refreshToken) => {},
+  setTokens: (idToken) => {},
   updateUsername: (username) => {},
 });
 
 function AuthContextProvider({ children }) {
   const [authToken, setAuthToken] = useState();
   const [username, setUsername] = useState();
-  const [refreshToken, setRefreshToken] = useState();
-  const [emailAddress, setEmailAddress] = useState();
+  const [email, setEmail] = useState();
+  const [uid, setUid] = useState();
 
-  function anonymousUser(emailAddress) {
-    setEmailAddress(emailAddress);
-    AsyncStorage.setItem("emailAddress", emailAddress);
+  function setEmailAddress(email) {
+    setEmail(email);
+    AsyncStorage.setItem("emailAddress", email);
     return true;
   }
 
-  function authenticate(token, refreshToken, userName) {
+  function authenticate(token, userName, uid) {
     setAuthToken(token);
     setUsername(userName);
-    setRefreshToken(refreshToken);
+    setUid(uid);
     AsyncStorage.setItem("token", token);
     AsyncStorage.setItem("username", userName);
-    AsyncStorage.setItem("refreshToken", refreshToken);
+    AsyncStorage.setItem("uid", uid);
   }
 
   function logout() {
     setAuthToken(null);
     setUsername(null);
-    setRefreshToken(null);
+    setUid(null);
     AsyncStorage.removeItem("token");
     AsyncStorage.removeItem("username");
-    AsyncStorage.removeItem("refreshToken");
     AsyncStorage.removeItem("emailAddress");
+    AsyncStorage.removeItem("uid");
   }
 
-  function setTokens(idToken, refreshToken) {
+  function setTokens(idToken) {
     setAuthToken(idToken);
-    setRefreshToken(refreshToken);
     AsyncStorage.setItem("token", idToken);
-    AsyncStorage.setItem("refreshToken", refreshToken);
   }
 
   function updateUsername(username) {
@@ -61,10 +58,10 @@ function AuthContextProvider({ children }) {
   const value = {
     token: authToken,
     username: username,
-    refreshToken: refreshToken,
-    emailAddress: emailAddress,
+    emailAddress: email,
     isAuthed: !!authToken,
-    anonymousUser: anonymousUser,
+    uid: uid,
+    setEmailAddress: setEmailAddress,
     authenticate: authenticate,
     logout: logout,
     setTokens: setTokens,

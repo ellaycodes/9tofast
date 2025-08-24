@@ -17,7 +17,6 @@ function ScheduleSelect({
   settings,
   setWizardState,
   token,
-  refreshToken,
   userName,
 }) {
   const { schedule, setSchedule } = useFasting();
@@ -147,7 +146,7 @@ function ScheduleSelect({
   }
 
   function onSkip() {
-    authCxt.authenticate(token, refreshToken, userName);
+    authCxt.authenticate(token, userName);
   }
 
   return (

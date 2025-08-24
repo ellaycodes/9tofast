@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import { ScrollView, View } from "react-native";
 import * as dt from "date-fns";
 import { AuthContext } from "../../store/auth-context";
@@ -6,7 +6,7 @@ import { useAppTheme } from "../../store/app-theme-context";
 import { useFasting } from "../../store/fastingLogic/fasting-context";
 import SectionTitle from "../../components/Settings/SectionTitle";
 import SettingsPressable from "../../components/Settings/SettingsPressable";
-import { getAccountInfo, refreshIdToken } from "../../util/useAuth";
+import { auth } from "../../firebase/app";
 
 function SettingsHomeScreen({ navigation }) {
   const authCxt = useContext(AuthContext);
@@ -15,8 +15,8 @@ function SettingsHomeScreen({ navigation }) {
 
   useEffect(() => {
     (async () => {
-      const res = await getAccountInfo(authCxt.token);
-      authCxt.anonymousUser(res.data.users[0].email);
+      const user = auth.currentUser;
+      authCxt.setEmailAddress(user.email);
     })();
   }, [authCxt.emailAddress]);
 
