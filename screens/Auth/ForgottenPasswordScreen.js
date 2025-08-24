@@ -5,8 +5,9 @@ import SubtitleText from "../../components/ui/SubtitleText";
 import PrimaryButton from "../../components/ui/PrimaryButton";
 import { Alert, StyleSheet, View } from "react-native";
 import { useState } from "react";
-import { forgottenPassword } from "../../util/useAuth";
 import LoadingOverlay from "../../components/ui/LoadingOverlay";
+import { sendPasswordResetEmail } from "firebase/auth";
+import { auth } from "../../firebase/app";
 
 function ForgottenPassword({ navigation }) {
   const [emailAddress, setEmailAddress] = useState("");
@@ -16,7 +17,7 @@ function ForgottenPassword({ navigation }) {
   async function submitHandler() {
     setLoading(true);
     try {
-      const res = await forgottenPassword(emailAddress);
+      const res = await sendPasswordResetEmail(auth, emailAddress);
       setEmailSent(true);
       setLoading(false);
     } catch (err) {

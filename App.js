@@ -21,16 +21,15 @@ function Navigator() {
     Ionicons.loadFont();
     (async () => {
       const storedToken = await AsyncStorage.getItem("token");
-      const storedRefreshToken = await AsyncStorage.getItem("refreshToken");
       const storedUsername = await AsyncStorage.getItem("username");
       const storedEmailAddress = await AsyncStorage.getItem("emailAddress");
 
       if (storedToken) {
-        authCxt.authenticate(storedToken, storedRefreshToken, storedUsername);
+        authCxt.authenticate(storedToken, storedUsername);
       }
 
       if (storedEmailAddress) {
-        authCxt.anonymousUser(storedEmailAddress)
+        authCxt.setEmailAddress(storedEmailAddress);
       }
 
       setLoading(false);

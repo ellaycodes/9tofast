@@ -1,11 +1,13 @@
 import AuthContent from "../../components/Auth/AuthContent";
-import { createUser } from "../../util/useAuth";
 import { useContext, useState } from "react";
 import { AuthContext } from "../../store/auth-context";
 import LoadingOverlay from "../../components/ui/LoadingOverlay";
 import { KeyboardAvoidingView, ScrollView } from "react-native";
 import { Platform } from "react-native";
 import randomUsername from "../../util/randomUsername";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../../firebase/app";
+import { addUser } from "../../firebase/db";
 
 function SignupScreen({ navigation }) {
   const [isAuthing, setIsAuthing] = useState(false);
@@ -15,15 +17,24 @@ function SignupScreen({ navigation }) {
   async function signUpHandler(authDetails) {
     setIsAuthing(true);
     try {
-      const { token, refreshToken } = await createUser(
+      const userName = randomUsername();
+
+      const { user } = await createUserWithEmailAndPassword(
+        auth,
         authDetails.email,
         authDetails.password
       );
-      const userName = randomUsername();
+
+      await addUser({
+        uid: user.uid,
+        email: authDetails.email,
+        displayName: userName,
+      });
+
       navigation.navigate("OnboardingCarousel", {
-        token,
-        refreshToken,
-        userName
+        token: user.stsTokenManager.accessToken,
+        userName: userName,
+        localId: user.uid,
       });
     } catch (err) {
       Alert.alert("Authentication Failed", "Could not sign you in!");

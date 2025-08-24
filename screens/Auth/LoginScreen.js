@@ -1,10 +1,12 @@
-import { getAccountInfo, login } from "../../util/useAuth";
 import { useContext, useState } from "react";
 import AuthContent from "../../components/Auth/AuthContent";
 import { AuthContext } from "../../store/auth-context";
 import { Alert, KeyboardAvoidingView, ScrollView } from "react-native";
 import LoadingOverlay from "../../components/ui/LoadingOverlay";
 import { Platform } from "react-native";
+import { updateUser } from "../../firebase/db";
+import { auth } from "../../firebase/app";
+import { getIdToken, signInWithEmailAndPassword } from "firebase/auth";
 
 function LoginScreen() {
   const [isAuthing, setIsAuthing] = useState(false);
@@ -14,17 +16,29 @@ function LoginScreen() {
   async function loginHandler(authDetails) {
     setIsAuthing(true);
     try {
-      const { token, refreshToken } = await login(
+      const { user } = await signInWithEmailAndPassword(
+        auth,
         authDetails.email,
         authDetails.password
       );
-      const res = await getAccountInfo(token);
-      const username = res.data.users[0].displayName;
-      const emailAddress = res.data.users[0].email;
 
-      authCxt.authenticate(token, refreshToken, username);
-      authCxt.anonymousUser(emailAddress);
+      const { displayName, email, uid } = user;
+
+      const args = {
+        uid: uid,
+        displayName: displayName,
+        email: email
+      };
+
+      await updateUser(args);
+
+      const token = await getIdToken(user, true);
+
+      authCxt.authenticate(token, displayName, uid);
+      authCxt.setEmailAddress(email);
     } catch (err) {
+      console.log(err);
+
       Alert.alert("Authentication Failed", "Could not log you in!");
       setIsAuthing(false);
     }

@@ -1,13 +1,14 @@
 import { StyleSheet, View } from "react-native";
 import AvatarSegment from "../../components/ui/AvatarSegment";
 import { AuthContext } from "../../store/auth-context";
-import { callAuthWithRefresh, updateProfile } from "../../util/useAuth";
 import { useNavigation } from "@react-navigation/native";
 import { useContext, useState } from "react";
 import SubtitleText from "../../components/ui/SubtitleText";
 import SettingsRow from "../../components/Settings/SettingsRow";
 import PrimaryButton from "../../components/ui/PrimaryButton";
 import Input from "../../components/Auth/Input";
+import { updateProfile } from "firebase/auth";
+import { auth } from "../../firebase/app";
 
 function EditProfileScreen() {
   const [showInputs, setShowInputs] = useState({
@@ -41,24 +42,16 @@ function EditProfileScreen() {
     const { name, username } = inputDetails;
     try {
       if (authCxt.username !== username) {
-        const authRes = await callAuthWithRefresh(
-          (idToken) => updateProfile(idToken, username),
-          () => ({
-            idToken: authCxt.token,
-            refreshToken: authCxt.refreshToken,
-          }),
-          async ({ idToken, refreshToken }) => {
-            authCxt.setTokens(idToken, refreshToken);
-          }
-        );
 
-        const newUsername = authRes?.data?.displayName;
+        await updateProfile(auth.currentUser, {
+          displayName: username,
+        });
 
-        authCxt.updateUsername(newUsername);
+        authCxt.updateUsername(username);
 
         navigation.navigate("ProfileScreen", {
           emailAddress: authCxt.emailAddress,
-          username: newUsername,
+          username: username,
         });
       }
     } catch (err) {
