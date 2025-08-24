@@ -9,6 +9,7 @@ import PrimaryButton from "../../components/ui/PrimaryButton";
 import Input from "../../components/Auth/Input";
 import { updateProfile } from "firebase/auth";
 import { auth } from "../../firebase/app";
+import { updateUser } from "../../firebase/db";
 
 function EditProfileScreen() {
   const [showInputs, setShowInputs] = useState({
@@ -41,19 +42,23 @@ function EditProfileScreen() {
   async function handleOnSubmit() {
     const { name, username } = inputDetails;
     try {
-      if (authCxt.username !== username) {
+      await updateProfile(auth.currentUser, {
+        displayName: username,
+      });
 
-        await updateProfile(auth.currentUser, {
-          displayName: username,
-        });
+      await updateUser({
+        uid: auth.currentUser.uid,
+        displayName: username ? username : auth.currentUser.displayName,
+        email: auth.currentUser.email,
+        fullName: name ? name : null,
+      });
 
-        authCxt.updateUsername(username);
-
-        navigation.navigate("ProfileScreen", {
-          emailAddress: authCxt.emailAddress,
-          username: username,
-        });
-      }
+      authCxt.updateUsername(username);
+      authCxt.updateFullName(name);
+      navigation.navigate("ProfileScreen", {
+        emailAddress: authCxt.emailAddress,
+        username: username,
+      });
     } catch (err) {
       console.log("submit error - AvatarSegment => handleOnSubmit", err);
     }
@@ -80,7 +85,7 @@ function EditProfileScreen() {
                   name: !showInputs.name,
                 }))
               }
-              right="Add"
+              right={authCxt.fullName ? authCxt.fullName : "Add"}
               open={showInputs.name}
             />
             {showInputs.name && (
@@ -101,7 +106,11 @@ function EditProfileScreen() {
                   username: !showInputs.username,
                 }))
               }
-              right={authCxt.username}
+              right={
+                auth.currentUser.displayName
+                  ? auth.currentUser.displayName
+                  : "Add"
+              }
               open={showInputs.username}
             />
             {showInputs.username && (

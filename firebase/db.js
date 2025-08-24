@@ -1,5 +1,11 @@
 import { db } from "./app";
-import { setDoc, serverTimestamp, doc, updateDoc } from "firebase/firestore";
+import {
+  setDoc,
+  serverTimestamp,
+  doc,
+  updateDoc,
+  deleteDoc,
+} from "firebase/firestore";
 
 export async function addUser({
   uid,
@@ -39,5 +45,15 @@ export async function updateUser({ uid, displayName, fullName, email }) {
   } catch (err) {
     console.error(err);
     throw new Error(err);
+  }
+}
+
+export async function deleteCurrentUser(uid) {
+  if (!uid) throw new Error("DELETE_USER_MISSING_UID");
+
+  try {
+    await deleteDoc(doc(db, "users", uid));
+  } catch (e) {
+    throw new Error(e);
   }
 }

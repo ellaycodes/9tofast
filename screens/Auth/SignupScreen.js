@@ -29,6 +29,7 @@ function SignupScreen({ navigation }) {
         uid: user.uid,
         email: authDetails.email,
         displayName: userName,
+        isAnonymous: false
       });
 
       navigation.navigate("OnboardingCarousel", {

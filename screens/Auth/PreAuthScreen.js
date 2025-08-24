@@ -10,6 +10,7 @@ import LoadingOverlay from "../../components/ui/LoadingOverlay";
 import randomUsername from "../../util/randomUsername";
 import { signInAnonymously } from "firebase/auth";
 import { auth } from "../../firebase/app";
+import { addUser } from "../../firebase/db";
 
 function PreAuthScreen({ navigation }) {
   const [isAuthing, setIsAuthing] = useState();
@@ -33,7 +34,12 @@ function PreAuthScreen({ navigation }) {
     try {
       const { user } = await signInAnonymously(auth);
       const userName = randomUsername();
-
+      await addUser({
+        uid: user.uid,
+        email: null,
+        displayName: userName,
+        isAnonymous: true,
+      });
 
       navigation.navigate("OnboardingCarousel", {
         token: user.stsTokenManager.accessToken,
