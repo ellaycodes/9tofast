@@ -18,6 +18,7 @@ function ScheduleSelect({
   setWizardState,
   token,
   userName,
+  uid
 }) {
   const { schedule, setSchedule } = useFasting();
   const authCxt = useContext(AuthContext);
@@ -146,7 +147,7 @@ function ScheduleSelect({
   }
 
   function onSkip() {
-    authCxt.authenticate(token, userName);
+    authCxt.authenticate(token, userName, uid);
   }
 
   return (

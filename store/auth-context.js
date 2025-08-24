@@ -7,16 +7,19 @@ export const AuthContext = createContext({
   emailAddress: "",
   isAuthed: false,
   uid: "",
+  fullName: "",
   setEmailAddress: (emailAddress) => {},
   authenticate: (token, userName, uid) => {},
   logout: () => {},
   setTokens: (idToken) => {},
   updateUsername: (username) => {},
+  updateFullName: (fullName) => {},
 });
 
 function AuthContextProvider({ children }) {
   const [authToken, setAuthToken] = useState();
   const [username, setUsername] = useState();
+  const [fullName, setFullName] = useState();
   const [email, setEmail] = useState();
   const [uid, setUid] = useState();
 
@@ -39,10 +42,12 @@ function AuthContextProvider({ children }) {
     setAuthToken(null);
     setUsername(null);
     setUid(null);
+    setFullName(null);
     AsyncStorage.removeItem("token");
     AsyncStorage.removeItem("username");
     AsyncStorage.removeItem("emailAddress");
     AsyncStorage.removeItem("uid");
+    AsyncStorage.removeItem("fullname");
   }
 
   function setTokens(idToken) {
@@ -55,17 +60,24 @@ function AuthContextProvider({ children }) {
     AsyncStorage.setItem("username", username);
   }
 
+  function updateFullName(fullName) {
+    setFullName(fullName);
+    AsyncStorage.setItem("fullname"), fullName;
+  }
+
   const value = {
     token: authToken,
     username: username,
     emailAddress: email,
     isAuthed: !!authToken,
     uid: uid,
+    fullName: fullName,
     setEmailAddress: setEmailAddress,
     authenticate: authenticate,
     logout: logout,
     setTokens: setTokens,
     updateUsername: updateUsername,
+    updateFullName: updateFullName,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
