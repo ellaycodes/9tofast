@@ -74,7 +74,12 @@ export default function FastingContextProvider({ children }) {
     [state.events]
   );
 
-  useScheduleBoundaryScheduler(state.schedule, state.events, dispatch, baselineAnchorTs = 0);
+  useScheduleBoundaryScheduler(
+    state.schedule,
+    state.events,
+    dispatch,
+    state.baselineAnchorTs || 0
+  );
 
   const value = {
     loading: state.loading,
