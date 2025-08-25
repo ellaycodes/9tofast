@@ -1,4 +1,4 @@
-import { Modal, StyleSheet, Text, View } from "react-native";
+import { Modal, StyleSheet, View } from "react-native";
 import { useAppTheme } from "../store/app-theme-context";
 import { Pressable } from "react-native";
 import Input from "../components/Auth/Input";

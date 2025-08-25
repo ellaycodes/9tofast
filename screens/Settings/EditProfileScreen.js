@@ -10,16 +10,19 @@ import Input from "../../components/Auth/Input";
 import { updateProfile } from "firebase/auth";
 import { auth } from "../../firebase/app";
 import { updateUser } from "../../firebase/db";
+import AvatarPickerModal from "../../modals/AvatarPickerModal";
+import FlatButton from "../../components/ui/FlatButton";
 
 function EditProfileScreen() {
   const [showInputs, setShowInputs] = useState({
     name: false,
     username: false,
   });
+  const [openModal, setOpenModal] = useState(false);
   const navigation = useNavigation();
   const authCxt = useContext(AuthContext);
   const [inputDetails, setInputDetails] = useState({
-    name: "",
+    name: authCxt.fullName || "",
     username: authCxt.username || "",
   });
 
@@ -46,11 +49,10 @@ function EditProfileScreen() {
         displayName: username,
       });
 
-      await updateUser({
-        uid: auth.currentUser.uid,
+      await updateUser(auth.currentUser.uid, {
         displayName: username ? username : auth.currentUser.displayName,
         email: auth.currentUser.email,
-        fullName: name ? name : null,
+        fullName: name ? name : authCxt.fullName,
       });
 
       authCxt.updateUsername(username);
@@ -60,13 +62,29 @@ function EditProfileScreen() {
         username: username,
       });
     } catch (err) {
-      console.log("submit error - AvatarSegment => handleOnSubmit", err);
+      throw new Error(err);
     }
   }
+
+  async function onAvatarSave(value) {
+    try {
+      await updateUser(auth.currentUser.uid, {
+        avatarId: value,
+      });
+      authCxt.updateAvatarId(value);
+      setOpenModal(false);
+    } catch (err) {
+      throw new Error(err);
+    }
+  }
+
   return (
     <View style={styles.container}>
       <View>
-        <AvatarSegment />
+        <AvatarSegment avatarId={authCxt.avatarId} />
+        <FlatButton onPress={() => setOpenModal(!openModal)}>
+          Edit Avatar
+        </FlatButton>
         <View>
           <SubtitleText
             muted
@@ -125,6 +143,12 @@ function EditProfileScreen() {
       </View>
 
       <PrimaryButton onPress={handleOnSubmit}>Save</PrimaryButton>
+
+      <AvatarPickerModal
+        showModal={openModal}
+        onRequestClose={() => setOpenModal(!openModal)}
+        onSave={onAvatarSave}
+      />
     </View>
   );
 }

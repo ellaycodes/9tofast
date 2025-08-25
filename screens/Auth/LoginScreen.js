@@ -25,19 +25,18 @@ function LoginScreen() {
       const { displayName, email, uid } = user;
 
       const args = {
-        uid: uid,
         displayName: displayName,
-        email: email
+        email: email,
       };
 
-      await updateUser(args);
+      await updateUser(uid, args);
 
       const token = await getIdToken(user, true);
 
       authCxt.authenticate(token, displayName, uid);
       authCxt.setEmailAddress(email);
     } catch (err) {
-      console.log(err);
+      throw new Error(err);
 
       Alert.alert("Authentication Failed", "Could not log you in!");
       setIsAuthing(false);
