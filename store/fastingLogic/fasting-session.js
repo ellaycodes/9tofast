@@ -5,7 +5,6 @@ export function getInitialState() {
   return {
     schedule: null,
     events: [],
-    hours: 0,
     baselineAnchorTs: null,
   };
 }

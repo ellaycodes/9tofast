@@ -5,11 +5,16 @@ import {
   useContext,
   useReducer,
   useCallback,
+  useMemo,
+  useRef
 } from "react";
 import { load, persist } from "./fasting-storage";
 import * as session from "./fasting-session";
 import * as events from "./events";
 import useScheduleBoundaryScheduler from "./scheduler";
+import * as dt from "date-fns";
+import { addDailyStats } from "../../firebase/fasting.db.js";
+import { auth } from "../../firebase/app";
 
 export const FastingContext = createContext({
   loading: true,
@@ -51,6 +56,7 @@ function reducer(state, action) {
 
 export default function FastingContextProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, session.getInitialState());
+  const lastSavedDay = useRef();
 
   useEffect(() => {
     let active = true;
@@ -63,10 +69,22 @@ export default function FastingContextProvider({ children }) {
     };
   }, []);
 
+  const hours = useMemo(() => session.hoursFastedToday(state), [state]);
+
   useEffect(() => {
     if (state.loading) return;
-    state.hours = session.hoursFastedToday(state);
-    persist(state);
+    const { hours: _unused, ...persistable } = state;
+    persist(persistable);
+    const day = dt.format(new Date(), "yyyy-MM-dd");
+    if (auth.currentUser && lastSavedDay.current !== day) {
+      addDailyStats(
+        auth.currentUser.uid,
+        day,
+        hours,
+        state.schedule?.fastingHours
+      );
+      lastSavedDay.current = day;
+    }
   }, [state]);
 
   const isFasting = useCallback(
@@ -85,7 +103,7 @@ export default function FastingContextProvider({ children }) {
     loading: state.loading,
     schedule: state.schedule,
     events: state.events,
-    hoursFastedToday: state.hours,
+    hoursFastedToday: hours,
     setSchedule: (data) => dispatch({ type: "SET_SCHEDULE", payload: data }),
     startFast: (trigger) => dispatch({ type: "START_FAST", trigger }),
     endFast: (trigger) => dispatch({ type: "END_FAST", trigger }),

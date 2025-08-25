@@ -17,8 +17,8 @@ export const addEvent = (state, type, ts = Date.now(), trigger) => {
     auth.currentUser.uid,
     ts,
     type,
+    dt.format(new Date(ts), "yyyy-MM-dd"),
     trigger,
-    dt.format(new Date(ts), "yyyy-MM-dd")
   );
   return { ...state, events: [...state.events, { type, ts, trigger }] };
 };
