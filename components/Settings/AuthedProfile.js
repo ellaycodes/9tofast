@@ -12,6 +12,7 @@ import { useNavigation } from "@react-navigation/native";
 import { updatePassword, deleteUser } from "firebase/auth";
 import { auth } from "../../firebase/app";
 import { deleteCurrentUser } from "../../firebase/db";
+import AvatarSegment from "../ui/AvatarSegment";
 
 function AuthedProfile({ emailAddress }) {
   const [showModal, setShowModal] = useState(false);
@@ -70,9 +71,7 @@ function AuthedProfile({ emailAddress }) {
   return (
     <ScrollView>
       <View>
-        <View style={styles(theme).profilePicContainer}>
-          <MaterialIcons name="person-outline" size={100} color={theme.muted} />
-        </View>
+        <AvatarSegment small={false} avatarId={authCxt.avatarId} />
         <SubtitleText muted style={{ marginTop: 2 }} size="m">
           {authCxt.username}
         </SubtitleText>

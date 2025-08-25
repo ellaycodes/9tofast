@@ -1,38 +1,39 @@
-import { MaterialIcons } from "@expo/vector-icons";
 import { useAppTheme } from "../../store/app-theme-context";
 import { StyleSheet, View } from "react-native";
-import FlatButton from "./FlatButton";
+import Avatar from "./Avatar";
+import { useState, useEffect } from "react";
+import { avatarUriById } from "../../assets/avatars";
 
-function AvatarSegment() {
+function AvatarSegment({ avatarId, small = false }) {
   const { theme } = useAppTheme();
+  const [uri, setUri] = useState(null);
+
+  useEffect(() => {
+    let mounted = true;
+    avatarUriById(avatarId).then((u) => {
+      if (mounted) setUri(u);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [avatarId]);
 
   return (
-    <View>
-        <View style={styles(theme).editProfileContainer}>
-          <View style={styles(theme).profilePicContainer}>
-            <MaterialIcons
-              name="person-outline"
-              size={100}
-              color={theme.muted}
-            />
-          </View>
-          <FlatButton onPress={() => console.log("TODO")}>
-            Edit Avatar
-          </FlatButton>
-        </View>
-    </View>
+      <View style={styles(theme, small).editProfileContainer}>
+        <Avatar uri={uri} small={small} />
+      </View>
   );
 }
 
 export default AvatarSegment;
 
-const styles = (theme) =>
+const styles = (theme, small) =>
   StyleSheet.create({
     profilePicContainer: {
       borderRadius: 70,
       backgroundColor: theme.secondary100,
       alignSelf: "center",
-      padding: 20,
+      padding: small ? 5 : 20,
       marginTop: 24,
     },
     editProfileContainer: {

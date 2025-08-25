@@ -23,14 +23,16 @@ function Navigator() {
       const storedToken = await AsyncStorage.getItem("token");
       const storedUsername = await AsyncStorage.getItem("username");
       const storedEmailAddress = await AsyncStorage.getItem("emailAddress");
+      const storedUid = await AsyncStorage.getItem("uid");
+      const storedName = await AsyncStorage.getItem("fullname");
+      const storedAvatarId = await AsyncStorage.getItem("avatarId");
 
-      if (storedToken) {
-        authCxt.authenticate(storedToken, storedUsername);
-      }
+      if (storedToken)
+        authCxt.authenticate(storedToken, storedUsername, storedUid);
 
-      if (storedEmailAddress) {
-        authCxt.setEmailAddress(storedEmailAddress);
-      }
+      if (storedEmailAddress) authCxt.setEmailAddress(storedEmailAddress);
+      if (storedAvatarId) authCxt.updateAvatarId(storedAvatarId);
+      if (storedName) authCxt.updateFullName(storedName);
 
       setLoading(false);
     })();

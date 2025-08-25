@@ -8,12 +8,14 @@ export const AuthContext = createContext({
   isAuthed: false,
   uid: "",
   fullName: "",
+  avatarId: "",
   setEmailAddress: (emailAddress) => {},
   authenticate: (token, userName, uid) => {},
   logout: () => {},
   setTokens: (idToken) => {},
   updateUsername: (username) => {},
   updateFullName: (fullName) => {},
+  updateAvatarId: (avatarId) => {},
 });
 
 function AuthContextProvider({ children }) {
@@ -22,6 +24,7 @@ function AuthContextProvider({ children }) {
   const [fullName, setFullName] = useState();
   const [email, setEmail] = useState();
   const [uid, setUid] = useState();
+  const [avatarId, setAvatarId] = useState();
 
   function setEmailAddress(email) {
     setEmail(email);
@@ -43,11 +46,13 @@ function AuthContextProvider({ children }) {
     setUsername(null);
     setUid(null);
     setFullName(null);
+    setAvatarId(null);
     AsyncStorage.removeItem("token");
     AsyncStorage.removeItem("username");
     AsyncStorage.removeItem("emailAddress");
     AsyncStorage.removeItem("uid");
     AsyncStorage.removeItem("fullname");
+    AsyncStorage.removeItem("avatarId");
   }
 
   function setTokens(idToken) {
@@ -62,7 +67,12 @@ function AuthContextProvider({ children }) {
 
   function updateFullName(fullName) {
     setFullName(fullName);
-    AsyncStorage.setItem("fullname"), fullName;
+    AsyncStorage.setItem("fullname", fullName);
+  }
+
+  function updateAvatarId(id) {
+    setAvatarId(id);
+    AsyncStorage.setItem("avatarId", id);
   }
 
   const value = {
@@ -72,12 +82,14 @@ function AuthContextProvider({ children }) {
     isAuthed: !!authToken,
     uid: uid,
     fullName: fullName,
+    avatarId: avatarId,
     setEmailAddress: setEmailAddress,
     authenticate: authenticate,
     logout: logout,
     setTokens: setTokens,
     updateUsername: updateUsername,
     updateFullName: updateFullName,
+    updateAvatarId: updateAvatarId,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

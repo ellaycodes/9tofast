@@ -29,18 +29,21 @@ export async function addUser({
   return { status: "user created" };
 }
 
-export async function updateUser({ uid, displayName, fullName, email }) {
+export async function updateUser(uid, partial) {
   if (!uid) throw new Error("UPDATE_USER_MISSING_UID");
+  if (!partial || typeof partial !== "object") throw new Error("BAD_PARTIAL");
 
-  const patch = {
-    displayName: displayName ?? null,
-    fullName: fullName ?? null,
-    email: email ? email.toLowerCase() : null,
-    updatedAt: serverTimestamp(),
-  };
+  const patch = {};
+  for (const [k, v] of Object.entries(partial)) {
+    if (v !== undefined) patch[k] = v;
+  }
+
+  if (Object.keys(patch).length === 0) return { status: "noop" };
+
+  patch.updatedAt = serverTimestamp();
 
   try {
-    await setDoc(doc(db, "users", uid), patch);
+    await updateDoc(doc(db, "users", uid), patch);
     return { status: "user updated" };
   } catch (err) {
     console.error(err);
