@@ -11,7 +11,7 @@ import FlatButton from "../ui/FlatButton";
 import { useNavigation } from "@react-navigation/native";
 import { updatePassword, deleteUser } from "firebase/auth";
 import { auth } from "../../firebase/app";
-import { deleteCurrentUser } from "../../firebase/db";
+import { deleteCurrentUser } from "../../firebase/users.db.js";
 import AvatarSegment from "../ui/AvatarSegment";
 
 function AuthedProfile({ emailAddress }) {

@@ -1,17 +1,18 @@
-import { Image, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useAppTheme } from "../../store/app-theme-context";
+import { Image } from "expo-image";
 
 function Avatar({ uri, size = 100, small = false }) {
   const { theme } = useAppTheme();
 
   small ? (size = 50) : size;
-  
+
   return (
     <View
       style={[
         styles(theme).profilePicContainer,
-        uri ? { padding: 10 } : { padding: 20 },
+        uri ? { padding: 4 } : { padding: 20 },
       ]}
     >
       {!uri ? (
@@ -24,7 +25,10 @@ function Avatar({ uri, size = 100, small = false }) {
             height: size * 1.2,
             borderRadius: (size * 1.2) / 2,
           }}
-          resizeMode="cover"
+          contentFit="cover"
+          cachePolicy="memory-disk"
+          priority="high"
+          transition={100}
         />
       )}
     </View>

@@ -63,6 +63,9 @@ function AvatarPickerModal({ showModal, onRequestClose, onSave }) {
           keyExtractor={(i) => i.id}
           renderItem={({ item }) => <Item avatar={item} />}
           numColumns={3}
+          initialNumToRender={9}
+          windowSize={5}
+          removeClippedSubviews
           contentContainerStyle={{ paddingVertical: 12, justifyContent: 'center', alignItems: 'center' }}
         />
         <PrimaryButton onPress={onSaveHandler}>Save</PrimaryButton>
