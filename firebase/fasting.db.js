@@ -39,7 +39,7 @@ export async function addFastingEvent(uid, ts, type, day, trigger) {
 
 export async function addDailyStats(uid, day, hoursFastedToday, fastingHours) {
   try {
-    const docRef = await addDoc(doc(db, "users", uid, "daily_stats", day), {
+    await setDoc(doc(db, "users", uid, "daily_stats", day), {
       hoursFastedToday: hoursFastedToday,
       percent: fastingHours,
     });
