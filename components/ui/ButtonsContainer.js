@@ -10,9 +10,12 @@ function ButtonsContainer({ withinFasting }) {
   const [tempTheme, setTempTheme] = useState(null);
 
   function toggleFastHandler() {
-    isFasting() ? endFast('manual') : startFast('manual');
+    if (isFasting()) {
+      endFast("manual");
+    } else {
+      startFast("manual");
+    }
   }
-  
 
   const buttonLabel = useMemo(() => {
     if (isFasting() && withinFasting) {

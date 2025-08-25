@@ -3,10 +3,12 @@ import { EVENT } from "./events";
 import * as dt from "date-fns";
 import { AppState } from "react-native";
 
+//helper
 function parseHHmmToTs(hhmm, baseDate) {
   return dt.parse(hhmm, "HH:mm", baseDate).getTime();
 }
 
+//helper
 function normalizeWindow(schedule, nowTs = Date.now()) {
   const base = dt.startOfDay(new Date(nowTs));
   let startTs = parseHHmmToTs(schedule.start, base);
@@ -18,6 +20,7 @@ function normalizeWindow(schedule, nowTs = Date.now()) {
   return { startTs, endTs };
 }
 
+//helper
 function stateAndNextBoundary(schedule, nowTs = Date.now()) {
   const { startTs, endTs } = normalizeWindow(schedule, nowTs);
 
@@ -39,6 +42,7 @@ function stateAndNextBoundary(schedule, nowTs = Date.now()) {
 
   return { state, nextBoundaryTs };
 }
+
 
 function eventAtBoundary(prevState) {
   return prevState === "eating" ? EVENT.START : EVENT.END;

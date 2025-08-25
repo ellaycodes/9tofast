@@ -6,6 +6,8 @@ import { useFasting } from "../../store/fastingLogic/fasting-context";
 import Title from "../../components/ui/Title";
 import SubtitleText from "../../components/ui/SubtitleText";
 import { useEffect, useState } from "react";
+import { getFastingSchedule } from "../../firebase/fasting.db.js";
+import { auth } from "../../firebase/app";
 
 function ProgressScreen() {
   const { theme } = useAppTheme();
@@ -19,7 +21,6 @@ function ProgressScreen() {
     return () => clearInterval(timer);
   }, []);
 
-  
   const percent = (hoursFastedToday / schedule?.fastingHours) * 100;
 
   return (
