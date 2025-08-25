@@ -1,3 +1,7 @@
+import { auth } from "../../firebase/app";
+import { addFastingEvent } from "../../firebase/fasting.db.js";
+import * as dt from "date-fns";
+
 export const EVENT = Object.freeze({
   START: "start",
   END: "end",
@@ -9,6 +13,13 @@ export const addEvent = (state, type, ts = Date.now(), trigger) => {
 
   if (type === EVENT.START && last === EVENT.START) return state;
   if (type === EVENT.END && last === EVENT.END) return state;
+  addFastingEvent(
+    auth.currentUser.uid,
+    ts,
+    type,
+    trigger,
+    dt.format(new Date(ts), "yyyy-MM-dd")
+  );
   return { ...state, events: [...state.events, { type, ts, trigger }] };
 };
 

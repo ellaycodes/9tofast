@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useMemo, useCallback, useContext } from "react";
 import { View } from "react-native";
 import * as dt from "date-fns";
 import { useFasting } from "../../store/fastingLogic/fasting-context";
@@ -13,9 +13,13 @@ import Ads from "../../components/monetising/Ads";
 import { getRandomOffScheduleTitle } from "../../util/offScheduleTitles";
 import PrimaryButton from "../../components/ui/PrimaryButton";
 import { prefetchAvatars } from "../../assets/avatars";
+import { getFastingSchedule } from "../../firebase/fasting.db.js";
+import { auth } from "../../firebase/app";
+import { AuthContext } from "../../store/auth-context.js";
 
 function TimerScreen({ navigation }) {
   const { schedule, isFasting } = useFasting();
+  const authCxt = useContext(AuthContext)
   const { theme } = useAppTheme();
   const [readout, setReadout] = useState(null);
   const [offScheduleTitle, setOffScheduleTitle] = useState("");
@@ -24,6 +28,8 @@ function TimerScreen({ navigation }) {
   useEffect(() => {
     if (!schedule) return;
 
+    // (async () => await getFastingSchedule(authCxt.uid || auth?.currentUser?.uid))();
+    
     const update = () => setReadout(calcReadout(schedule));
     update();
 

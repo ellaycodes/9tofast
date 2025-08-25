@@ -4,7 +4,7 @@ import { Asset } from "expo-asset";
 
 // Point this to where your file actually is.
 // If your file is at /avatars/manifest.v1.json, use that URL.
-const MANIFEST_URL = "https://9toassets.netlify.app/manifest.json";
+const MANIFEST_URL = "https://9toassets.netlify.app/avatars/manifest.v1.json";
 
 // Keep the key versioned to avoid stale cache issues when you bump the manifest.
 const AS_KEY = "avatar_manifest_v1";
@@ -16,8 +16,7 @@ async function fetchJson(url, ms = 6000) {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), ms);
   try {
-    const res = await fetch(url, { cache: "no-store", signal: ctrl.signal });
-    
+    const res = await fetch(url, { cache: "no-store" });
     if (!res.ok) throw new Error("manifest_fetch_failed");
     return await res.json();
   } finally {
