@@ -1,4 +1,4 @@
-import { Image, StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, View } from "react-native";
 import { useAppTheme } from "../../store/app-theme-context";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Title from "../ui/Title";

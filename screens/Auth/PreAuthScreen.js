@@ -10,7 +10,7 @@ import LoadingOverlay from "../../components/ui/LoadingOverlay";
 import randomUsername from "../../util/randomUsername";
 import { signInAnonymously } from "firebase/auth";
 import { auth } from "../../firebase/app";
-import { addUser } from "../../firebase/db";
+import { addUser } from "../../firebase/users.db.js";
 
 function PreAuthScreen({ navigation }) {
   const [isAuthing, setIsAuthing] = useState();

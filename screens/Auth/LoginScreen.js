@@ -4,7 +4,7 @@ import { AuthContext } from "../../store/auth-context";
 import { Alert, KeyboardAvoidingView, ScrollView } from "react-native";
 import LoadingOverlay from "../../components/ui/LoadingOverlay";
 import { Platform } from "react-native";
-import { updateUser } from "../../firebase/db";
+import { updateUser } from "../../firebase/users.db.js";
 import { auth } from "../../firebase/app";
 import { getIdToken, signInWithEmailAndPassword } from "firebase/auth";
 

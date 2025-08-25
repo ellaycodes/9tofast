@@ -7,7 +7,7 @@ import { Platform } from "react-native";
 import randomUsername from "../../util/randomUsername";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../firebase/app";
-import { addUser } from "../../firebase/db";
+import { addUser } from "../../firebase/users.db.js";
 
 function SignupScreen({ navigation }) {
   const [isAuthing, setIsAuthing] = useState(false);

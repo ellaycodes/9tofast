@@ -12,6 +12,7 @@ import ButtonsContainer from "../../components/ui/ButtonsContainer";
 import Ads from "../../components/monetising/Ads";
 import { getRandomOffScheduleTitle } from "../../util/offScheduleTitles";
 import PrimaryButton from "../../components/ui/PrimaryButton";
+import { prefetchAvatars } from "../../assets/avatars";
 
 function TimerScreen({ navigation }) {
   const { schedule, isFasting } = useFasting();
@@ -27,6 +28,8 @@ function TimerScreen({ navigation }) {
     update();
 
     const id = setInterval(update, 100);
+
+    prefetchAvatars(12);
 
     return () => {
       clearInterval(id);

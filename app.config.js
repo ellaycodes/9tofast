@@ -46,5 +46,6 @@ export default ({ config }) => ({
         resizeMode: "contain",
       },
     ],
+    "expo-asset",
   ],
 });

@@ -9,7 +9,7 @@ import PrimaryButton from "../../components/ui/PrimaryButton";
 import Input from "../../components/Auth/Input";
 import { updateProfile } from "firebase/auth";
 import { auth } from "../../firebase/app";
-import { updateUser } from "../../firebase/db";
+import { updateUser } from "../../firebase/users.db.js";
 import AvatarPickerModal from "../../modals/AvatarPickerModal";
 import FlatButton from "../../components/ui/FlatButton";
 
