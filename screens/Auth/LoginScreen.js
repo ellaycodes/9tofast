@@ -4,7 +4,9 @@ import { AuthContext } from "../../store/auth-context";
 import { Alert, KeyboardAvoidingView, ScrollView } from "react-native";
 import LoadingOverlay from "../../components/ui/LoadingOverlay";
 import { Platform } from "react-native";
-import { updateUser } from "../../firebase/users.db.js";
+import { updateUser, getUser } from "../../firebase/users.db.js";
+import { getPreferences } from "../../firebase/fasting.db.js";
+import { useFasting } from "../../store/fastingLogic/fasting-context";
 import { auth } from "../../firebase/app";
 import { getIdToken, signInWithEmailAndPassword } from "firebase/auth";
 
@@ -12,6 +14,7 @@ function LoginScreen() {
   const [isAuthing, setIsAuthing] = useState(false);
 
   const authCxt = useContext(AuthContext);
+  const { setSchedule } = useFasting();
 
   async function loginHandler(authDetails) {
     setIsAuthing(true);
@@ -36,6 +39,14 @@ function LoginScreen() {
       authCxt.authenticate(token, displayName, uid);
       authCxt.setEmailAddress(email);
       authCxt.setOnboarded("true");
+
+      const [userData, prefs] = await Promise.all([
+        getUser(uid),
+        getPreferences(uid),
+      ]);
+      if (userData?.fullName) authCxt.updateFullName(userData.fullName);
+      if (userData?.avatarId) authCxt.updateAvatarId(userData.avatarId);
+      if (prefs?.fastingSchedule) setSchedule(prefs.fastingSchedule);
     } catch (err) {
       Alert.alert("Authentication Failed", err);
       setIsAuthing(false);
