@@ -1,4 +1,3 @@
-// /store/fasting-context.js
 import {
   createContext,
   useEffect,
@@ -6,15 +5,13 @@ import {
   useReducer,
   useCallback,
   useMemo,
-  useRef
+  useRef,
 } from "react";
-import { load, persist } from "./fasting-storage";
+import useFastingPersistence from "./useFastingPersistence.js";
 import * as session from "./fasting-session";
 import * as events from "./events";
 import useScheduleBoundaryScheduler from "./scheduler";
 import * as dt from "date-fns";
-import { addDailyStats } from "../../firebase/fasting.db.js";
-import { auth } from "../../firebase/app";
 
 export const FastingContext = createContext({
   loading: true,
@@ -55,6 +52,8 @@ function reducer(state, action) {
 }
 
 export default function FastingContextProvider({ children }) {
+  const { load, persist, addFastingEvent, addDailyStats } =
+    useFastingPersistence();
   const [state, dispatch] = useReducer(reducer, session.getInitialState());
   const lastSavedDay = useRef();
 
@@ -67,7 +66,7 @@ export default function FastingContextProvider({ children }) {
     return () => {
       active = false;
     };
-  }, []);
+  }, [load]);
 
   const hours = useMemo(() => session.hoursFastedToday(state), [state]);
 
@@ -76,16 +75,11 @@ export default function FastingContextProvider({ children }) {
     const { hours: _unused, ...persistable } = state;
     persist(persistable);
     const day = dt.format(new Date(), "yyyy-MM-dd");
-    if (auth.currentUser && lastSavedDay.current !== day) {
-      addDailyStats(
-        auth.currentUser.uid,
-        day,
-        hours,
-        state.schedule?.fastingHours
-      );
+    if (lastSavedDay.current !== day) {
+      addDailyStats(day, hours, state.schedule?.fastingHours);
       lastSavedDay.current = day;
     }
-  }, [state]);
+  }, [state, hours, persist, addDailyStats]);
 
   const isFasting = useCallback(
     () => session.isFasting(state.events),
@@ -105,8 +99,20 @@ export default function FastingContextProvider({ children }) {
     events: state.events,
     hoursFastedToday: hours,
     setSchedule: (data) => dispatch({ type: "SET_SCHEDULE", payload: data }),
-    startFast: (trigger) => dispatch({ type: "START_FAST", trigger }),
-    endFast: (trigger) => dispatch({ type: "END_FAST", trigger }),
+    startFast: (trigger) => {
+      const last = state.events.at(-1)?.type;
+      if (last === events.EVENT.START) return;
+      const ts = Date.now();
+      addFastingEvent(ts, events.EVENT.START, trigger);
+      dispatch({ type: "START_FAST", trigger, payload: ts });
+    },
+    endFast: (trigger) => {
+      const last = state.events.at(-1)?.type;
+      if (last === events.EVENT.END) return;
+      const ts = Date.now();
+      addFastingEvent(ts, events.EVENT.END, trigger);
+      dispatch({ type: "END_FAST", trigger, payload: ts });
+    },
     setBaselineAnchor: (ts) =>
       dispatch({ type: "SET_BASELINE_ANCHOR", payload: ts }),
     clearFast: () => dispatch({ type: "CLEAR_ALL" }),

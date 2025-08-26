@@ -22,7 +22,7 @@ export async function getFastingSchedule(uid) {
   }
 }
 
-export async function addFastingEvent(uid, ts, type, day, trigger) {
+export async function addFastingEventDb(uid, ts, type, day, trigger) {
   try {
     const docRef = await addDoc(collection(db, "users", uid, "events"), {
       ts: ts,
@@ -37,7 +37,7 @@ export async function addFastingEvent(uid, ts, type, day, trigger) {
   }
 }
 
-export async function addDailyStats(uid, day, hoursFastedToday, fastingHours) {
+export async function addDailyStatsDb(uid, day, hoursFastedToday, fastingHours) {
   try {
     await setDoc(doc(db, "users", uid, "daily_stats", day), {
       hoursFastedToday: hoursFastedToday,
