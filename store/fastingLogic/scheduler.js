@@ -188,7 +188,12 @@ export function stateAt(schedule, atTs) {
   return inEating ? "eating" : "fasting";
 }
 
-export function baselineSinceAnchor(schedule, anchorTs, nowTs = Date.now()) {
+export function baselineSinceAnchor(
+  schedule,
+  anchorTs,
+  nowTs = Date.now(),
+  userEvents = []
+) {
   if (!schedule || !anchorTs) return [];
   if (nowTs < anchorTs) return [];
 
@@ -196,11 +201,15 @@ export function baselineSinceAnchor(schedule, anchorTs, nowTs = Date.now()) {
   const initial = stateAt(schedule, anchorTs);
 
   // seed a synthetic flip at the anchor to set state
-  events.push({
-    type: initial === "fasting" ? EVENT.START : EVENT.END,
-    ts: anchorTs,
-    trigger: "auto",
-  });
+  const syntheticType = initial === "fasting" ? EVENT.START : EVENT.END;
+
+  // seed a synthetic flip at the anchor unless user already logged one
+  const hasUserEventAtAnchor = userEvents.some(
+    (e) => e.ts === anchorTs && e.type === syntheticType
+  );
+  if (!hasUserEventAtAnchor) {
+    events.push({ type: syntheticType, ts: anchorTs, trigger: "auto" });
+  }
 
   // add the first boundary after anchor, if it is before now
   // compute next boundary after anchor
