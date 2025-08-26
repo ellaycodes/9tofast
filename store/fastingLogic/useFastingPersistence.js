@@ -1,7 +1,10 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCallback } from "react";
 import { getInitialState } from "./fasting-session";
-import { addDailyStatsDb, addFastingEventDb } from "../../firebase/fasting.db.js";
+import {
+  addDailyStatsDb,
+  addFastingEventDb,
+} from "../../firebase/fasting.db.js";
 import { auth } from "../../firebase/app";
 import * as dt from "date-fns";
 
@@ -34,21 +37,39 @@ export default function useFastingPersistence() {
     }
   }, []);
 
-  const addFastingEvent = useCallback((ts, type, trigger) => {
+  const addFastingEvent = useCallback(async (ts, type, trigger) => {
     if (!auth.currentUser) return;
-    addFastingEventDb(
-      auth.currentUser.uid,
-      ts,
-      type,
-      dt.format(new Date(ts), "yyyy-MM-dd"),
-      trigger
-    );
+    try {
+      return await addFastingEventDb(
+        auth.currentUser.uid,
+        ts,
+        type,
+        dt.format(new Date(ts), "yyyy-MM-dd"),
+        trigger
+      );
+    } catch (e) {
+      console.warn("[fasting-persistence] addFastingEvent() failed:", err);
+      throw err;
+    }
   }, []);
 
-  const addDailyStats = useCallback((day, hoursFastedToday, fastingHours) => {
-    if (!auth.currentUser) return;
-    addDailyStatsDb(auth.currentUser.uid, day, hoursFastedToday, fastingHours);
-  }, []);
+  const addDailyStats = useCallback(
+    async (day, hoursFastedToday, fastingHours) => {
+      if (!auth.currentUser) return;
+      try {
+        return await addDailyStatsDb(
+          auth.currentUser.uid,
+          day,
+          hoursFastedToday,
+          fastingHours
+        );
+      } catch (e) {
+        console.warn("[fasting-persistence] addDailyStats() failed:", err);
+        throw err;
+      }
+    },
+    []
+  );
 
   return { load, persist, addFastingEvent, addDailyStats };
 }
