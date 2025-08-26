@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCallback } from "react";
 import { getInitialState } from "./fasting-session";
-import { addDailyStatsDb, addFastingEventDb } from "../../firebase/fasting.db";
+import { addDailyStatsDb, addFastingEventDb } from "../../firebase/fasting.db.js";
 import { auth } from "../../firebase/app";
 import * as dt from "date-fns";
 

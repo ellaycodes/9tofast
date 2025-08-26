@@ -43,7 +43,6 @@ function stateAndNextBoundary(schedule, nowTs = Date.now()) {
   return { state, nextBoundaryTs };
 }
 
-
 function eventAtBoundary(prevState) {
   return prevState === "eating" ? EVENT.START : EVENT.END;
 }
@@ -131,14 +130,12 @@ export default function useScheduleBoundaryScheduler(
   }
 
   useEffect(() => {
-    if (!schedule) return;
-
     reconcileNow();
     armTimer();
 
     return () => clearTimer();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [schedule?.start, schedule?.end]);
+  }, [schedule?.start, schedule?.end, anchorTs]);
 
   // Re-arm when returning to foreground to avoid missing boundaries
   useEffect(() => {
@@ -237,6 +234,6 @@ export function nextBoundaryAfter(schedule, afterTs) {
   if (endTs <= startTs) endTs = dt.addDays(new Date(endTs), 1).getTime();
 
   const candidates = [startTs, endTs, startTs + 86400000, endTs + 86400000];
-  const next = candidates.filter(ts => ts > afterTs).sort((a, b) => a - b)[0];
+  const next = candidates.filter((ts) => ts > afterTs).sort((a, b) => a - b)[0];
   return next ?? null;
 }
