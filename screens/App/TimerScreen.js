@@ -19,17 +19,17 @@ import { AuthContext } from "../../store/auth-context.js";
 
 function TimerScreen({ navigation }) {
   const { schedule, isFasting } = useFasting();
-  const authCxt = useContext(AuthContext)
+  const authCxt = useContext(AuthContext);
   const { theme } = useAppTheme();
   const [readout, setReadout] = useState(null);
   const [offScheduleTitle, setOffScheduleTitle] = useState("");
   const [tick, setTick] = useState(Date.now());
 
+  const fasting = isFasting();
+
   useEffect(() => {
     if (!schedule) return;
 
-    // (async () => await getFastingSchedule(authCxt.uid || auth?.currentUser?.uid))();
-    
     const update = () => setReadout(calcReadout(schedule));
     update();
 
@@ -40,7 +40,7 @@ function TimerScreen({ navigation }) {
     return () => {
       clearInterval(id);
     };
-  }, [schedule, isFasting()]);
+  }, [schedule, fasting]);
 
   const withinFasting = useCallback(() => {
     if (!schedule) return false;
@@ -58,14 +58,14 @@ function TimerScreen({ navigation }) {
     return now < start || now >= end;
   }, [schedule]);
 
-  const offSchedule = isFasting() !== withinFasting();
+  const inside = withinFasting();
+
+  const offSchedule = fasting !== inside;
 
   useEffect(() => {
     if (offSchedule) {
       setOffScheduleTitle(
-        getRandomOffScheduleTitle(
-          !isFasting() && withinFasting() ? "eating" : "fasting"
-        )
+        getRandomOffScheduleTitle(!fasting && inside ? "eating" : "fasting")
       );
     }
 
@@ -74,7 +74,7 @@ function TimerScreen({ navigation }) {
     return () => {
       clearInterval(id);
     };
-  }, [offSchedule, isFasting(), withinFasting()]);
+  }, [offSchedule, fasting, inside]);
 
   const timeUnits = readout ? Object.keys(readout.units).slice(0, -1) : [];
 
@@ -84,12 +84,12 @@ function TimerScreen({ navigation }) {
         <Title
           style={[
             styles(theme).title,
-            withinFasting() === offSchedule
+            inside === offSchedule
               ? styles(theme).eating
               : styles(theme).fasting,
           ]}
         >
-          {withinFasting() ? "Fasting Window" : "Eating Window"}
+          {inside ? "Fasting Window" : "Eating Window"}
         </Title>
       ) : (
         <Title style={[styles(theme).title, styles(theme).eating]}>
@@ -103,7 +103,7 @@ function TimerScreen({ navigation }) {
           ))}
         </View>
       )}
-      {offSchedule ? null : withinFasting() ? (
+      {offSchedule ? null : inside ? (
         <SubtitleText>
           Ends{" "}
           {schedule &&
@@ -117,7 +117,7 @@ function TimerScreen({ navigation }) {
         </SubtitleText>
       )}
       <View>
-        <ButtonsContainer fast={isFasting()} withinFasting={withinFasting()} />
+        <ButtonsContainer fast={fasting} withinFasting={inside} />
       </View>
       <Ads />
     </View>
