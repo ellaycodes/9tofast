@@ -18,7 +18,7 @@ export async function getFastingSchedule(uid) {
     );
     return docSnap.data().fastingSchedule ?? null;
   } catch (err) {
-    console.log(err);
+    console.log('getFastingSchedule', err);
   }
 }
 
@@ -32,7 +32,7 @@ export async function addFastingEventDb(uid, ts, type, day, trigger) {
       createdAt: serverTimestamp(),
     });
   } catch (e) {
-    console.log(e);
+    console.log('addFastingEventDb', e);
   }
 }
 
@@ -43,6 +43,6 @@ export async function addDailyStatsDb(uid, day, hoursFastedToday, fastingHours) 
       percent: fastingHours,
     });
   } catch (e) {
-    console.log(e);
+    console.log('addDailyStatsDb', e);
   }
 }

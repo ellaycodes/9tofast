@@ -26,6 +26,7 @@ function Navigator() {
       const storedUid = await AsyncStorage.getItem("uid");
       const storedName = await AsyncStorage.getItem("fullname");
       const storedAvatarId = await AsyncStorage.getItem("avatarId");
+      const storedOnboarded = await AsyncStorage.getItem("onboarded");
 
       if (storedToken)
         authCxt.authenticate(storedToken, storedUsername, storedUid);
@@ -33,6 +34,7 @@ function Navigator() {
       if (storedEmailAddress) authCxt.setEmailAddress(storedEmailAddress);
       if (storedAvatarId) authCxt.updateAvatarId(storedAvatarId);
       if (storedName) authCxt.updateFullName(storedName);
+      if (storedOnboarded) authCxt.setOnboarded(true);
 
       setLoading(false);
     })();
@@ -44,7 +46,7 @@ function Navigator() {
 
   return (
     <NavigationContainer>
-      {authCxt.isAuthed ? <AppTabs /> : <AuthStack />}
+      {authCxt.isAuthed && authCxt.onboarded ? <AppTabs /> : <AuthStack />}
     </NavigationContainer>
   );
 }
