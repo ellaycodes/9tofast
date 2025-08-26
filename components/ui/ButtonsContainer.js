@@ -17,19 +17,21 @@ function ButtonsContainer({ withinFasting }) {
     }
   }
 
+  const fasting = isFasting();
+
   const buttonLabel = useMemo(() => {
-    if (isFasting() && withinFasting) {
+    if (fasting && withinFasting) {
       return "Pause Fast";
     }
-    if (isFasting() && !withinFasting) {
+    if (fasting && !withinFasting) {
       return "Resume Eating";
     }
-    if (!isFasting() && withinFasting) {
+    if (!fasting && withinFasting) {
       return "Resume Fasting";
     }
 
     return "Start Fast Early";
-  }, [isFasting(), withinFasting]);
+  }, [fasting, withinFasting]);
 
   function onAppThemeChange() {
     if (themeName !== "Desk") {
