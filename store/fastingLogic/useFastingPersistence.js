@@ -12,6 +12,7 @@ import {
 } from "../../firebase/fasting.db.js";
 import { auth } from "../../firebase/app";
 import * as dt from "date-fns";
+import { stripOldEvents } from "./stripOldEvents";
 
 const V2KEY = "fastingstate_v2";
 const LAST_DAY_KEY = "fasting_last_uploaded_day";
@@ -19,8 +20,12 @@ const LAST_DAY_KEY = "fasting_last_uploaded_day";
 export default function useFastingPersistence() {
   const persist = useCallback(async (state) => {
     try {
-      const { hours, ...persistable } = state;
-      await AsyncStorage.setItem(V2KEY, JSON.stringify(persistable));
+      const { hours, events = [], ...persistable } = state;
+      const todayEvents = stripOldEvents(events);
+      await AsyncStorage.setItem(
+        V2KEY,
+        JSON.stringify({ ...persistable, events: todayEvents })
+      );
     } catch (err) {
       console.warn("[fasting-persistence] persist() failed:", err);
     }
