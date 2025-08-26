@@ -1,6 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createContext, useContext, useEffect, useState } from "react";
 import { Colors } from "../constants/Colors";
+import { auth } from "../firebase/app";
+import { getPreferences, setThemeDb } from "../firebase/fasting.db.js";
 
 export const AppThemeContext = createContext({
   themeName: "Original",
@@ -17,14 +19,25 @@ export default function AppThemeContextProvider({ children }) {
     async function loadTheme() {
       try {
         const res = await AsyncStorage.getItem("theme");
-        if (res && Colors[res]) {
-          setTheme(Colors[res]);
-          setThemeNameState(res);
+        // if (res && Colors[res]) {
+        //   setTheme(Colors[res]);
+        //   setThemeNameState(res);
+        let name;
+        if (auth.currentUser) {
+          const prefs = await getPreferences(auth.currentUser.uid);
+          name = prefs?.theme;
+        }
+        if (!name) {
+          name = await AsyncStorage.getItem("theme");
+        }
+        if (name && Colors[name]) {
+          setTheme(Colors[name]);
+          setThemeNameState(name);
         }
       } catch (err) {
         console.error("Failed to load theme:", err);
       } finally {
-        setLoaded(true)
+        setLoaded(true);
       }
     }
     loadTheme();
@@ -39,6 +52,9 @@ export default function AppThemeContextProvider({ children }) {
     setThemeNameState(name);
     try {
       await AsyncStorage.setItem("theme", name);
+      if (auth.currentUser) {
+        await setThemeDb(auth.currentUser.uid, name);
+      }
     } catch (err) {
       console.error("Failed to save theme:", err);
     }
@@ -50,7 +66,7 @@ export default function AppThemeContextProvider({ children }) {
     setThemeName,
   };
 
-    if (!loaded) {
+  if (!loaded) {
     return null;
   }
 

@@ -26,6 +26,10 @@ export async function addUser({
   };
 
   await setDoc(doc(db, "users", uid), data);
+  await setDoc(doc(db, "users", uid, "settings", "preferences"), {
+    fastingSchedule: null,
+    theme: "Original",
+  });
   return { status: "user created" };
 }
 
