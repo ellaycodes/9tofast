@@ -59,6 +59,7 @@ function AuthContextProvider({ children }) {
     AsyncStorage.removeItem("fullname");
     AsyncStorage.removeItem("avatarId");
     AsyncStorage.removeItem("onboarded");
+    AsyncStorage.removeItem("fastingstate_v2");
   }
 
   function setTokens(idToken) {

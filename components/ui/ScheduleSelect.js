@@ -12,14 +12,9 @@ import SchedulePickerModal from "../../modals/SchedulePickerModal";
 import { CommonActions, useNavigation } from "@react-navigation/native";
 import ErrorText from "./ErrorText";
 import { AuthContext } from "../../store/auth-context";
+import { setFastingScheduleDb } from "../../firebase/fasting.db.js";
 
-function ScheduleSelect({
-  settings,
-  setWizardState,
-  token,
-  userName,
-  uid
-}) {
+function ScheduleSelect({ settings, setWizardState, token, userName, uid }) {
   const { schedule, setSchedule } = useFasting();
   const authCxt = useContext(AuthContext);
   const navigate = useNavigation();
@@ -120,8 +115,17 @@ function ScheduleSelect({
     return fastingHours > 18;
   }
 
-  function onSave(settings) {
+  async function onSave(settings) {
     setSchedule(chosenSchedule);
+
+    const userId = uid || authCxt.uid;
+    if (userId) {
+      try {
+        await setFastingScheduleDb(userId, chosenSchedule);
+      } catch (err) {
+        console.log("setFastingScheduleDb", err);
+      }
+    }
 
     if (settings) {
       navigate.dispatch(

@@ -35,11 +35,11 @@ function LoginScreen() {
 
       authCxt.authenticate(token, displayName, uid);
       authCxt.setEmailAddress(email);
+      authCxt.setOnboarded("true");
     } catch (err) {
-      throw new Error(err);
-
-      Alert.alert("Authentication Failed", "Could not log you in!");
+      Alert.alert("Authentication Failed", err);
       setIsAuthing(false);
+      throw new Error(err);
     }
   }
 

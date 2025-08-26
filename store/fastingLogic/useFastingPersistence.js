@@ -4,6 +4,7 @@ import { getInitialState } from "./fasting-session";
 import {
   addDailyStatsDb,
   addFastingEventDb,
+  getFastingSchedule,
 } from "../../firebase/fasting.db.js";
 import { auth } from "../../firebase/app";
 import * as dt from "date-fns";
@@ -19,6 +20,13 @@ export default function useFastingPersistence() {
         const parsed = JSON.parse(rawV2);
         delete parsed.hours;
         return parsed;
+      }
+
+      if (auth.currentUser) {
+        const schedule = await getFastingSchedule(auth.currentUser.uid);
+        if (schedule) {
+          return { ...getInitialState(), schedule };
+        }
       }
 
       return getInitialState();
