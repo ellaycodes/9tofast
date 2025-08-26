@@ -6,6 +6,7 @@ export const AuthContext = createContext({
   username: "",
   emailAddress: "",
   isAuthed: false,
+  onboarded: false,
   uid: "",
   fullName: "",
   avatarId: "",
@@ -16,6 +17,8 @@ export const AuthContext = createContext({
   updateUsername: (username) => {},
   updateFullName: (fullName) => {},
   updateAvatarId: (avatarId) => {},
+  completeOnboarding: () => {},
+  setOnboarded: (flag) => {},
 });
 
 function AuthContextProvider({ children }) {
@@ -25,6 +28,7 @@ function AuthContextProvider({ children }) {
   const [email, setEmail] = useState();
   const [uid, setUid] = useState();
   const [avatarId, setAvatarId] = useState();
+  const [onboarded, setOnboarded] = useState(false);
 
   function setEmailAddress(email) {
     setEmail(email);
@@ -47,12 +51,14 @@ function AuthContextProvider({ children }) {
     setUid(null);
     setFullName(null);
     setAvatarId(null);
+    setOnboarded(false);
     AsyncStorage.removeItem("token");
     AsyncStorage.removeItem("username");
     AsyncStorage.removeItem("emailAddress");
     AsyncStorage.removeItem("uid");
     AsyncStorage.removeItem("fullname");
     AsyncStorage.removeItem("avatarId");
+    AsyncStorage.removeItem("onboarded");
   }
 
   function setTokens(idToken) {
@@ -75,11 +81,26 @@ function AuthContextProvider({ children }) {
     AsyncStorage.setItem("avatarId", id);
   }
 
+  function completeOnboarding() {
+    setOnboarded(true);
+    AsyncStorage.setItem("onboarded", "true");
+  }
+
+  function setOnboardedState(flag) {
+    setOnboarded(flag);
+    if (flag) {
+      AsyncStorage.setItem("onboarded", "true");
+    } else {
+      AsyncStorage.removeItem("onboarded");
+    }
+  }
+
   const value = {
     token: authToken,
     username: username,
     emailAddress: email,
     isAuthed: !!authToken,
+    onboarded: onboarded,
     uid: uid,
     fullName: fullName,
     avatarId: avatarId,
@@ -90,6 +111,8 @@ function AuthContextProvider({ children }) {
     updateUsername: updateUsername,
     updateFullName: updateFullName,
     updateAvatarId: updateAvatarId,
+    completeOnboarding: completeOnboarding,
+    setOnboarded: setOnboardedState,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
