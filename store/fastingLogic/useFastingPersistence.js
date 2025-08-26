@@ -55,23 +55,24 @@ export default function useFastingPersistence() {
         dt.format(new Date(ts), "yyyy-MM-dd"),
         trigger
       );
-    } catch (e) {
+    } catch (err) {
       console.warn("[fasting-persistence] addFastingEvent() failed:", err);
       throw err;
     }
   }, []);
 
   const addDailyStats = useCallback(
-    async (day, hoursFastedToday, fastingHours) => {
+    async (day, hoursFastedToday, fastingHours, events = []) => {
       if (!auth.currentUser) return;
       try {
         return await addDailyStatsDb(
           auth.currentUser.uid,
           day,
           hoursFastedToday,
-          fastingHours
+          fastingHours,
+          events
         );
-      } catch (e) {
+      } catch (err) {
         console.warn("[fasting-persistence] addDailyStats() failed:", err);
         throw err;
       }
@@ -79,5 +80,17 @@ export default function useFastingPersistence() {
     []
   );
 
-  return { load, persist, addFastingEvent, addDailyStats };
+  const flushDailyEvents = useCallback(async (events) => {
+    try {
+      const raw = await AsyncStorage.getItem(V2KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      parsed.events = events;
+      await AsyncStorage.setItem(V2KEY, JSON.stringify(parsed));
+    } catch (err) {
+      console.warn("[fasting-persistence] flushDailyEvents() failed:", err);
+    }
+  }, []);
+
+  return { load, persist, addFastingEvent, addDailyStats, flushDailyEvents };
 }

@@ -46,13 +46,16 @@ function reducer(state, action) {
     case "CLEAR_ALL":
       return session.clearAll();
 
+    case "SET_EVENTS":
+      return { ...state, events: action.payload };
+
     default:
       return state;
   }
 }
 
 export default function FastingContextProvider({ children }) {
-  const { load, persist, addFastingEvent, addDailyStats } =
+  const { load, persist, addFastingEvent, addDailyStats, flushDailyEvents } =
     useFastingPersistence();
   const [state, dispatch] = useReducer(reducer, session.getInitialState());
   const lastSavedDay = useRef();
@@ -72,14 +75,42 @@ export default function FastingContextProvider({ children }) {
 
   useEffect(() => {
     if (state.loading) return;
+    const now = new Date();
+    const startOfToday = dt.startOfDay(now).getTime();
+    const day = dt.format(now, "yyyy-MM-dd");
+
+    if (!lastSavedDay.current) {
+      lastSavedDay.current = day;
+    } else if (lastSavedDay.current !== day) {
+      const prevDayStr = dt.format(startOfToday - 1, "yyyy-MM-dd");
+      const prevEvents = state.events.filter((e) => e.ts < startOfToday);
+      const hoursPrevDay = session.hoursFastedToday(state, startOfToday - 1);
+      addDailyStats(
+        prevDayStr,
+        hoursPrevDay,
+        state.schedule?.fastingHours,
+        prevEvents
+      );
+
+      let remaining = state.events.filter((e) => e.ts >= startOfToday);
+      if (session.isFasting(prevEvents)) {
+        remaining = [
+          {
+            type: events.EVENT.START,
+            ts: startOfToday,
+            trigger: events.EVENT.TRIGGER,
+          },
+          ...remaining,
+        ];
+      }
+      flushDailyEvents(remaining);
+      dispatch({ type: "SET_EVENTS", payload: remaining });
+      lastSavedDay.current = day;
+      return;
+    }
     const { hours: _unused, ...persistable } = state;
     persist(persistable);
-    const day = dt.format(new Date(), "yyyy-MM-dd");
-    if (lastSavedDay.current !== day) {
-      addDailyStats(day, hours, state.schedule?.fastingHours);
-      lastSavedDay.current = day;
-    }
-  }, [state, hours, persist, addDailyStats]);
+  }, [state, persist, addDailyStats, flushDailyEvents]);
 
   const isFasting = useCallback(
     () => session.isFasting(state.events),

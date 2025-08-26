@@ -75,12 +75,14 @@ export async function addDailyStatsDb(
   uid,
   day,
   hoursFastedToday,
-  fastingHours
+  fastingHours,
+  events = []
 ) {
   try {
     await setDoc(doc(db, "users", uid, "daily_stats", day), {
       hoursFastedToday: hoursFastedToday,
       percent: fastingHours,
+      events,
     });
   } catch (e) {
     console.log("addDailyStatsDb", e);
