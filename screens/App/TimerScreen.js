@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback, useContext } from "react";
+import { useEffect, useState, useCallback, useContext } from "react";
 import { View } from "react-native";
 import * as dt from "date-fns";
 import { useFasting } from "../../store/fastingLogic/fasting-context";
@@ -23,7 +23,6 @@ function TimerScreen({ navigation }) {
   const { theme } = useAppTheme();
   const [readout, setReadout] = useState(null);
   const [offScheduleTitle, setOffScheduleTitle] = useState("");
-  const [tick, setTick] = useState(Date.now());
 
   const fasting = isFasting();
 
@@ -68,12 +67,6 @@ function TimerScreen({ navigation }) {
         getRandomOffScheduleTitle(!fasting && inside ? "eating" : "fasting")
       );
     }
-
-    const id = setInterval(() => setTick(Date.now()), 100);
-
-    return () => {
-      clearInterval(id);
-    };
   }, [offSchedule, fasting, inside]);
 
   const timeUnits = readout ? Object.keys(readout.units).slice(0, -1) : [];
