@@ -8,7 +8,6 @@ import {
 import { EVENT } from "./events";
 import {
   addDailyStatsDb,
-  addFastingEventDb,
   getFastingSchedule,
 } from "../../firebase/fasting.db.js";
 import { auth } from "../../firebase/app";
@@ -28,15 +27,13 @@ export default function useFastingPersistence() {
   }, []);
 
   const addFastingEvent = useCallback(async (ts, type, trigger) => {
-    if (!auth.currentUser) return;
     try {
-      return await addFastingEventDb(
-        auth.currentUser.uid,
-        ts,
-        type,
-        dt.format(new Date(ts), "yyyy-MM-dd"),
-        trigger
-      );
+      const raw = await AsyncStorage.getItem(V2KEY);
+      const parsed = raw ? JSON.parse(raw) : getInitialState();
+      const events = parsed.events || [];
+      events.push({ ts, type, trigger });
+      parsed.events = events;
+      await AsyncStorage.setItem(V2KEY, JSON.stringify(parsed));
     } catch (err) {
       console.warn("[fasting-persistence] addFastingEvent() failed:", err);
       throw err;

@@ -1,15 +1,5 @@
 import { db } from "./app";
-import {
-  setDoc,
-  addDoc,
-  serverTimestamp,
-  doc,
-  updateDoc,
-  deleteDoc,
-  getDoc,
-  collection,
-  getDocs,
-} from "firebase/firestore";
+import { setDoc, doc, getDoc } from "firebase/firestore";
 
 export async function getFastingSchedule(uid) {
   try {
@@ -54,20 +44,6 @@ export async function setThemeDb(uid, theme) {
     );
   } catch (e) {
     console.log("setThemeDb", e);
-  }
-}
-
-export async function addFastingEventDb(uid, ts, type, day, trigger) {
-  try {
-    const docRef = await addDoc(collection(db, "users", uid, "events"), {
-      ts: ts,
-      type: type,
-      day: day,
-      trigger: trigger,
-      createdAt: serverTimestamp(),
-    });
-  } catch (e) {
-    console.log("addFastingEventDb", e);
   }
 }
 
