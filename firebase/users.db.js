@@ -5,6 +5,7 @@ import {
   doc,
   updateDoc,
   deleteDoc,
+  getDoc,
 } from "firebase/firestore";
 
 export async function addUser({
@@ -31,6 +32,16 @@ export async function addUser({
     theme: "Original",
   });
   return { status: "user created" };
+}
+
+export async function getUser(uid) {
+  if (!uid) throw new Error("GET_USER_MISSING_UID");
+  try {
+    const docSnap = await getDoc(doc(db, "users", uid));
+    return docSnap.exists() ? docSnap.data() : null;
+  } catch (e) {
+    console.log("getUser", e);
+  }
 }
 
 export async function updateUser(uid, partial) {
