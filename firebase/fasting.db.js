@@ -31,7 +31,6 @@ export async function addFastingEventDb(uid, ts, type, day, trigger) {
       trigger: trigger,
       createdAt: serverTimestamp(),
     });
-    console.log(docRef.id);
   } catch (e) {
     console.log(e);
   }
