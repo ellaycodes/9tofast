@@ -56,6 +56,8 @@ export default function useScheduleBoundaryScheduler(
   const timeoutRef = useRef(null);
   const appStateRef = useRef(AppState.currentState);
   const lastEmitRef = useRef({ ts: 0, type: null });
+  const effectiveAnchor = anchorTs ?? 0;
+
 
   // Cancel any pending timeout
   function clearTimer() {
@@ -67,11 +69,12 @@ export default function useScheduleBoundaryScheduler(
 
   function armTimer() {
     if (!schedule) return;
-    if (!anchorTs) return;
+    // if (!anchorTs) return;
 
     const now = Date.now();
     const { state, nextBoundaryTs } = stateAndNextBoundary(schedule, now);
-    const target = Math.max(nextBoundaryTs, anchorTs);
+    // const target = Math.max(nextBoundaryTs, anchorTs);
+    const target = Math.max(nextBoundaryTs, effectiveAnchor);
     const delay = Math.max(0, target - now);
 
     clearTimer();
@@ -105,7 +108,8 @@ export default function useScheduleBoundaryScheduler(
   // On mount or when schedule changes, ensure state matches current time.
   // If out of sync, emit a corrective event immediately.
   function reconcileNow() {
-    if (!anchorTs || Date.now() < anchorTs) return;
+    // if (!anchorTs || Date.now() < anchorTs) return;
+    if (Date.now() < effectiveAnchor) return;
     if (!schedule) return;
     const now = Date.now();
     const { state } = stateAndNextBoundary(schedule, now);
@@ -135,7 +139,7 @@ export default function useScheduleBoundaryScheduler(
 
     return () => clearTimer();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [schedule?.start, schedule?.end, anchorTs]);
+  }, [schedule?.start, schedule?.end, effectiveAnchor]);
 
   // Re-arm when returning to foreground to avoid missing boundaries
   useEffect(() => {

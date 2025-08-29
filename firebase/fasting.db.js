@@ -8,7 +8,7 @@ export async function getFastingSchedule(uid) {
     );
     return docSnap.data().fastingSchedule ?? null;
   } catch (err) {
-    console.log("getFastingSchedule", err);
+    console.warn("getFastingSchedule", err);
   }
 }
 
@@ -19,7 +19,7 @@ export async function getPreferences(uid) {
     );
     return docSnap.exists() ? docSnap.data() : null;
   } catch (err) {
-    console.log("getPreferences", err);
+    console.warn("getPreferences", err);
   }
 }
 
@@ -31,7 +31,7 @@ export async function setFastingScheduleDb(uid, schedule) {
       { merge: true }
     );
   } catch (e) {
-    console.log("setFastingScheduleDb", e);
+    console.warn("setFastingScheduleDb", e);
   }
 }
 
@@ -43,7 +43,7 @@ export async function setThemeDb(uid, theme) {
       { merge: true }
     );
   } catch (e) {
-    console.log("setThemeDb", e);
+    console.warn("setThemeDb", e);
   }
 }
 
@@ -57,10 +57,13 @@ export async function addDailyStatsDb(
   try {
     await setDoc(doc(db, "users", uid, "daily_stats", day), {
       hoursFastedToday: hoursFastedToday,
-      percent: fastingHours,
+      percent:
+        typeof fastingHours === "number" && fastingHours > 0
+          ? Math.round((hoursFastedToday / fastingHours) * 100)
+          : 0,
       events,
     });
   } catch (e) {
-    console.log("addDailyStatsDb", e);
+    console.warn("addDailyStatsDb", e);
   }
 }

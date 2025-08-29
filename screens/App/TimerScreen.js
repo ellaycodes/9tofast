@@ -18,7 +18,7 @@ import { auth } from "../../firebase/app";
 import { AuthContext } from "../../store/auth-context.js";
 
 function TimerScreen({ navigation }) {
-  const { schedule, isFasting } = useFasting();
+  const { schedule, isFasting, events, hoursFastedToday } = useFasting();
   const authCxt = useContext(AuthContext);
   const { theme } = useAppTheme();
   const [readout, setReadout] = useState(null);
@@ -62,6 +62,8 @@ function TimerScreen({ navigation }) {
   const offSchedule = fasting !== inside;
 
   useEffect(() => {
+    console.log('events', events, 'hoursFastedToday', hoursFastedToday);
+
     if (offSchedule) {
       setOffScheduleTitle(
         getRandomOffScheduleTitle(!fasting && inside ? "eating" : "fasting")

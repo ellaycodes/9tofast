@@ -57,6 +57,7 @@ export default function useFastingPersistence() {
           events
         );
         await AsyncStorage.setItem(LAST_DAY_KEY, day);
+        const storageDay = await AsyncStorage.getItem(day);
       } catch (err) {
         console.warn("[fasting-persistence] addDailyStats() failed:", err);
         throw err;
@@ -71,6 +72,7 @@ export default function useFastingPersistence() {
       if (!raw) return;
       const parsed = JSON.parse(raw);
       parsed.events = events;
+
       await AsyncStorage.setItem(V2KEY, JSON.stringify(parsed));
     } catch (err) {
       console.warn("[fasting-persistence] flushDailyEvents() failed:", err);
@@ -90,21 +92,20 @@ export default function useFastingPersistence() {
         const prevEvents = (parsed.events || []).filter(
           (e) => e.ts < startOfToday
         );
+        const prevDayStr = dt.format(startOfToday - 1, "yyyy-MM-dd");
+        const lastUploaded = await AsyncStorage.getItem(LAST_DAY_KEY);
+
+        if (lastUploaded !== prevDayStr) {
+          const hoursPrev = hoursFastedToday(parsed, startOfToday - 1);
+          await addDailyStats(
+            prevDayStr,
+            hoursPrev,
+            parsed.schedule?.fastingHours,
+            prevEvents
+          );
+        }
 
         if (prevEvents.length) {
-          const prevDayStr = dt.format(startOfToday - 1, "yyyy-MM-dd");
-          const lastUploaded = await AsyncStorage.getItem(LAST_DAY_KEY);
-
-          if (lastUploaded !== prevDayStr) {
-            const hoursPrev = hoursFastedToday(parsed, startOfToday - 1);
-            await addDailyStats(
-              prevDayStr,
-              hoursPrev,
-              parsed.schedule?.fastingHours,
-              prevEvents
-            );
-          }
-
           let remaining = parsed.events.filter((e) => e.ts >= startOfToday);
           if (isFasting(prevEvents)) {
             remaining = [

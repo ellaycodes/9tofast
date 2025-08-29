@@ -62,6 +62,7 @@ export default function FastingContextProvider({ children }) {
 
   useEffect(() => {
     let active = true;
+    console.log(state.events);
     (async () => {
       const res = await load();
       if (active) dispatch({ type: "LOADED", payload: res });

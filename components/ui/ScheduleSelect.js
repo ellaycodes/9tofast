@@ -123,7 +123,7 @@ function ScheduleSelect({ settings, setWizardState, token, userName, uid }) {
       try {
         await setFastingScheduleDb(userId, chosenSchedule);
       } catch (err) {
-        console.log("setFastingScheduleDb", err);
+        console.warn("setFastingScheduleDb", err);
       }
     }
 

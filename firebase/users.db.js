@@ -40,7 +40,7 @@ export async function getUser(uid) {
     const docSnap = await getDoc(doc(db, "users", uid));
     return docSnap.exists() ? docSnap.data() : null;
   } catch (e) {
-    console.log("getUser", e);
+    console.warn("getUser", e);
   }
 }
 
