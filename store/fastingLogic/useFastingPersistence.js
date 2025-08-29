@@ -12,20 +12,24 @@ import {
 } from "../../firebase/fasting.db.js";
 import { auth } from "../../firebase/app";
 import * as dt from "date-fns";
-import { stripOldEvents } from "./stripOldEvents";
+import { stripOldEvents, filterEventHorizon } from "./stripOldEvents";
 
 const V2KEY = "fastingstate_v2";
 const LAST_DAY_KEY = "fasting_last_uploaded_day";
+const LAST_TS_KEY = "fasting_last_ts";
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 export default function useFastingPersistence() {
   const persist = useCallback(async (state) => {
     try {
       const { hours, events = [], ...persistable } = state;
       const todayEvents = stripOldEvents(events);
+      const filtered = filterEventHorizon(todayEvents);
       await AsyncStorage.setItem(
         V2KEY,
-        JSON.stringify({ ...persistable, events: todayEvents })
+        JSON.stringify({ ...persistable, events: filtered })
       );
+      await AsyncStorage.setItem(LAST_TS_KEY, Date.now().toString());
     } catch (err) {
       console.warn("[fasting-persistence] persist() failed:", err);
     }
@@ -39,6 +43,7 @@ export default function useFastingPersistence() {
       events.push({ ts, type, trigger });
       parsed.events = events;
       await AsyncStorage.setItem(V2KEY, JSON.stringify(parsed));
+      await AsyncStorage.setItem(LAST_TS_KEY, Date.now().toString());
     } catch (err) {
       console.warn("[fasting-persistence] addFastingEvent() failed:", err);
       throw err;
@@ -74,6 +79,7 @@ export default function useFastingPersistence() {
       parsed.events = events;
 
       await AsyncStorage.setItem(V2KEY, JSON.stringify(parsed));
+      await AsyncStorage.setItem(LAST_TS_KEY, Date.now().toString());
     } catch (err) {
       console.warn("[fasting-persistence] flushDailyEvents() failed:", err);
     }
@@ -82,16 +88,26 @@ export default function useFastingPersistence() {
   const load = useCallback(async () => {
     try {
       const rawV2 = await AsyncStorage.getItem(V2KEY);
-
       if (rawV2) {
         const parsed = JSON.parse(rawV2);
         delete parsed.hours;
 
-        const now = new Date();
+        const lastTsRaw = await AsyncStorage.getItem(LAST_TS_KEY);
+        const lastTs = lastTsRaw ? Number(lastTsRaw) : 0;
+        const nowTs = Date.now();
+
+        if (lastTs && nowTs - lastTs > DAY_MS) {
+          parsed.events = [];
+          parsed.baselineAnchorTs = null;
+          return parsed;
+        }
+
+        const now = new Date(nowTs);
+
         const startOfToday = dt.startOfDay(now).getTime();
-        const prevEvents = (parsed.events || []).filter(
-          (e) => e.ts < startOfToday
-        );
+
+        const origEvents = parsed.events || [];
+        const prevEvents = origEvents.filter((e) => e.ts < startOfToday);
         const prevDayStr = dt.format(startOfToday - 1, "yyyy-MM-dd");
         const lastUploaded = await AsyncStorage.getItem(LAST_DAY_KEY);
 
@@ -105,8 +121,9 @@ export default function useFastingPersistence() {
           );
         }
 
+        let remaining = origEvents;
         if (prevEvents.length) {
-          let remaining = parsed.events.filter((e) => e.ts >= startOfToday);
+          remaining = origEvents.filter((e) => e.ts >= startOfToday);
           if (isFasting(prevEvents)) {
             remaining = [
               {
@@ -117,11 +134,13 @@ export default function useFastingPersistence() {
               ...remaining,
             ];
           }
-
-          await flushDailyEvents(remaining);
-          parsed.events = remaining;
         }
 
+        const filtered = filterEventHorizon(remaining, now);
+        if (prevEvents.length || filtered.length !== origEvents.length) {
+          await flushDailyEvents(filtered);
+        }
+        parsed.events = filtered;
         return parsed;
       }
 

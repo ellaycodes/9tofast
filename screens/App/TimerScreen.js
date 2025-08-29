@@ -13,13 +13,9 @@ import Ads from "../../components/monetising/Ads";
 import { getRandomOffScheduleTitle } from "../../util/offScheduleTitles";
 import PrimaryButton from "../../components/ui/PrimaryButton";
 import { prefetchAvatars } from "../../assets/avatars";
-import { getFastingSchedule } from "../../firebase/fasting.db.js";
-import { auth } from "../../firebase/app";
-import { AuthContext } from "../../store/auth-context.js";
 
 function TimerScreen({ navigation }) {
   const { schedule, isFasting, events, hoursFastedToday } = useFasting();
-  const authCxt = useContext(AuthContext);
   const { theme } = useAppTheme();
   const [readout, setReadout] = useState(null);
   const [offScheduleTitle, setOffScheduleTitle] = useState("");

@@ -32,11 +32,12 @@ export function hoursFastedToday(state, now = Date.now()) {
   // helper: are we fasting at a given time?
   const activeAt = (atTs) => {
     const base = schedule
-      ? baselineSinceAnchor(schedule, baselineAnchorTs, atTs, userEvents)
+      ? baselineSinceAnchor(schedule, baselineAnchorTs, now, userEvents)
       : [];
-    const allUpTo = [...base, ...userEvents.filter((e) => e.ts <= atTs)].sort(
-      (a, b) => a.ts - b.ts
-    );
+    const allUpTo = [
+      ...base.filter((e) => e.ts <= atTs),
+      ...userEvents.filter((e) => e.ts <= atTs),
+    ].sort((a, b) => a.ts - b.ts);
 
     let active = false;
     for (const e of allUpTo) {
@@ -58,7 +59,7 @@ export function hoursFastedToday(state, now = Date.now()) {
 
   // only today’s events, sorted, and collapse exact dupes
   const all = [...baseline, ...userEvents]
-    .filter((e) => e.ts >= dayStart)
+    .filter((e) => e.ts >= dayStart && e.ts <= now)
     .sort((a, b) => a.ts - b.ts)
     .filter(
       (e, i, arr) =>
