@@ -14,7 +14,22 @@ import FastingContextProvider from "./store/fastingLogic/fasting-context";
 import { Ionicons } from "@expo/vector-icons";
 import { auth } from "./firebase/app";
 import { getUser } from "./firebase/users.db.js";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, getIdToken } from "firebase/auth";
+import { Buffer } from "buffer";
+
+function isTokenExpired(token) {
+  try {
+    const base64 = token.split(".")[1];
+    const payload =
+      typeof atob === "function"
+        ? atob(base64)
+        : Buffer.from(base64, "base64").toString("utf8");
+    const { exp } = JSON.parse(payload);
+    return exp * 1000 <= Date.now();
+  } catch (e) {
+    return true;
+  }
+}
 
 function Navigator() {
   const authCxt = useContext(AuthContext);
@@ -22,7 +37,27 @@ function Navigator() {
 
   useEffect(() => {
     Ionicons.loadFont();
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    const verifyStoredToken = async () => {
+      try {
+        const [token, storedUsername, storedUid] = await Promise.all([
+          AsyncStorage.getItem("token"),
+          AsyncStorage.getItem("username"),
+          AsyncStorage.getItem("uid"),
+        ]);
+        if (token && storedUsername && storedUid) {
+          if (isTokenExpired(token)) {
+            authCxt.logout();
+          } else {
+            authCxt.authenticate(token, storedUsername, storedUid);
+          }
+        }
+      } catch (err) {
+        console.warn("verifyStoredToken", err);
+      }
+    };
+    verifyStoredToken();
+
+    const unsubAuth = onAuthStateChanged(auth, async (user) => {
       if (user) {
         try {
           const token = await getIdToken(user, true);
@@ -47,7 +82,16 @@ function Navigator() {
         setLoading(false);
       }
     });
-    return unsubscribe;
+    const unsubToken = onIdTokenChanged(auth, async (user) => {
+      if (user) {
+        const token = await getIdToken(user, true);
+        authCxt.refreshToken(token);
+      }
+    });
+    return () => {
+      unsubAuth();
+      unsubToken();
+    };
   }, [authCxt]);
 
   if (loading) {

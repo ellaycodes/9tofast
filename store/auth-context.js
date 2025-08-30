@@ -1,5 +1,7 @@
 import { createContext, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { signOut } from "firebase/auth";
+import { auth } from "../firebase/app";
 
 export const AuthContext = createContext({
   token: "",
@@ -13,7 +15,7 @@ export const AuthContext = createContext({
   setEmailAddress: (emailAddress) => {},
   authenticate: (token, userName, uid) => {},
   logout: () => {},
-  setTokens: (idToken) => {},
+  refreshToken: (idToken) => {},
   updateUsername: (username) => {},
   updateFullName: (fullName) => {},
   updateAvatarId: (avatarId) => {},
@@ -45,7 +47,8 @@ function AuthContextProvider({ children }) {
     AsyncStorage.setItem("uid", uid);
   }
 
-  function logout() {
+  async function logout() {
+    await signOut(auth);
     setAuthToken(null);
     setUsername(null);
     setUid(null);
@@ -62,7 +65,7 @@ function AuthContextProvider({ children }) {
     AsyncStorage.removeItem("fastingstate_v2");
   }
 
-  function setTokens(idToken) {
+  function refreshToken(idToken) {
     setAuthToken(idToken);
     AsyncStorage.setItem("token", idToken);
   }
@@ -108,7 +111,7 @@ function AuthContextProvider({ children }) {
     setEmailAddress: setEmailAddress,
     authenticate: authenticate,
     logout: logout,
-    setTokens: setTokens,
+    refreshToken: refreshToken,
     updateUsername: updateUsername,
     updateFullName: updateFullName,
     updateAvatarId: updateAvatarId,

@@ -2,7 +2,6 @@ import { Alert, ScrollView, StyleSheet, View } from "react-native";
 import SubtitleText from "../../components/ui/SubtitleText";
 import { useContext, useState } from "react";
 import { AuthContext } from "../../store/auth-context";
-import { MaterialIcons } from "@expo/vector-icons";
 import { useAppTheme } from "../../store/app-theme-context";
 import SettingsPressable from "./SettingsPressable";
 import ChangePasswordModal from "../../modals/ChangePasswordModal";
@@ -22,8 +21,17 @@ function AuthedProfile({ emailAddress }) {
   const navigation = useNavigation();
   const { theme } = useAppTheme();
 
-  function logoutHandler() {
-    return authCxt.logout();
+  async function logoutHandler() {
+    try {
+      return authCxt.logout();
+    } catch (error) {
+      const message =
+        error?.response?.data?.error?.message ||
+        error?.message ||
+        "Something went wrong.";
+      console.error(error);
+      Alert.alert("Error", message);
+    }
   }
 
   function deleteHandler() {
