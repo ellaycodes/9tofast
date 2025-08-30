@@ -10,6 +10,7 @@ function ManageAccountScreen({ navigation }) {
 
   function logoutHandler() {
     // wipe fasting state so next user doesn't inherit previous data
+    // TODO: Log out user from firebase
     clearFast();
     return authCxt.logout();
   }
