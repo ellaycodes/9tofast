@@ -46,8 +46,8 @@ function PreAuthScreen({ navigation }) {
         userName: userName,
         localId: user.uid,
       });
-    } catch (err) {
-      Alert.alert("Authentication Failed", `Could not log you in! ${err}`);
+    } catch (error) {
+      Alert.alert("Authentication Failed", `Could not log you in! ${error}`);
       setIsAuthing(false);
     }
   }

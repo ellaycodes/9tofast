@@ -39,8 +39,8 @@ export async function getUser(uid) {
   try {
     const docSnap = await getDoc(doc(db, "users", uid));
     return docSnap.exists() ? docSnap.data() : null;
-  } catch (e) {
-    console.warn("getUser", e);
+  } catch (error) {
+    console.warn("getUser", error);
   }
 }
 
@@ -60,9 +60,9 @@ export async function updateUser(uid, partial) {
   try {
     await updateDoc(doc(db, "users", uid), patch);
     return { status: "user updated" };
-  } catch (err) {
-    console.error(err);
-    throw new Error(err);
+  } catch (error) {
+    console.error(error);
+    throw error;
   }
 }
 
@@ -71,7 +71,7 @@ export async function deleteCurrentUser(uid) {
 
   try {
     await deleteDoc(doc(db, "users", uid));
-  } catch (e) {
-    throw new Error(e);
+  } catch (error) {
+    throw error;
   }
 }

@@ -34,10 +34,10 @@ function PreAuthProfile() {
       authCxt.setEmailAddress(email);
 
       navigation.navigate("TimerScreen");
-    } catch (err) {
-      const msg = err?.error?.message || "Sign up failed";
+    } catch (error) {
+      const msg = error?.error?.message || "Sign up failed";
       Alert.alert("Authentication Failed", msg);
-      console.error(err);
+      console.error(error);
       setIsAuthing(false);
     }
   }

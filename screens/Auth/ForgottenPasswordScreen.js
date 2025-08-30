@@ -20,7 +20,7 @@ function ForgottenPassword({ navigation }) {
       const res = await sendPasswordResetEmail(auth, emailAddress);
       setEmailSent(true);
       setLoading(false);
-    } catch (err) {
+    } catch (error) {
       setLoading(false);
       Alert.alert(
         "Could not send reset password email!",

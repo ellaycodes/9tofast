@@ -34,8 +34,8 @@ export default function AppThemeContextProvider({ children }) {
           setTheme(Colors[name]);
           setThemeNameState(name);
         }
-      } catch (err) {
-        console.error("Failed to load theme:", err);
+      } catch (error) {
+        console.error("Failed to load theme:", error);
       } finally {
         setLoaded(true);
       }
@@ -55,8 +55,8 @@ export default function AppThemeContextProvider({ children }) {
       if (auth.currentUser) {
         await setThemeDb(auth.currentUser.uid, name);
       }
-    } catch (err) {
-      console.error("Failed to save theme:", err);
+    } catch (error) {
+      console.error("Failed to save theme:", error);
     }
   }
 

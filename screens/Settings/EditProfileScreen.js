@@ -39,6 +39,7 @@ function EditProfileScreen() {
           ...inputDetails,
           username: value,
         }));
+        break;
     }
   }
 
@@ -61,8 +62,8 @@ function EditProfileScreen() {
         emailAddress: authCxt.emailAddress,
         username: username,
       });
-    } catch (err) {
-      throw new Error(err);
+    } catch (error) {
+      throw error;
     }
   }
 
@@ -73,8 +74,8 @@ function EditProfileScreen() {
       });
       authCxt.updateAvatarId(value);
       setOpenModal(false);
-    } catch (err) {
-      throw new Error(err);
+    } catch (error) {
+      throw error;
     }
   }
 

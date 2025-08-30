@@ -48,12 +48,12 @@ function AuthedProfile({ emailAddress }) {
 
       setShowModal(false);
       Alert.alert("Success", "Password updated.");
-    } catch (err) {
+    } catch (error) {
       const message =
-        err?.response?.data?.error?.message ||
-        err?.message ||
+        error?.response?.data?.error?.message ||
+        error?.message ||
         "Something went wrong.";
-      console.error(err);
+      console.error(error);
       Alert.alert("Error", message);
     } finally {
       setLoading(false);
