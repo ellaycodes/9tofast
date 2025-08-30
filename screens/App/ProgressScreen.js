@@ -8,6 +8,7 @@ import SubtitleText from "../../components/ui/SubtitleText";
 import { useEffect, useState } from "react";
 import useWeeklyStats from "../../store/fastingLogic/useWeeklyStats";
 import WeeklyDonut from "../../components/progress/WeeklyDonut";
+import FastingCalendar from "../../components/progress/FastingCalendar";
 
 function ProgressScreen() {
   const { theme } = useAppTheme();
@@ -61,6 +62,7 @@ function ProgressScreen() {
             <Text style={styles(theme).unit}> HOURS</Text>
           </Text>
         </View>
+        <FastingCalendar />
         <Ads />
       </View>
     </ScrollView>
