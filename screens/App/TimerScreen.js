@@ -50,7 +50,7 @@ function TimerScreen({ navigation }) {
 
     if (start < end) return now < start || now >= end;
 
-    return now < start || now >= end;
+    return now >= start || now < end;
   }, [schedule]);
 
   const inside = withinFasting();
@@ -65,7 +65,7 @@ function TimerScreen({ navigation }) {
         getRandomOffScheduleTitle(!fasting && inside ? "eating" : "fasting")
       );
     }
-  }, [offSchedule, fasting, inside]);
+  }, [offSchedule, fasting, inside, events, hoursFastedToday]);
 
   const timeUnits = readout ? Object.keys(readout.units).slice(0, -1) : [];
 

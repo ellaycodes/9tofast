@@ -30,8 +30,8 @@ export default function useFastingPersistence() {
         JSON.stringify({ ...persistable, events: filtered })
       );
       await AsyncStorage.setItem(LAST_TS_KEY, Date.now().toString());
-    } catch (err) {
-      console.warn("[fasting-persistence] persist() failed:", err);
+    } catch (error) {
+      console.warn("[fasting-persistence] persist() failed:", error);
     }
   }, []);
 
@@ -44,9 +44,9 @@ export default function useFastingPersistence() {
       parsed.events = events;
       await AsyncStorage.setItem(V2KEY, JSON.stringify(parsed));
       await AsyncStorage.setItem(LAST_TS_KEY, Date.now().toString());
-    } catch (err) {
-      console.warn("[fasting-persistence] addFastingEvent() failed:", err);
-      throw err;
+    } catch (error) {
+      console.warn("[fasting-persistence] addFastingEvent() failed:", error);
+      throw error;
     }
   }, []);
 
@@ -63,9 +63,9 @@ export default function useFastingPersistence() {
         );
         await AsyncStorage.setItem(LAST_DAY_KEY, day);
         const storageDay = await AsyncStorage.getItem(day);
-      } catch (err) {
-        console.warn("[fasting-persistence] addDailyStats() failed:", err);
-        throw err;
+      } catch (error) {
+        console.warn("[fasting-persistence] addDailyStats() failed:", error);
+        throw error;
       }
     },
     []
@@ -80,8 +80,8 @@ export default function useFastingPersistence() {
 
       await AsyncStorage.setItem(V2KEY, JSON.stringify(parsed));
       await AsyncStorage.setItem(LAST_TS_KEY, Date.now().toString());
-    } catch (err) {
-      console.warn("[fasting-persistence] flushDailyEvents() failed:", err);
+    } catch (error) {
+      console.warn("[fasting-persistence] flushDailyEvents() failed:", error);
     }
   }, []);
 
@@ -152,8 +152,8 @@ export default function useFastingPersistence() {
       }
 
       return getInitialState();
-    } catch (err) {
-      console.warn("[fasting-persistence] load() failed:", err);
+    } catch (error) {
+      console.warn("[fasting-persistence] load() failed:", error);
       return getInitialState();
     }
   }, [addDailyStats, flushDailyEvents]);

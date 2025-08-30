@@ -122,8 +122,8 @@ function ScheduleSelect({ settings, setWizardState, token, userName, uid }) {
     if (userId) {
       try {
         await setFastingScheduleDb(userId, chosenSchedule);
-      } catch (err) {
-        console.warn("setFastingScheduleDb", err);
+      } catch (error) {
+        console.warn("setFastingScheduleDb", error);
       }
     }
 

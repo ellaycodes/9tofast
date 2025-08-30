@@ -63,10 +63,10 @@ export async function loadManifest() {
     // Store the full json so we can rebuild list for a different scale later if needed
     await AsyncStorage.setItem(AS_KEY, JSON.stringify(json));
     return list;
-  } catch (e) {
+  } catch (error) {
     // Fallback to cached json
     const cached = await AsyncStorage.getItem(AS_KEY);
-    if (!cached) throw e;
+    if (!cached) throw error;
     const json = JSON.parse(cached);
     const list = buildList(json);
     cacheList = list;

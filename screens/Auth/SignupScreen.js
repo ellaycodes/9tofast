@@ -2,7 +2,7 @@ import AuthContent from "../../components/Auth/AuthContent";
 import { useContext, useState } from "react";
 import { AuthContext } from "../../store/auth-context";
 import LoadingOverlay from "../../components/ui/LoadingOverlay";
-import { KeyboardAvoidingView, ScrollView } from "react-native";
+import { Alert, KeyboardAvoidingView, ScrollView } from "react-native";
 import { Platform } from "react-native";
 import randomUsername from "../../util/randomUsername";
 import { createUserWithEmailAndPassword } from "firebase/auth";
@@ -37,7 +37,7 @@ function SignupScreen({ navigation }) {
         userName: userName,
         localId: user.uid,
       });
-    } catch (err) {
+    } catch (error) {
       Alert.alert("Authentication Failed", "Could not sign you in!");
       setIsAuthing(false);
     }

@@ -7,8 +7,8 @@ export async function getFastingSchedule(uid) {
       doc(db, "users", uid, "settings", "preferences")
     );
     return docSnap.data().fastingSchedule ?? null;
-  } catch (err) {
-    console.warn("getFastingSchedule", err);
+  } catch (error) {
+    console.warn("getFastingSchedule", error);
   }
 }
 
@@ -18,8 +18,8 @@ export async function getPreferences(uid) {
       doc(db, "users", uid, "settings", "preferences")
     );
     return docSnap.exists() ? docSnap.data() : null;
-  } catch (err) {
-    console.warn("getPreferences", err);
+  } catch (error) {
+    console.warn("getPreferences", error);
   }
 }
 
@@ -30,8 +30,8 @@ export async function setFastingScheduleDb(uid, schedule) {
       { fastingSchedule: schedule },
       { merge: true }
     );
-  } catch (e) {
-    console.warn("setFastingScheduleDb", e);
+  } catch (error) {
+    console.warn("setFastingScheduleDb", error);
   }
 }
 
@@ -42,8 +42,8 @@ export async function setThemeDb(uid, theme) {
       { theme },
       { merge: true }
     );
-  } catch (e) {
-    console.warn("setThemeDb", e);
+  } catch (error) {
+    console.warn("setThemeDb", error);
   }
 }
 
@@ -63,7 +63,7 @@ export async function addDailyStatsDb(
           : 0,
       events,
     });
-  } catch (e) {
-    console.warn("addDailyStatsDb", e);
+  } catch (error) {
+    console.warn("addDailyStatsDb", error);
   }
 }

@@ -38,7 +38,7 @@ function LoginScreen() {
 
       authCxt.authenticate(token, displayName, uid);
       authCxt.setEmailAddress(email);
-      authCxt.setOnboarded("true");
+      authCxt.setOnboarded(true);
 
       const [userData, prefs] = await Promise.all([
         getUser(uid),
@@ -47,10 +47,10 @@ function LoginScreen() {
       if (userData?.fullName) authCxt.updateFullName(userData.fullName);
       if (userData?.avatarId) authCxt.updateAvatarId(userData.avatarId);
       if (prefs?.fastingSchedule) setSchedule(prefs.fastingSchedule);
-    } catch (err) {
-      Alert.alert("Authentication Failed", err);
+    } catch (error) {
+      Alert.alert("Authentication Failed", error.message);
       setIsAuthing(false);
-      throw new Error(err);
+      throw error;
     }
   }
 

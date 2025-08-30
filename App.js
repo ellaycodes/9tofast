@@ -34,14 +34,14 @@ function Navigator() {
       if (storedEmailAddress) authCxt.setEmailAddress(storedEmailAddress);
       if (storedAvatarId) authCxt.updateAvatarId(storedAvatarId);
       if (storedName) authCxt.updateFullName(storedName);
-      if (storedOnboarded) authCxt.setOnboarded(true);
+      if (storedOnboarded === "true") authCxt.setOnboarded(true);
 
       setLoading(false);
     })();
   }, []);
 
   if (loading) {
-    <LoadingOverlay>Loading</LoadingOverlay>;
+    return <LoadingOverlay>Loading</LoadingOverlay>;
   }
 
   return (
