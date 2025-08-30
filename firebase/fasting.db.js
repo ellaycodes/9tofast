@@ -1,5 +1,14 @@
 import { db } from "./app";
-import { setDoc, doc, getDoc } from "firebase/firestore";
+import {
+  setDoc,
+  doc,
+  getDoc,
+  query,
+  collection,
+  orderBy,
+  documentId,
+  getDocs,
+} from "firebase/firestore";
 
 export async function getFastingSchedule(uid) {
   try {
@@ -65,5 +74,30 @@ export async function addDailyStatsDb(
     });
   } catch (error) {
     console.warn("addDailyStatsDb", error);
+  }
+}
+
+export async function getDailyStatsRange(uid, startDay, endDay) {
+  try {
+    const statsQuery = query(
+      collection(db, "users", uid, "daily_stats"),
+      orderBy(documentId()),
+      startAt(startDay),
+      endAt(endDay)
+    );
+    const querySnapshot = await getDocs(statsQuery);
+    const stats = querySnapshot.docs.map((docSnap) => {
+      const data = docSnap.data();
+      return {
+        day: docSnap.id,
+        hoursFastedToday: data.hoursFastedToday,
+        percent: data.percent,
+        events: data.events ?? [],
+      };
+    });
+    return stats.sort((a, b) => a.day.localeCompare(b.day));
+  } catch (error) {
+    console.warn("getDailyStatsRange", error);
+    return [];
   }
 }
