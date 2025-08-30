@@ -12,6 +12,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import LoadingOverlay from "./components/ui/LoadingOverlay";
 import FastingContextProvider from "./store/fastingLogic/fasting-context";
 import { Ionicons } from "@expo/vector-icons";
+import { auth } from "./firebase/app";
+import { getUser } from "./firebase/users.db.js";
+import { onAuthStateChanged } from "firebase/auth";
 
 function Navigator() {
   const authCxt = useContext(AuthContext);
@@ -19,26 +22,33 @@ function Navigator() {
 
   useEffect(() => {
     Ionicons.loadFont();
-    (async () => {
-      const storedToken = await AsyncStorage.getItem("token");
-      const storedUsername = await AsyncStorage.getItem("username");
-      const storedEmailAddress = await AsyncStorage.getItem("emailAddress");
-      const storedUid = await AsyncStorage.getItem("uid");
-      const storedName = await AsyncStorage.getItem("fullname");
-      const storedAvatarId = await AsyncStorage.getItem("avatarId");
-      const storedOnboarded = await AsyncStorage.getItem("onboarded");
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          const token = await getIdToken(user, true);
+          const { displayName, email, uid } = user;
+          authCxt.authenticate(token, displayName, uid);
+          if (email) authCxt.setEmailAddress(email);
 
-      if (storedToken)
-        authCxt.authenticate(storedToken, storedUsername, storedUid);
-
-      if (storedEmailAddress) authCxt.setEmailAddress(storedEmailAddress);
-      if (storedAvatarId) authCxt.updateAvatarId(storedAvatarId);
-      if (storedName) authCxt.updateFullName(storedName);
-      if (storedOnboarded === "true") authCxt.setOnboarded(true);
-
-      setLoading(false);
-    })();
-  }, []);
+          try {
+            const userData = await getUser(uid);
+            if (userData?.fullName) authCxt.updateFullName(userData.fullName);
+            if (userData?.avatarId) authCxt.updateAvatarId(userData.avatarId);
+          } catch (error) {
+            console.warn("hydrateUser", error);
+          }
+          const storedOnboarded = await AsyncStorage.getItem("onboarded");
+          if (storedOnboarded === "true") authCxt.setOnboarded(true);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        authCxt.logout();
+        setLoading(false);
+      }
+    });
+    return unsubscribe;
+  }, [authCxt]);
 
   if (loading) {
     return <LoadingOverlay>Loading</LoadingOverlay>;

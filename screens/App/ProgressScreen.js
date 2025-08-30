@@ -6,13 +6,14 @@ import { useFasting } from "../../store/fastingLogic/fasting-context";
 import Title from "../../components/ui/Title";
 import SubtitleText from "../../components/ui/SubtitleText";
 import { useEffect, useState } from "react";
-import { getFastingSchedule } from "../../firebase/fasting.db.js";
-import { auth } from "../../firebase/app";
+import useWeeklyStats from "../../store/fastingLogic/useWeeklyStats";
+import WeeklyDonut from "../../components/progress/WeeklyDonut";
 
 function ProgressScreen() {
   const { theme } = useAppTheme();
   const { schedule, hoursFastedToday } = useFasting();
   const [now, setNow] = useState(Date.now());
+  const { weeklyStats } = useWeeklyStats();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -30,6 +31,7 @@ function ProgressScreen() {
   return (
     <ScrollView>
       <View style={styles(theme).container}>
+        <WeeklyDonut weeklyStats={weeklyStats} />
         <Title>Today's Fast</Title>
         <AnimatedCircularProgress
           size={250}
