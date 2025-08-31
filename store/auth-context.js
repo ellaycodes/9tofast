@@ -2,6 +2,7 @@ import { createContext, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase/app";
+import { setFastingStateDb } from "../firebase/fasting.db.js";
 
 export const AuthContext = createContext({
   token: "",
@@ -48,6 +49,23 @@ function AuthContextProvider({ children }) {
   }
 
   async function logout() {
+    try {
+      if (uid) {
+        const rawState = await AsyncStorage.getItem("fastingstate_v2");
+        const lastTs = await AsyncStorage.getItem("fasting_last_ts");
+        if (rawState) {
+          const parsed = JSON.parse(rawState);
+          if (auth?.currentUser?.uid) {
+            await setFastingStateDb(uid, {
+              ...parsed,
+              lastTs: lastTs ? Number(lastTs) : Date.now(),
+            });
+          }
+        }
+      }
+    } catch (error) {
+      console.warn("[auth-context] logout backup failed", error);
+    }
     await signOut(auth);
     setAuthToken(null);
     setUsername(null);
