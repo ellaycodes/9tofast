@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useCallback } from "react";
 import { Dimensions, FlatList, StyleSheet, View, Text } from "react-native";
 import * as dt from "date-fns";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
@@ -25,7 +25,7 @@ export default function WeeklyDonut({ onWeekChange }) {
 
   // page index 0 is current week, 1 is previous week, etc
   const pages = useMemo(() => {
-    // prebuild 26 weeks including current
+    // prebuild 12 weeks including current
     return Array.from({ length: 12 }).map((_, idx) => {
       const start = dt.startOfWeek(dt.subWeeks(new Date(), idx), {
         weekStartsOn: 1,
@@ -56,49 +56,50 @@ export default function WeeklyDonut({ onWeekChange }) {
     itemVisiblePercentThreshold: 100,
   }).current;
 
-  const renderWeek = ({ item }) => {
-    const days = buildWeekDays(item.start, statsMap);
+  const renderWeek = useCallback(
+    ({ item }) => {
+      const days = buildWeekDays(item.start, statsMap);
 
-    return (
-      <View style={[styles.page, { width: SCREEN_WIDTH * 0.91 }]}>
-        <View style={styles.circlesRow}>
-          {days.map((day, idx) => (
-            <View key={idx} style={[styles.circleWrap]}>
-              <View style={styles.weekRow}>
-                <Text
-                  key={idx}
-                  style={[
-                    styles.weekDay,
-                    {
-                      color: theme.text,
-                      backgroundColor:
-                        dt.format(new Date(), "ddd") ===
-                        dt.format(day.date, "ddd")
+      return (
+        <View style={[styles.page, { width: SCREEN_WIDTH * 0.91 }]}>
+          <View style={styles.circlesRow}>
+            {days.map((day, idx) => (
+              <View key={idx} style={[styles.circleWrap]}>
+                <View style={styles.weekRow}>
+                  <Text
+                    key={idx}
+                    style={[
+                      styles.weekDay,
+                      {
+                        color: theme.text,
+                        backgroundColor: dt.isSameDay(day.date, new Date())
                           ? theme.card
                           : null,
-                      paddingVertical: 6,
-                      borderRadius: 100,
-                    },
-                  ]}
-                >
-                  {dt.format(day.date, "EEEEEE")}
-                </Text>
+                        paddingVertical: 6,
+                        borderRadius: 100,
+                      },
+                    ]}
+                  >
+                    {dt.format(day.date, "EEEEEE")}
+                  </Text>
+                </View>
+                <AnimatedCircularProgress
+                  size={CIRCLE_SIZE}
+                  width={CIRCLE_WIDTH}
+                  fill={Math.min(100, Math.max(0, day.percent))}
+                  tintColor={theme.success}
+                  backgroundColor={theme.secondary100}
+                  lineCap="round"
+                  rotation={0}
+                />
               </View>
-              <AnimatedCircularProgress
-                size={CIRCLE_SIZE}
-                width={CIRCLE_WIDTH}
-                fill={Math.min(100, Math.max(0, day.percent))}
-                tintColor={theme.success}
-                backgroundColor={theme.secondary100}
-                lineCap="round"
-                rotation={0}
-              />
-            </View>
-          ))}
+            ))}
+          </View>
         </View>
-      </View>
-    );
-  };
+      );
+    },
+    [statsMap, theme]
+  );
 
   return (
     <FlatList
