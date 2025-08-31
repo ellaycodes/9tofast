@@ -9,7 +9,7 @@ import {
   documentId,
   getDocs,
   startAt,
-  endAt
+  endAt,
 } from "firebase/firestore";
 
 export async function getFastingSchedule(uid) {
@@ -101,5 +101,24 @@ export async function getDailyStatsRange(uid, startDay, endDay) {
   } catch (error) {
     console.warn("getDailyStatsRange", error);
     return [];
+  }
+}
+
+export async function setFastingStateDb(uid, state) {
+  try {
+    await setDoc(doc(db, "users", uid, "fasting_state", "current"), state);
+  } catch (error) {
+    console.warn("setFastingStateDb", error);
+  }
+}
+
+export async function getFastingStateDb(uid) {
+  try {
+    const docSnap = await getDoc(
+      doc(db, "users", uid, "fasting_state", "current")
+    );
+    return docSnap.exists() ? docSnap.data() : null;
+  } catch (error) {
+    console.warn("getFastingStateDb", error);
   }
 }

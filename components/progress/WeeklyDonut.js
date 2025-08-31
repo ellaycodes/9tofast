@@ -47,7 +47,6 @@ export default function WeeklyDonut({ onWeekChange }) {
   const onViewableItemsChanged = useRef(({ viewableItems }) => {
     if (!viewableItems?.length) return;
     const first = viewableItems[0]?.item;
-    console.log(viewableItems);
 
     if (!first) return;
     refreshWeeklyStats(first.start, first.end);
