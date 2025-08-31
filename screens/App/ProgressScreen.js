@@ -12,14 +12,21 @@ import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import ProgressCalendarModal from "../../modals/ProgressCalendarModal";
 import * as dt from "date-fns";
+import EventsChart from "../../components/progress/EventsChart";
 
 function ProgressScreen() {
   const { theme } = useAppTheme();
-  const { schedule, hoursFastedToday } = useFasting();
+  const { schedule, hoursFastedToday, events } = useFasting();
   const [now, setNow] = useState(Date.now());
   const { weeklyStats } = useWeeklyStats();
   const [openModal, setOpenModal] = useState(false);
   const navigation = useNavigation();
+
+  const handleWeekChange = (start, end) => {
+    navigation.setOptions({
+      title: `${dt.format(start, "d MMM")} - ${dt.format(end, "d MMM")}`,
+    });
+  };
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -27,7 +34,10 @@ function ProgressScreen() {
     }, 60_000);
     navigation.setOptions({
       headerRight: () => (
-        <Pressable onPress={() => setOpenModal(!openModal)}>
+        <Pressable
+          onPress={() => setOpenModal(!openModal)}
+          style={{ paddingHorizontal: 10, flex: 1}}
+        >
           <Ionicons
             color={theme.text}
             name="calendar-clear-outline"
@@ -35,10 +45,12 @@ function ProgressScreen() {
           />
         </Pressable>
       ),
-      title: `${dt.format(new Date(), "PPPP")}`,
     });
+    const start = dt.startOfWeek(new Date(), { weekStartsOn: 1 });
+    const end = dt.endOfWeek(start, { weekStartsOn: 0 });
+    handleWeekChange(start, end);
     return () => clearInterval(timer);
-  }, [navigation]);
+  }, [navigation, theme.text]);
 
   const fastingHours =
     typeof schedule?.fastingHours === "number" && schedule.fastingHours > 0
@@ -49,10 +61,11 @@ function ProgressScreen() {
   return (
     <ScrollView>
       <View style={styles(theme).container}>
-        <WeeklyDonut weeklyStats={weeklyStats} />
+        <WeeklyDonut onWeekChange={handleWeekChange} />
+        <Title>Today, {dt.format(new Date(), "d MMM")}</Title>
         <AnimatedCircularProgress
           size={250}
-          width={60}
+          width={50}
           fill={percent}
           tintColor={
             percent < 20
@@ -65,11 +78,19 @@ function ProgressScreen() {
           style={styles(theme).mainProgress}
           rotation={0}
           lineCap="round"
-          duration={1500}
-          renderCap={({ center }) => {
-            console.log(center); // returns  {"x": 55.1975922765034, "y": 189.44085564300605}
-            // <Ionicons name="image" size={12} color={theme.muted} />
-          }}
+          duration={2000}
+          renderCap={({ center }) => (
+            <Ionicons
+              name="flame"
+              size={36}
+              color={theme.secondary200}
+              style={{
+                position: "absolute",
+                left: center.x - 12,
+                top: center.y - 10,
+              }}
+            />
+          )}
         >
           {() => (
             <Text style={styles(theme).hours}>
@@ -80,7 +101,7 @@ function ProgressScreen() {
         </AnimatedCircularProgress>
         <View style={styles(theme).inner}>
           <SubtitleText style={styles(theme).text} size="xl">
-            Fast
+            Fasted
           </SubtitleText>
           <Text style={styles(theme).hours}>
             {Math.round(hoursFastedToday)}
@@ -91,9 +112,7 @@ function ProgressScreen() {
           </Text>
         </View>
         <Ads />
-        {/**Doesn't yet exist but want a small chart of the events array to show fasting and eating times for that day
-         * <Events />
-         */}
+        <EventsChart events={events} />
       </View>
 
       <ProgressCalendarModal
@@ -128,6 +147,7 @@ const styles = (theme) =>
       textAlign: "left",
       padding: 0,
       margin: 0,
+      fontWeight: "bold",
     },
     slashAndTotal: {
       fontSize: 32,

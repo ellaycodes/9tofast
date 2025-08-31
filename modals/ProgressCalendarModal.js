@@ -55,6 +55,7 @@ function MonthGrid({ monthDate, theme, statsMap, limitDays }) {
                   backgroundColor={theme.secondary100}
                   lineCap="round"
                   rotation={0}
+                  duration={0}
                 />
               </>
             )}
@@ -90,8 +91,8 @@ export default function ProgressCalendarModal({ showModal, onRequestClose }) {
     if (!viewableItems?.length) return;
     const first = viewableItems[0]?.item;
     if (!first) return;
-    const start = dt.startOfMonth(first.month);
-    const end = dt.endOfMonth(first.month);
+    const start = dt.startOfMonth(dt.subMonths(first.month, 1));
+    const end = dt.endOfMonth(dt.addMonths(first.month, 1));
 
     refreshWeeklyStats(start, end);
     setVisibleMonth(dt.format(first.month, "MMMM yyyy"));
@@ -150,7 +151,6 @@ export default function ProgressCalendarModal({ showModal, onRequestClose }) {
           data={months}
           renderItem={renderMonth}
           keyExtractor={(m) => m.key}
-          pagingEnabled
           showsVerticalScrollIndicator={false}
           onViewableItemsChanged={onViewableItemsChanged}
           viewabilityConfig={viewabilityConfig}
@@ -179,11 +179,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 6
+    marginBottom: 6,
   },
   headerHint: {
     fontSize: 18,
-    fontWeight: 'bold'
+    fontWeight: "bold",
   },
   monthLabel: {
     textAlign: "left",
