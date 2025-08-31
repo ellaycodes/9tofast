@@ -11,6 +11,7 @@ import {
   startAt,
   endAt,
 } from "firebase/firestore";
+import { logWarn } from "../../util/logger";
 
 export async function getFastingSchedule(uid) {
   try {
@@ -19,7 +20,7 @@ export async function getFastingSchedule(uid) {
     );
     return docSnap.data().fastingSchedule ?? null;
   } catch (error) {
-    console.warn("getFastingSchedule", error);
+    logWarn("getFastingSchedule", error);
   }
 }
 
@@ -30,7 +31,7 @@ export async function getPreferences(uid) {
     );
     return docSnap.exists() ? docSnap.data() : null;
   } catch (error) {
-    console.warn("getPreferences", error);
+    logWarn("getPreferences", error);
   }
 }
 
@@ -42,7 +43,7 @@ export async function setFastingScheduleDb(uid, schedule) {
       { merge: true }
     );
   } catch (error) {
-    console.warn("setFastingScheduleDb", error);
+    logWarn("setFastingScheduleDb", error);
   }
 }
 
@@ -54,7 +55,7 @@ export async function setThemeDb(uid, theme) {
       { merge: true }
     );
   } catch (error) {
-    console.warn("setThemeDb", error);
+    logWarn("setThemeDb", error);
   }
 }
 
@@ -75,7 +76,7 @@ export async function addDailyStatsDb(
       events,
     });
   } catch (error) {
-    console.warn("addDailyStatsDb", error);
+    logWarn("addDailyStatsDb", error);
   }
 }
 
@@ -99,7 +100,7 @@ export async function getDailyStatsRange(uid, startDay, endDay) {
     });
     return stats.sort((a, b) => a.day.localeCompare(b.day));
   } catch (error) {
-    console.warn("getDailyStatsRange", error);
+    logWarn("getDailyStatsRange", error);
     return [];
   }
 }
@@ -108,7 +109,7 @@ export async function setFastingStateDb(uid, state) {
   try {
     await setDoc(doc(db, "users", uid, "fasting_state", "current"), state);
   } catch (error) {
-    console.warn("setFastingStateDb", error);
+    logWarn("setFastingStateDb", error);
   }
 }
 
@@ -119,6 +120,6 @@ export async function getFastingStateDb(uid) {
     );
     return docSnap.exists() ? docSnap.data() : null;
   } catch (error) {
-    console.warn("getFastingStateDb", error);
+    logWarn("getFastingStateDb", error);
   }
 }

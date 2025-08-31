@@ -3,6 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase/app";
 import { setFastingStateDb } from "../firebase/fasting.db.js";
+import { logWarn } from "../util/logger";
 
 export const AuthContext = createContext({
   token: "",
@@ -64,7 +65,7 @@ function AuthContextProvider({ children }) {
         }
       }
     } catch (error) {
-      console.warn("[auth-context] logout backup failed", error);
+      logWarn("[auth-context] logout backup failed", error);
     }
     await signOut(auth);
     setAuthToken(null);

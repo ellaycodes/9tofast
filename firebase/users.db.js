@@ -7,6 +7,7 @@ import {
   deleteDoc,
   getDoc,
 } from "firebase/firestore";
+import { logWarn } from "../../util/logger";
 
 export async function addUser({
   uid,
@@ -40,7 +41,7 @@ export async function getUser(uid) {
     const docSnap = await getDoc(doc(db, "users", uid));
     return docSnap.exists() ? docSnap.data() : null;
   } catch (error) {
-    console.warn("getUser", error);
+    logWarn("getUser", error);
   }
 }
 

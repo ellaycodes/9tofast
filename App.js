@@ -16,6 +16,7 @@ import { auth } from "./firebase/app";
 import { getUser } from "./firebase/users.db.js";
 import { onAuthStateChanged, getIdToken, onIdTokenChanged } from "firebase/auth";
 import { Buffer } from "buffer";
+import { logWarn } from "./util/logger.js";
 
 function isTokenExpired(token) {
   try {
@@ -52,7 +53,8 @@ function Navigator() {
           }
         }
       } catch (err) {
-        console.warn("verifyStoredToken", err);
+        logWarn("verifyStoredToken", err);
+        authCxt.logout();
       }
     };
     verifyStoredToken();

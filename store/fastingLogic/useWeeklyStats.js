@@ -3,6 +3,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import * as dt from "date-fns";
 import { auth } from "../../firebase/app";
 import { getDailyStatsRange } from "../../firebase/fasting.db.js";
+import { logWarn } from "../../util/logger";
 
 export default function useWeeklyStats() {
   const [weeklyStats, setWeeklyStats] = useState([]);
@@ -21,7 +22,7 @@ export default function useWeeklyStats() {
       const stats = await getDailyStatsRange(auth.currentUser.uid, start, end);
       setWeeklyStats(stats);
     } catch (error) {
-      console.warn("[weekly-stats] refreshWeeklyStats", error);
+      logWarn("[weekly-stats] refreshWeeklyStats", error);
     }
   }, []);
 

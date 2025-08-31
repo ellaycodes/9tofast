@@ -13,6 +13,7 @@ import { CommonActions, useNavigation } from "@react-navigation/native";
 import ErrorText from "./ErrorText";
 import { AuthContext } from "../../store/auth-context";
 import { setFastingScheduleDb } from "../../firebase/fasting.db.js";
+import { logWarn } from "../../util/logger";
 
 function ScheduleSelect({ settings, setWizardState, token, userName, uid }) {
   const { schedule, setSchedule } = useFasting();
@@ -123,7 +124,7 @@ function ScheduleSelect({ settings, setWizardState, token, userName, uid }) {
       try {
         await setFastingScheduleDb(userId, chosenSchedule);
       } catch (error) {
-        console.warn("setFastingScheduleDb", error);
+        logWarn("setFastingScheduleDb", error);
       }
     }
 

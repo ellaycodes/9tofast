@@ -24,9 +24,9 @@ function ProgressScreen() {
   const memoStyle = useMemo(() => styles(theme), [theme]);
 
   const handleWeekChange = useCallback(
-    (start, end) => {
+    (start) => {
       navigation.setOptions({
-        title: `${dt.format(new Date(), "EEE do MMM")}`,
+        title: dt.format(start, "EEE do MMM"),
       });
     },
     [navigation]

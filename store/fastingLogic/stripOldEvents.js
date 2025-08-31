@@ -1,6 +1,7 @@
 import * as dt from "date-fns";
 import { EVENT } from "./events";
 import { isFasting } from "./fasting-session";
+import { logWarn } from "../util/logger";
 
 /**
  * Milliseconds after "now" beyond which future events are discarded.
@@ -22,7 +23,7 @@ export function filterEventHorizon(events = [], now = new Date()) {
   const inRange = events.filter((e) => e.ts <= horizon);
   const outOfRange = events.filter((e) => e.ts > horizon);
   if (outOfRange.length) {
-    console.warn("[fasting-persistence] dropping future events:", outOfRange);
+    logWarn("[fasting-persistence] dropping future events:", outOfRange);
   }
   return inRange;
 }
