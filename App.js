@@ -14,7 +14,7 @@ import FastingContextProvider from "./store/fastingLogic/fasting-context";
 import { Ionicons } from "@expo/vector-icons";
 import { auth } from "./firebase/app";
 import { getUser } from "./firebase/users.db.js";
-import { onAuthStateChanged, getIdToken } from "firebase/auth";
+import { onAuthStateChanged, getIdToken, onIdTokenChanged } from "firebase/auth";
 import { Buffer } from "buffer";
 
 function isTokenExpired(token) {

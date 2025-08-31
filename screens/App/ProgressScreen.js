@@ -1,4 +1,11 @@
-import { ScrollView, StyleSheet, View, Text } from "react-native";
+import {
+  ScrollView,
+  StyleSheet,
+  View,
+  Text,
+  Button,
+  Pressable,
+} from "react-native";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
 import Ads from "../../components/monetising/Ads";
 import { useAppTheme } from "../../store/app-theme-context";
@@ -9,19 +16,35 @@ import { useEffect, useState } from "react";
 import useWeeklyStats from "../../store/fastingLogic/useWeeklyStats";
 import WeeklyDonut from "../../components/progress/WeeklyDonut";
 import FastingCalendar from "../../components/progress/FastingCalendar";
+import { useNavigation } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
+import ProgressCalendarModal from "../../modals/ProgressCalendarModal";
 
 function ProgressScreen() {
   const { theme } = useAppTheme();
   const { schedule, hoursFastedToday } = useFasting();
   const [now, setNow] = useState(Date.now());
   const { weeklyStats } = useWeeklyStats();
+  const [openModal, setOpenModal] = useState(false);
+  const navigation = useNavigation();
 
   useEffect(() => {
     const timer = setInterval(() => {
       setNow(Date.now());
     }, 60_000);
+    navigation.setOptions({
+      headerRight: () => (
+        <Pressable onPress={() => setOpenModal(!openModal)}>
+          <Ionicons
+            color={theme.text}
+            name="calendar-clear-outline"
+            size={22}
+          />
+        </Pressable>
+      ),
+    });
     return () => clearInterval(timer);
-  }, []);
+  }, [navigation]);
 
   const fastingHours =
     typeof schedule?.fastingHours === "number" && schedule.fastingHours > 0
@@ -32,6 +55,7 @@ function ProgressScreen() {
   return (
     <ScrollView>
       <View style={styles(theme).container}>
+        {/* <FastingCalendar /> */}
         <WeeklyDonut weeklyStats={weeklyStats} />
         <Title>Today's Fast</Title>
         <AnimatedCircularProgress
@@ -62,9 +86,13 @@ function ProgressScreen() {
             <Text style={styles(theme).unit}> HOURS</Text>
           </Text>
         </View>
-        <FastingCalendar />
         <Ads />
       </View>
+
+      <ProgressCalendarModal
+        showModal={openModal}
+        onRequestClose={() => setOpenModal(!openModal)}
+      />
     </ScrollView>
   );
 }
