@@ -45,6 +45,7 @@ function FastingCalendar() {
           <Ionicons name="chevron-forward" size={20} color={theme.text} />
         </Pressable>
       </View>
+      
       <View style={styles.weekRow}>
         {"SMTWTFS".split("").map((d, i) => (
           <Text
@@ -55,6 +56,7 @@ function FastingCalendar() {
           </Text>
         ))}
       </View>
+
       <View style={styles.days}>
         {days.map((item, idx) => {
           const inMonth = dt.isSameMonth(item.date, currentMonth);
