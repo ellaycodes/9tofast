@@ -18,7 +18,7 @@ function buildWeekDays(weekStart, statsMap) {
   });
 }
 
-export default function WeeklyDonut() {
+export default function WeeklyDonut({ onWeekChange }) {
   const { theme } = useAppTheme();
   const { weeklyStats, refreshWeeklyStats } = useWeeklyStats();
   const listRef = useRef(null);
@@ -49,6 +49,7 @@ export default function WeeklyDonut() {
     const first = viewableItems[0]?.item;
     if (!first) return;
     refreshWeeklyStats(first.start, first.end);
+    onWeekChange && onWeekChange(first.start, first.end);
   }).current;
 
   const viewabilityConfig = useRef({
@@ -62,10 +63,7 @@ export default function WeeklyDonut() {
       <View style={[styles.page, { width: SCREEN_WIDTH * 0.91 }]}>
         <View style={styles.circlesRow}>
           {days.map((day, idx) => (
-            <View
-              key={idx}
-              style={[styles.circleWrap]}
-            >
+            <View key={idx} style={[styles.circleWrap]}>
               <View style={styles.weekRow}>
                 <Text
                   key={idx}
@@ -73,9 +71,13 @@ export default function WeeklyDonut() {
                     styles.weekDay,
                     {
                       color: theme.text,
-                      backgroundColor: dt.format(new Date(), "ddd") === dt.format(day.date, "ddd") ? theme.card : null,
+                      backgroundColor:
+                        dt.format(new Date(), "ddd") ===
+                        dt.format(day.date, "ddd")
+                          ? theme.card
+                          : null,
                       paddingVertical: 6,
-                      borderRadius: 100
+                      borderRadius: 100,
                     },
                   ]}
                 >
@@ -94,10 +96,6 @@ export default function WeeklyDonut() {
             </View>
           ))}
         </View>
-
-        {/* <Text style={[styles.weekLabel, { color: theme.text }]}>
-          {dt.format(item.start, "d MMM")} to {dt.format(item.end, "d MMM")}
-        </Text> */}
       </View>
     );
   };
@@ -146,11 +144,5 @@ const styles = StyleSheet.create({
   circleWrap: {
     alignItems: "center",
     flex: 1,
-  },
-  weekLabel: {
-    marginTop: 8,
-    fontSize: 12,
-    textAlign: "center",
-    opacity: 0.7,
   },
 });
