@@ -1,21 +1,22 @@
 import { Text, Pressable, StyleSheet, View } from "react-native";
 import { useAppTheme } from "../../store/app-theme-context";
-import { formatTime } from "../../util/formatTime";
+import { useMemo } from "react";
 
 function CustomSelector({ label, time, onPress }) {
   const { theme } = useAppTheme();
-  
+  const memoStyle = useMemo(() => styles(theme), [theme]);
+
   return (
     <View>
-      <Text style={styles(theme).customLabel}>{label}</Text>
+      <Text style={memoStyle.customLabel}>{label}</Text>
       <Pressable
         style={({ pressed }) => [
-          styles(theme).timeButton,
-          pressed && styles(theme).timeButtonActive,
+          memoStyle.timeButton,
+          pressed && memoStyle.timeButtonActive,
         ]}
         onPress={onPress}
       >
-        <Text style={styles(theme).timeText}>{time}</Text>
+        <Text style={memoStyle.timeText}>{time}</Text>
       </Pressable>
     </View>
   );

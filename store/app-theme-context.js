@@ -19,9 +19,6 @@ export default function AppThemeContextProvider({ children }) {
     async function loadTheme() {
       try {
         const res = await AsyncStorage.getItem("theme");
-        // if (res && Colors[res]) {
-        //   setTheme(Colors[res]);
-        //   setThemeNameState(res);
         let name;
         if (auth.currentUser) {
           const prefs = await getPreferences(auth.currentUser.uid);

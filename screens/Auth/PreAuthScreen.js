@@ -9,12 +9,10 @@ import { Alert } from "react-native";
 import LoadingOverlay from "../../components/ui/LoadingOverlay";
 import randomUsername from "../../util/randomUsername";
 import {
-  getIdToken,
   signInAnonymously,
-  signInWithEmailAndPassword,
 } from "firebase/auth";
 import { auth } from "../../firebase/app";
-import { addUser, updateUser } from "../../firebase/users.db.js";
+import { addUser } from "../../firebase/users.db.js";
 
 function PreAuthScreen({ navigation }) {
   const [isAuthing, setIsAuthing] = useState();
@@ -31,36 +29,6 @@ function PreAuthScreen({ navigation }) {
 
   function emailHandler() {
     navigation.navigate("LoginScreen");
-  }
-
-  async function adminLogin() {
-    const { user } = await signInWithEmailAndPassword(
-      auth,
-      "estheryekini@hotmail.com",
-      "testing"
-    );
-
-    const { displayName, email, uid } = user;
-    const args = {
-      displayName: displayName,
-      email: email,
-    };
-
-    await updateUser(uid, args);
-
-    const token = await getIdToken(user, true);
-
-    authCxt.authenticate(token, displayName, uid);
-    authCxt.setEmailAddress(email);
-    authCxt.setOnboarded(true);
-
-    const [userData, prefs] = await Promise.all([
-      getUser(uid),
-      getPreferences(uid),
-    ]);
-    if (userData?.fullName) authCxt.updateFullName(userData.fullName);
-    if (userData?.avatarId) authCxt.updateAvatarId(userData.avatarId);
-    if (prefs?.fastingSchedule) setSchedule(prefs.fastingSchedule);
   }
 
   async function signInAnonymouslyHandler() {
@@ -100,9 +68,6 @@ function PreAuthScreen({ navigation }) {
       <View style={styles.buttonContainer}>
         <PrimaryButton onPress={emailHandler}>
           Continue with Email
-        </PrimaryButton>
-        <PrimaryButton onPress={adminLogin}>
-          Admin Login
         </PrimaryButton>
         <PrimaryButton lowlight onPress={signInAnonymouslyHandler}>
           Continue without signing up

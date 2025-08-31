@@ -1,6 +1,6 @@
 import { useAppTheme } from "../../store/app-theme-context";
 import { StyleSheet } from "react-native";
-import { TextInput, View, Text } from "react-native";
+import { TextInput, View } from "react-native";
 
 function Input({ label, value, secure, onUpdateText, keyboardType, style }) {
   const { theme } = useAppTheme();
@@ -39,12 +39,5 @@ const styles = (theme) =>
       margin: 8,
       color: theme.text,
       backgroundColor: theme.secondary200,
-    },
-    text: {
-      color: theme.text,
-      fontSize: 18,
-      fontWeight: "bold",
-      marginLeft: 8,
-      marginBottom: 4,
-    },
+    }
   });

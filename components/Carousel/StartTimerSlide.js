@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState, useRef } from "react";
+import { useContext, useEffect, useState, useRef, useMemo } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { parse, startOfDay } from "date-fns";
 import { onAuthStateChanged } from "firebase/auth";
@@ -9,15 +9,19 @@ import { useAppTheme } from "../../store/app-theme-context";
 import { AuthContext } from "../../store/auth-context";
 import { useFasting } from "../../store/fastingLogic/fasting-context";
 import { auth } from "../../firebase/app";
-import { 
-  calcReadout, 
-  msToHms 
-} from "../../util/formatTime";
+import { calcReadout, msToHms } from "../../util/formatTime";
 
-export default function StartTimerSlide({ setWizardState, token, userName, localId }) {
+export default function StartTimerSlide({
+  setWizardState,
+  token,
+  userName,
+  localId,
+}) {
   const { theme } = useAppTheme();
+  const memoStyle = useMemo(() => styles(theme), [theme]);
   const authCxt = useContext(AuthContext);
-  const { setSchedule, startFast, schedule, endFast, setBaselineAnchor } = useFasting();
+  const { setSchedule, startFast, schedule, endFast, setBaselineAnchor } =
+    useFasting();
 
   const [started, setStarted] = useState(false);
   const [readout, setReadout] = useState("\u00A0"); // non‑breaking space as placeholder
@@ -56,7 +60,7 @@ export default function StartTimerSlide({ setWizardState, token, userName, local
 
   const startFastHandler = () => {
     if (started) return;
-    
+
     const run = () => {
       const now = Date.now();
       setBaselineAnchor(now);
@@ -104,17 +108,17 @@ export default function StartTimerSlide({ setWizardState, token, userName, local
 
   return (
     <ScrollView
-      contentContainerStyle={styles(theme).container}
+      contentContainerStyle={memoStyle.container}
       showsVerticalScrollIndicator={false}
     >
-      <View style={styles(theme).contentWrap}>
+      <View style={memoStyle.contentWrap}>
         <Title>Start your fasting schedule</Title>
-        <Text style={styles(theme).scheduleLabel}>{schedule.label}</Text>
+        <Text style={memoStyle.scheduleLabel}>{schedule.label}</Text>
         <Text
-          style={styles(theme).window}
+          style={memoStyle.window}
         >{`${schedule.start}  -  ${schedule.end}`}</Text>
 
-        {started && <Text style={styles(theme).countdown}>{readout}</Text>}
+        {started && <Text style={memoStyle.countdown}>{readout}</Text>}
       </View>
 
       {!started ? (
