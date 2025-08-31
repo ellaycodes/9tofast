@@ -47,13 +47,15 @@ export default function WeeklyDonut({ onWeekChange }) {
   const onViewableItemsChanged = useRef(({ viewableItems }) => {
     if (!viewableItems?.length) return;
     const first = viewableItems[0]?.item;
+    console.log(viewableItems);
+
     if (!first) return;
     refreshWeeklyStats(first.start, first.end);
     onWeekChange && onWeekChange(first.start, first.end);
   }).current;
 
   const viewabilityConfig = useRef({
-    itemVisiblePercentThreshold: 100,
+    itemVisiblePercentThreshold: 90,
   }).current;
 
   const renderWeek = useCallback(
@@ -92,6 +94,18 @@ export default function WeeklyDonut({ onWeekChange }) {
                   lineCap="round"
                   rotation={0}
                 />
+                <Text
+                  key={idx}
+                  style={[
+                    styles.weekDay,
+                    {
+                      color: theme.muted,
+                      paddingVertical: 6,
+                    },
+                  ]}
+                >
+                  {dt.format(day.date, "dd")}
+                </Text>
               </View>
             ))}
           </View>

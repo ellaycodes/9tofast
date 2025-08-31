@@ -58,8 +58,6 @@ function TimerScreen({ navigation }) {
   const offSchedule = fasting !== inside;
 
   useEffect(() => {
-    console.log('events', events, 'hoursFastedToday', hoursFastedToday);
-
     if (offSchedule) {
       setOffScheduleTitle(
         getRandomOffScheduleTitle(!fasting && inside ? "eating" : "fasting")
