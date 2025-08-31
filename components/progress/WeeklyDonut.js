@@ -57,19 +57,31 @@ export default function WeeklyDonut() {
 
   const renderWeek = ({ item }) => {
     const days = buildWeekDays(item.start, statsMap);
+
     return (
       <View style={[styles.page, { width: SCREEN_WIDTH * 0.91 }]}>
-        <View style={styles.weekRow}>
-          {"MTWTFSS".split("").map((d, i) => (
-            <Text key={d + i} style={[styles.weekDay, { color: theme.muted }]}>
-              {d}
-            </Text>
-          ))}
-        </View>
-
         <View style={styles.circlesRow}>
           {days.map((day, idx) => (
-            <View key={idx} style={styles.circleWrap}>
+            <View
+              key={idx}
+              style={[styles.circleWrap]}
+            >
+              <View style={styles.weekRow}>
+                <Text
+                  key={idx}
+                  style={[
+                    styles.weekDay,
+                    {
+                      color: theme.text,
+                      backgroundColor: dt.format(new Date(), "ddd") === dt.format(day.date, "ddd") ? theme.card : null,
+                      paddingVertical: 6,
+                      borderRadius: 100
+                    },
+                  ]}
+                >
+                  {dt.format(day.date, "EEEEEE")}
+                </Text>
+              </View>
               <AnimatedCircularProgress
                 size={CIRCLE_SIZE}
                 width={CIRCLE_WIDTH}
@@ -83,9 +95,9 @@ export default function WeeklyDonut() {
           ))}
         </View>
 
-        <Text style={[styles.weekLabel, { color: theme.text }]}>
+        {/* <Text style={[styles.weekLabel, { color: theme.text }]}>
           {dt.format(item.start, "d MMM")} to {dt.format(item.end, "d MMM")}
-        </Text>
+        </Text> */}
       </View>
     );
   };
@@ -114,7 +126,7 @@ export default function WeeklyDonut() {
 
 const styles = StyleSheet.create({
   page: {
-    paddingVertical: 15
+    paddingVertical: 15,
   },
   weekRow: {
     flexDirection: "row",
