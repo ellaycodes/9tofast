@@ -26,7 +26,7 @@ function ProgressScreen() {
   const handleWeekChange = useCallback(
     (start, end) => {
       navigation.setOptions({
-        title: `${dt.format(start, "d MMM")} - ${dt.format(end, "d MMM")}`,
+        title: `${dt.format(new Date(), "EEE do MMM")}`,
       });
     },
     [navigation]
@@ -52,7 +52,7 @@ function ProgressScreen() {
       ),
     });
     const start = dt.startOfWeek(new Date(), { weekStartsOn: 1 });
-    const end = dt.endOfWeek(start, { weekStartsOn: 0 });
+    const end = dt.endOfWeek(start, { weekStartsOn: 1 });
     handleWeekChange(start, end);
   }, [navigation, theme.text, handleWeekChange, memoStyle]);
 
@@ -90,8 +90,8 @@ function ProgressScreen() {
               color={theme.secondary200}
               style={{
                 position: "absolute",
-                left: center.x - 12,
-                top: center.y - 10,
+                left: center.x - 16,
+                top: center.y - 16,
               }}
             />
           )}
