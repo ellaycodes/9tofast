@@ -1,9 +1,11 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useAppTheme } from "../../store/app-theme-context";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import * as dt from "date-fns";
 import useWeeklyStats from "../../store/fastingLogic/useWeeklyStats";
+
+const CELL_SIZE = `${100 / 7}%`;
 
 function FastingCalendar() {
   const { theme } = useAppTheme();
@@ -16,21 +18,24 @@ function FastingCalendar() {
     refreshWeeklyStats(start, end);
   }, [currentMonth, refreshWeeklyStats]);
 
-  const startDate = dt.startOfWeek(dt.startOfMonth(currentMonth), {
-    weekStartsOn: 0,
-  });
-  const days = [];
-  for (let i = 0; i < 42; i++) {
-    const day = dt.addDays(startDate, i);
-    const formatted = dt.format(day, "yyyy-MM-dd");
-    const stat = weeklyStats.find((s) => s.day === formatted);
-    days.push({ date: day, percent: stat?.percent ?? 0 });
-  }
+  const days = useMemo(() => {
+    const startDate = dt.startOfWeek(dt.startOfMonth(currentMonth), {
+      weekStartsOn: 0,
+    });
+    const list = [];
+    for (let i = 0; i < 42; i++) {
+      const day = dt.addDays(startDate, i);
+      const formatted = dt.format(day, "yyyy-MM-dd");
+      const stat = weeklyStats.find((s) => s.day === formatted);
+      list.push({ date: day, percent: stat?.percent ?? 0 });
+    }
+    return list;
+  }, [currentMonth, weeklyStats]);
 
   const handlePrev = () => setCurrentMonth(dt.subMonths(currentMonth, 1));
   const handleNext = () => setCurrentMonth(dt.addMonths(currentMonth, 1));
 
-  const cellSize = `${100 / 7}%`;
+  const cellSize = CELL_SIZE;
 
   return (
     <View style={styles.container}>
@@ -45,7 +50,7 @@ function FastingCalendar() {
           <Ionicons name="chevron-forward" size={20} color={theme.text} />
         </Pressable>
       </View>
-      
+
       <View style={styles.weekRow}>
         {"SMTWTFS".split("").map((d, i) => (
           <Text

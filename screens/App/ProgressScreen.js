@@ -5,38 +5,43 @@ import { useAppTheme } from "../../store/app-theme-context";
 import { useFasting } from "../../store/fastingLogic/fasting-context";
 import Title from "../../components/ui/Title";
 import SubtitleText from "../../components/ui/SubtitleText";
-import { useEffect, useState } from "react";
-import useWeeklyStats from "../../store/fastingLogic/useWeeklyStats";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import WeeklyDonut from "../../components/progress/WeeklyDonut";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import ProgressCalendarModal from "../../modals/ProgressCalendarModal";
 import * as dt from "date-fns";
 import EventsChart from "../../components/progress/EventsChart";
+import useInterval from "../../util/useInterval";
 
 function ProgressScreen() {
   const { theme } = useAppTheme();
   const { schedule, hoursFastedToday, events } = useFasting();
-  const [now, setNow] = useState(Date.now());
-  const { weeklyStats } = useWeeklyStats();
+  const [, setNow] = useState(Date.now());
   const [openModal, setOpenModal] = useState(false);
   const navigation = useNavigation();
 
-  const handleWeekChange = (start, end) => {
-    navigation.setOptions({
-      title: `${dt.format(start, "d MMM")} - ${dt.format(end, "d MMM")}`,
-    });
-  };
+  const memoStyle = useMemo(() => styles(theme), [theme]);
+
+  const handleWeekChange = useCallback(
+    (start, end) => {
+      navigation.setOptions({
+        title: `${dt.format(start, "d MMM")} - ${dt.format(end, "d MMM")}`,
+      });
+    },
+    [navigation]
+  );
+
+  useInterval(() => setNow(Date.now()), 60_000);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setNow(Date.now());
-    }, 60_000);
     navigation.setOptions({
       headerRight: () => (
         <Pressable
-          onPress={() => setOpenModal(!openModal)}
-          style={{ paddingHorizontal: 10, flex: 1}}
+          accessibilityRole="button"
+          accessibilityLabel="Open progress calendar"
+          onPress={() => setOpenModal((prev) => !prev)}
+          style={memoStyle.headerButton}
         >
           <Ionicons
             color={theme.text}
@@ -49,18 +54,17 @@ function ProgressScreen() {
     const start = dt.startOfWeek(new Date(), { weekStartsOn: 1 });
     const end = dt.endOfWeek(start, { weekStartsOn: 0 });
     handleWeekChange(start, end);
-    return () => clearInterval(timer);
-  }, [navigation, theme.text]);
+  }, [navigation, theme.text, handleWeekChange, memoStyle]);
 
-  const fastingHours =
-    typeof schedule?.fastingHours === "number" && schedule.fastingHours > 0
-      ? schedule.fastingHours
-      : 0;
-  const percent = (hoursFastedToday / (fastingHours || 1)) * 100;
+  const fastingHours = Math.max(schedule?.fastingHours ?? 0, 0);
+  const percent = Math.min(
+    100,
+    Math.max(0, (hoursFastedToday / Math.max(fastingHours, 1)) * 100)
+  );
 
   return (
     <ScrollView>
-      <View style={styles(theme).container}>
+      <View style={memoStyle.container}>
         <WeeklyDonut onWeekChange={handleWeekChange} />
         <Title>Today, {dt.format(new Date(), "d MMM")}</Title>
         <AnimatedCircularProgress
@@ -75,7 +79,7 @@ function ProgressScreen() {
               : theme.success
           }
           backgroundColor={theme.secondary100}
-          style={styles(theme).mainProgress}
+          style={memoStyle.mainProgress}
           rotation={0}
           lineCap="round"
           duration={2000}
@@ -93,22 +97,22 @@ function ProgressScreen() {
           )}
         >
           {() => (
-            <Text style={styles(theme).hours}>
+            <Text style={memoStyle.hours}>
               {Math.round(hoursFastedToday)}
-              <Text style={styles(theme).unit}> HOURS</Text>
+              <Text style={memoStyle.unit}> HOURS</Text>
             </Text>
           )}
         </AnimatedCircularProgress>
-        <View style={styles(theme).inner}>
-          <SubtitleText style={styles(theme).text} size="xl">
+        <View style={memoStyle.inner}>
+          <SubtitleText style={memoStyle.text} size="xl">
             Fasted
           </SubtitleText>
-          <Text style={styles(theme).hours}>
+          <Text style={memoStyle.hours}>
             {Math.round(hoursFastedToday)}
-            <Text style={styles(theme).slashAndTotal}>
+            <Text style={memoStyle.slashAndTotal}>
               /{schedule?.fastingHours}
             </Text>
-            <Text style={styles(theme).unit}> HOURS</Text>
+            <Text style={memoStyle.unit}> HOURS</Text>
           </Text>
         </View>
         <Ads />
@@ -117,7 +121,7 @@ function ProgressScreen() {
 
       <ProgressCalendarModal
         showModal={openModal}
-        onRequestClose={() => setOpenModal(!openModal)}
+        onRequestClose={() => setOpenModal((prev) => !prev)}
       />
     </ScrollView>
   );
@@ -142,6 +146,10 @@ const styles = (theme) =>
       fontSize: 32,
       fontWeight: "500",
       color: theme.primary200,
+    },
+    headerButton: {
+      paddingHorizontal: 10,
+      flex: 1,
     },
     text: {
       textAlign: "left",
