@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useContext } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { View } from "react-native";
 import * as dt from "date-fns";
 import { useFasting } from "../../store/fastingLogic/fasting-context";
@@ -17,6 +17,7 @@ import { prefetchAvatars } from "../../assets/avatars";
 function TimerScreen({ navigation }) {
   const { schedule, isFasting, events, hoursFastedToday } = useFasting();
   const { theme } = useAppTheme();
+  const memoStyle = useMemo(() => styles(theme), [theme]);
   const [readout, setReadout] = useState(null);
   const [offScheduleTitle, setOffScheduleTitle] = useState("");
 
@@ -68,25 +69,25 @@ function TimerScreen({ navigation }) {
   const timeUnits = readout ? Object.keys(readout.units).slice(0, -1) : [];
 
   return schedule ? (
-    <View style={styles(theme).container}>
+    <View style={memoStyle.container}>
       {!offSchedule ? (
         <Title
           style={[
-            styles(theme).title,
+            memoStyle.title,
             inside === offSchedule
-              ? styles(theme).eating
-              : styles(theme).fasting,
+              ? memoStyle.eating
+              : memoStyle.fasting,
           ]}
         >
           {inside ? "Fasting Window" : "Eating Window"}
         </Title>
       ) : (
-        <Title style={[styles(theme).title, styles(theme).eating]}>
+        <Title style={[memoStyle.title, memoStyle.eating]}>
           {offScheduleTitle}
         </Title>
       )}
       {offSchedule ? null : (
-        <View style={styles(theme).countdownContainer}>
+        <View style={memoStyle.countdownContainer}>
           {timeUnits.map((u) => (
             <Countdown key={u} label={u} time={readout.units[u]} />
           ))}
@@ -111,7 +112,7 @@ function TimerScreen({ navigation }) {
       <Ads />
     </View>
   ) : (
-    <View style={[styles(theme).container, { justifyContent: "center" }]}>
+    <View style={[memoStyle.container, { justifyContent: "center" }]}>
       <PrimaryButton
         lowlight
         style={{ height: "50%" }}

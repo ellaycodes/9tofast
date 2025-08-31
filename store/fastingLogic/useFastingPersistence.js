@@ -4,12 +4,12 @@ import {
   getInitialState,
   hoursFastedToday,
   isFasting,
-  getFastingStateDb,
 } from "./fasting-session";
 import { EVENT } from "./events";
 import {
   addDailyStatsDb,
   getFastingSchedule,
+  getFastingStateDb,
 } from "../../firebase/fasting.db.js";
 import { auth } from "../../firebase/app";
 import * as dt from "date-fns";
@@ -63,7 +63,6 @@ export default function useFastingPersistence() {
           events
         );
         await AsyncStorage.setItem(LAST_DAY_KEY, day);
-        const storageDay = await AsyncStorage.getItem(day);
       } catch (error) {
         console.warn("[fasting-persistence] addDailyStats() failed:", error);
         throw error;

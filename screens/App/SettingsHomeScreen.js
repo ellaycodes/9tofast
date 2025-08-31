@@ -13,13 +13,6 @@ function SettingsHomeScreen({ navigation }) {
   const { schedule } = useFasting();
   const { themeName } = useAppTheme();
 
-  useEffect(() => {
-    (async () => {
-      const user = auth.currentUser;
-      authCxt.setEmailAddress(user.email);
-    })();
-  }, [authCxt.emailAddress]);
-
   function editScheduleHandler() {
     navigation.navigate("EditScheduleScreen");
   }

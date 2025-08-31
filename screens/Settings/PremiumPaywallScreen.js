@@ -1,16 +1,17 @@
 import { StyleSheet, View } from "react-native";
-import { Text } from "react-native";
 import Title from "../../components/ui/Title";
 import SubtitleText from "../../components/ui/SubtitleText";
 import SettingsPressable from "../../components/Settings/SettingsPressable";
 import PrimaryButton from "../../components/ui/PrimaryButton";
 import FlatButton from "../../components/ui/FlatButton";
 import { useAppTheme } from "../../store/app-theme-context";
+import { useMemo } from "react";
 
 function PremiumPaywallScreen() {
   const { theme } = useAppTheme();
+  const memoStyle = useMemo(() => styles(theme), [theme]);
   return (
-    <View style={styles(theme).container}>
+    <View style={memoStyle.container}>
       <View>
         <Title
           style={{
@@ -22,14 +23,14 @@ function PremiumPaywallScreen() {
           Go Premium, Stay Focused
         </Title>
 
-        <View style={styles(theme).pricesContainer}>
-          <SubtitleText style={styles(theme).SubtitleText}>
+        <View style={memoStyle.pricesContainer}>
+          <SubtitleText style={memoStyle.SubtitleText}>
             £1.49 Per Month
           </SubtitleText>
-          <SubtitleText style={styles(theme).SubtitleText}>
+          <SubtitleText style={memoStyle.SubtitleText}>
             £14.99 Annual
           </SubtitleText>
-          <SubtitleText style={styles(theme).SubtitleText}>
+          <SubtitleText style={memoStyle.SubtitleText}>
             £19.99 Forever
           </SubtitleText>
         </View>
