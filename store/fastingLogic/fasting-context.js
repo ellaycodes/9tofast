@@ -1,17 +1,16 @@
 import {
   createContext,
-  useEffect,
   useContext,
   useReducer,
   useCallback,
   useMemo,
-  useRef,
 } from "react";
 import useFastingPersistence from "./useFastingPersistence.js";
 import * as session from "./fasting-session";
 import * as events from "./events";
 import useScheduleBoundaryScheduler from "./scheduler";
-import * as dt from "date-fns";
+import useFastingLoader from "./useFastingLoader";
+import useDailyStatsSync from "./useDailyStatsSync";
 
 export const FastingContext = createContext({
   loading: true,
@@ -19,9 +18,9 @@ export const FastingContext = createContext({
   events: [],
   hoursFastedToday: null,
   setSchedule: () => {},
-  setBaselineAnchor: (ts) => {},
-  startFast: (trigger) => {},
-  endFast: (trigger) => {},
+  setBaselineAnchor: () => {},
+  startFast: () => {},
+  endFast: () => {},
   clearFast: () => {},
   isFasting: false,
 });
@@ -58,59 +57,11 @@ export default function FastingContextProvider({ children }) {
   const { load, persist, addFastingEvent, addDailyStats, flushDailyEvents } =
     useFastingPersistence();
   const [state, dispatch] = useReducer(reducer, session.getInitialState());
-  const lastSavedDay = useRef();
 
-  useEffect(() => {
-    let active = true;
-    (async () => {
-      const res = await load();
-      if (active) dispatch({ type: "LOADED", payload: res });
-    })();
-    return () => {
-      active = false;
-    };
-  }, [load]);
+  useFastingLoader(load, dispatch);
+  useDailyStatsSync(state, addDailyStats, flushDailyEvents, persist, dispatch);
 
   const hours = useMemo(() => session.hoursFastedToday(state), [state]);
-
-  useEffect(() => {
-    if (state.loading) return;
-    const now = new Date();
-    const startOfToday = dt.startOfDay(now).getTime();
-    const day = dt.format(now, "yyyy-MM-dd");
-
-    if (!lastSavedDay.current) {
-      lastSavedDay.current = day;
-    } else if (lastSavedDay.current !== day) {
-      const prevDayStr = dt.format(startOfToday - 1, "yyyy-MM-dd");
-      const prevEvents = state.events.filter((e) => e.ts < startOfToday);
-      const hoursPrevDay = session.hoursFastedToday(state, startOfToday - 1);
-      addDailyStats(
-        prevDayStr,
-        hoursPrevDay,
-        state.schedule?.fastingHours,
-        prevEvents
-      );
-
-      let remaining = state.events.filter((e) => e.ts >= startOfToday);
-      if (session.isFasting(prevEvents)) {
-        remaining = [
-          {
-            type: events.EVENT.START,
-            ts: startOfToday,
-            trigger: events.EVENT.TRIGGER,
-          },
-          ...remaining,
-        ];
-      }
-      flushDailyEvents(remaining);
-      dispatch({ type: "SET_EVENTS", payload: remaining });
-      lastSavedDay.current = day;
-      return;
-    }
-    const { hours: _unused, ...persistable } = state;
-    persist(persistable);
-  }, [state, persist, addDailyStats, flushDailyEvents]);
 
   const isFasting = useCallback(
     () => session.isFasting(state.events),

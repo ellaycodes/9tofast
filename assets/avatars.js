@@ -24,6 +24,19 @@ async function fetchJson(url, ms = 6000) {
   }
 }
 
+// Fetch with simple exponential backoff
+async function fetchJsonWithRetry(url, { timeout = 6000, attempts = 3 } = {}) {
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await fetchJson(url, timeout);
+    } catch (err) {
+      if (i === attempts - 1) throw err;
+      const delay = 100 * 2 ** i;
+      await new Promise((r) => setTimeout(r, delay));
+    }
+  }
+}
+
 // Choose the best path for this device
 function pickPath(paths, scale) {
   // Prefer WebP at the right density, then PNG, then any fallback
@@ -35,8 +48,8 @@ function pickPath(paths, scale) {
     );
   }
   return (
-      paths["2xWebp"] ||
       paths["1xWebp"] ||
+      paths["2xWebp"] ||
       paths["1xPng"]
   );
 }
@@ -55,9 +68,9 @@ function buildList(json) {
 export async function loadManifest() {
   if (cacheList) return cacheList;
 
-  // Try network first
+  // Try network first with retry/backoff
   try {
-    const json = await fetchJson(MANIFEST_URL);
+    const json = await fetchJsonWithRetry(MANIFEST_URL);
     const list = buildList(json);
     cacheList = list;
     // Store the full json so we can rebuild list for a different scale later if needed

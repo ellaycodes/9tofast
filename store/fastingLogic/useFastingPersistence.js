@@ -14,25 +14,81 @@ import {
 import { auth } from "../../firebase/app";
 import * as dt from "date-fns";
 import { stripOldEvents, filterEventHorizon } from "./stripOldEvents";
+import { logWarn } from "../util/logger";
 
 const V2KEY = "fastingstate_v2";
 const LAST_DAY_KEY = "fasting_last_uploaded_day";
 const LAST_TS_KEY = "fasting_last_ts";
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+async function getLastTimestamp(lastTs) {
+  if (lastTs !== undefined) return lastTs;
+  const lastTsRaw = await AsyncStorage.getItem(LAST_TS_KEY);
+  return lastTsRaw ? Number(lastTsRaw) : 0;
+}
+
+async function uploadPreviousDay(parsed, startOfToday, addDailyStats) {
+  const origEvents = parsed.events || [];
+  const prevEvents = origEvents.filter((e) => e.ts < startOfToday);
+  const prevDayStr = dt.format(startOfToday - 1, "yyyy-MM-dd");
+  const lastUploaded = await AsyncStorage.getItem(LAST_DAY_KEY);
+  if (lastUploaded !== prevDayStr) {
+    const hoursPrev = hoursFastedToday(parsed, startOfToday - 1);
+    await addDailyStats(
+      prevDayStr,
+      hoursPrev,
+      parsed.schedule?.fastingHours,
+      prevEvents
+    );
+  }
+  return { origEvents, prevEvents };
+}
+
+function rebuildEvents(origEvents, prevEvents, startOfToday) {
+  let remaining = origEvents;
+  if (prevEvents.length) {
+    remaining = origEvents.filter((e) => e.ts >= startOfToday);
+    if (isFasting(prevEvents)) {
+      remaining = [
+        { type: EVENT.START, ts: startOfToday, trigger: EVENT.TRIGGER },
+        ...remaining,
+      ];
+    }
+  }
+  return remaining;
+}
+
+async function commitEvents(
+  parsed,
+  origEvents,
+  remaining,
+  now,
+  prevLen,
+  flushDailyEvents
+) {
+  const filtered = filterEventHorizon(remaining, now);
+  if (prevLen || filtered.length !== origEvents.length) {
+    await flushDailyEvents(filtered);
+  }
+  parsed.events = filtered;
+}
+
 export default function useFastingPersistence() {
   const persist = useCallback(async (state) => {
     try {
-      const { hours, events = [], ...persistable } = state;
+      const events = state.events || [];
       const todayEvents = stripOldEvents(events);
       const filtered = filterEventHorizon(todayEvents);
+      const persistable = { ...state };
+      delete persistable.hours;
+      delete persistable.events;
       await AsyncStorage.setItem(
         V2KEY,
         JSON.stringify({ ...persistable, events: filtered })
       );
       await AsyncStorage.setItem(LAST_TS_KEY, Date.now().toString());
     } catch (error) {
-      console.warn("[fasting-persistence] persist() failed:", error);
+      logWarn("[fasting-persistence] persist() failed:", error);
     }
   }, []);
 
@@ -46,7 +102,7 @@ export default function useFastingPersistence() {
       await AsyncStorage.setItem(V2KEY, JSON.stringify(parsed));
       await AsyncStorage.setItem(LAST_TS_KEY, Date.now().toString());
     } catch (error) {
-      console.warn("[fasting-persistence] addFastingEvent() failed:", error);
+      logWarn("[fasting-persistence] addFastingEvent() failed:", error);
       throw error;
     }
   }, []);
@@ -64,7 +120,7 @@ export default function useFastingPersistence() {
         );
         await AsyncStorage.setItem(LAST_DAY_KEY, day);
       } catch (error) {
-        console.warn("[fasting-persistence] addDailyStats() failed:", error);
+        logWarn("[fasting-persistence] addDailyStats() failed:", error);
         throw error;
       }
     },
@@ -81,7 +137,7 @@ export default function useFastingPersistence() {
       await AsyncStorage.setItem(V2KEY, JSON.stringify(parsed));
       await AsyncStorage.setItem(LAST_TS_KEY, Date.now().toString());
     } catch (error) {
-      console.warn("[fasting-persistence] flushDailyEvents() failed:", error);
+      logWarn("[fasting-persistence] flushDailyEvents() failed:", error);
     }
   }, []);
 
@@ -89,11 +145,7 @@ export default function useFastingPersistence() {
     async (parsed, lastTs) => {
       delete parsed.hours;
 
-      let lastTsVal = lastTs;
-      if (lastTsVal === undefined) {
-        const lastTsRaw = await AsyncStorage.getItem(LAST_TS_KEY);
-        lastTsVal = lastTsRaw ? Number(lastTsRaw) : 0;
-      }
+      const lastTsVal = await getLastTimestamp(lastTs);
       const nowTs = Date.now();
       if (lastTsVal && nowTs - lastTsVal > DAY_MS) {
         parsed.events = [];
@@ -102,44 +154,22 @@ export default function useFastingPersistence() {
       }
 
       const now = new Date(nowTs);
-
       const startOfToday = dt.startOfDay(now).getTime();
 
-      const origEvents = parsed.events || [];
-      const prevEvents = origEvents.filter((e) => e.ts < startOfToday);
-      const prevDayStr = dt.format(startOfToday - 1, "yyyy-MM-dd");
-      const lastUploaded = await AsyncStorage.getItem(LAST_DAY_KEY);
-
-      if (lastUploaded !== prevDayStr) {
-        const hoursPrev = hoursFastedToday(parsed, startOfToday - 1);
-        await addDailyStats(
-          prevDayStr,
-          hoursPrev,
-          parsed.schedule?.fastingHours,
-          prevEvents
-        );
-      }
-
-      let remaining = origEvents;
-      if (prevEvents.length) {
-        remaining = origEvents.filter((e) => e.ts >= startOfToday);
-        if (isFasting(prevEvents)) {
-          remaining = [
-            {
-              type: EVENT.START,
-              ts: startOfToday,
-              trigger: EVENT.TRIGGER,
-            },
-            ...remaining,
-          ];
-        }
-      }
-
-      const filtered = filterEventHorizon(remaining, now);
-      if (prevEvents.length || filtered.length !== origEvents.length) {
-        await flushDailyEvents(filtered);
-      }
-      parsed.events = filtered;
+      const { origEvents, prevEvents } = await uploadPreviousDay(
+        parsed,
+        startOfToday,
+        addDailyStats
+      );
+      const remaining = rebuildEvents(origEvents, prevEvents, startOfToday);
+      await commitEvents(
+        parsed,
+        origEvents,
+        remaining,
+        now,
+        prevEvents.length,
+        flushDailyEvents
+      );
       return parsed;
     },
     [addDailyStats, flushDailyEvents]
@@ -151,7 +181,6 @@ export default function useFastingPersistence() {
       if (rawV2) {
         const parsed = JSON.parse(rawV2);
         return await processParsed(parsed);
-        // delete parsed.hours;
       }
 
       if (auth.currentUser) {
@@ -173,7 +202,7 @@ export default function useFastingPersistence() {
 
       return getInitialState();
     } catch (error) {
-      console.warn("[fasting-persistence] load() failed:", error);
+      logWarn("[fasting-persistence] load() failed:", error);
       return getInitialState();
     }
   }, [processParsed]);
