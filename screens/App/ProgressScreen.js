@@ -3,7 +3,6 @@ import {
   StyleSheet,
   View,
   Text,
-  Button,
   Pressable,
 } from "react-native";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
@@ -15,10 +14,10 @@ import SubtitleText from "../../components/ui/SubtitleText";
 import { useEffect, useState } from "react";
 import useWeeklyStats from "../../store/fastingLogic/useWeeklyStats";
 import WeeklyDonut from "../../components/progress/WeeklyDonut";
-import FastingCalendar from "../../components/progress/FastingCalendar";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import ProgressCalendarModal from "../../modals/ProgressCalendarModal";
+import * as dt from 'date-fns'
 
 function ProgressScreen() {
   const { theme } = useAppTheme();
@@ -42,6 +41,7 @@ function ProgressScreen() {
           />
         </Pressable>
       ),
+      title: `${dt.format(new Date(), 'PPPP')}`
     });
     return () => clearInterval(timer);
   }, [navigation]);
@@ -55,9 +55,8 @@ function ProgressScreen() {
   return (
     <ScrollView>
       <View style={styles(theme).container}>
-        {/* <FastingCalendar /> */}
         <WeeklyDonut weeklyStats={weeklyStats} />
-        <Title>Today's Fast</Title>
+        {/* <Title>Today</Title> */}
         <AnimatedCircularProgress
           size={250}
           width={60}
@@ -109,7 +108,7 @@ const styles = (theme) =>
       marginVertical: 10,
     },
     inner: {
-      alignItems: "left",
+      alignItems: "flex-start",
       justifyContent: "center",
     },
     hours: {

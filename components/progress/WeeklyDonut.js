@@ -6,6 +6,8 @@ import { useAppTheme } from "../../store/app-theme-context";
 import useWeeklyStats from "../../store/fastingLogic/useWeeklyStats";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const CIRCLE_SIZE = Math.floor(SCREEN_WIDTH / 9);
+const CIRCLE_WIDTH = Math.max(4, Math.round(CIRCLE_SIZE * 0.25));
 
 // helper to build 7-day array for a given week start
 function buildWeekDays(weekStart, statsMap) {
@@ -24,9 +26,9 @@ export default function WeeklyDonut() {
   // page index 0 is current week, 1 is previous week, etc
   const pages = useMemo(() => {
     // prebuild 26 weeks including current
-    return Array.from({ length: 26 }).map((_, idx) => {
+    return Array.from({ length: 12 }).map((_, idx) => {
       const start = dt.startOfWeek(dt.subWeeks(new Date(), idx), {
-        weekStartsOn: 0,
+        weekStartsOn: 1,
       });
       const end = dt.endOfWeek(start, { weekStartsOn: 0 });
       return { key: dt.format(start, "yyyy-MM-dd"), start, end };
@@ -49,21 +51,17 @@ export default function WeeklyDonut() {
     refreshWeeklyStats(first.start, first.end);
   }).current;
 
-  const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 100 }).current;
+  const viewabilityConfig = useRef({
+    itemVisiblePercentThreshold: 100,
+  }).current;
 
   const renderWeek = ({ item }) => {
     const days = buildWeekDays(item.start, statsMap);
     return (
-      <View style={[styles.page, { width: SCREEN_WIDTH}]}>
+      <View style={[styles.page, { width: SCREEN_WIDTH * 0.91 }]}>
         <View style={styles.weekRow}>
-          {"SMTWTFS".split("").map((d, i) => (
-            <Text
-              key={d + i}
-              style={[
-                styles.weekDay,
-                { color: theme.muted, width: `${100 / 7}%` },
-              ]}
-            >
+          {"MTWTFSS".split("").map((d, i) => (
+            <Text key={d + i} style={[styles.weekDay, { color: theme.muted }]}>
               {d}
             </Text>
           ))}
@@ -73,8 +71,8 @@ export default function WeeklyDonut() {
           {days.map((day, idx) => (
             <View key={idx} style={styles.circleWrap}>
               <AnimatedCircularProgress
-                size={50}
-                width={10}
+                size={CIRCLE_SIZE}
+                width={CIRCLE_WIDTH}
                 fill={Math.min(100, Math.max(0, day.percent))}
                 tintColor={theme.success}
                 backgroundColor={theme.secondary100}
@@ -98,6 +96,7 @@ export default function WeeklyDonut() {
       data={pages}
       horizontal
       pagingEnabled
+      inverted
       showsHorizontalScrollIndicator={false}
       renderItem={renderWeek}
       keyExtractor={(i) => i.key}
@@ -115,27 +114,26 @@ export default function WeeklyDonut() {
 
 const styles = StyleSheet.create({
   page: {
-    // paddingHorizontal: 20,
-    paddingTop: 6,
-    paddingBottom: 12,
+    paddingVertical: 15
   },
   weekRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "space-around",
     marginBottom: 6,
   },
   weekDay: {
     textAlign: "center",
     fontSize: 12,
+    flex: 1,
   },
   circlesRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "space-around",
     alignItems: "center",
   },
   circleWrap: {
-    width: `${100 / 7}%`,
     alignItems: "center",
+    flex: 1,
   },
   weekLabel: {
     marginTop: 8,

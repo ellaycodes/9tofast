@@ -42,7 +42,7 @@ function AppTabs() {
         name="ProgressScreen"
         component={ProgressScreen}
         options={{
-          title: "Progress",
+          tabBarLabel: "Progress",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="stats-chart" color={color} size={size} />
           ),
