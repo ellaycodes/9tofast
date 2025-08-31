@@ -1,10 +1,4 @@
-import {
-  ScrollView,
-  StyleSheet,
-  View,
-  Text,
-  Pressable,
-} from "react-native";
+import { ScrollView, StyleSheet, View, Text, Pressable } from "react-native";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
 import Ads from "../../components/monetising/Ads";
 import { useAppTheme } from "../../store/app-theme-context";
@@ -17,7 +11,7 @@ import WeeklyDonut from "../../components/progress/WeeklyDonut";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import ProgressCalendarModal from "../../modals/ProgressCalendarModal";
-import * as dt from 'date-fns'
+import * as dt from "date-fns";
 
 function ProgressScreen() {
   const { theme } = useAppTheme();
@@ -41,7 +35,7 @@ function ProgressScreen() {
           />
         </Pressable>
       ),
-      title: `${dt.format(new Date(), 'PPPP')}`
+      title: `${dt.format(new Date(), "PPPP")}`,
     });
     return () => clearInterval(timer);
   }, [navigation]);
@@ -56,7 +50,6 @@ function ProgressScreen() {
     <ScrollView>
       <View style={styles(theme).container}>
         <WeeklyDonut weeklyStats={weeklyStats} />
-        {/* <Title>Today</Title> */}
         <AnimatedCircularProgress
           size={250}
           width={60}
@@ -72,7 +65,19 @@ function ProgressScreen() {
           style={styles(theme).mainProgress}
           rotation={0}
           lineCap="round"
-        />
+          duration={1500}
+          renderCap={({ center }) => {
+            console.log(center); // returns  {"x": 55.1975922765034, "y": 189.44085564300605}
+            // <Ionicons name="image" size={12} color={theme.muted} />
+          }}
+        >
+          {() => (
+            <Text style={styles(theme).hours}>
+              {Math.round(hoursFastedToday)}
+              <Text style={styles(theme).unit}> HOURS</Text>
+            </Text>
+          )}
+        </AnimatedCircularProgress>
         <View style={styles(theme).inner}>
           <SubtitleText style={styles(theme).text} size="xl">
             Fast
@@ -86,6 +91,9 @@ function ProgressScreen() {
           </Text>
         </View>
         <Ads />
+        {/**Doesn't yet exist but want a small chart of the events array to show fasting and eating times for that day
+         * <Events />
+         */}
       </View>
 
       <ProgressCalendarModal
