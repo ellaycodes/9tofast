@@ -14,7 +14,7 @@ import {
 import { auth } from "../../firebase/app";
 import * as dt from "date-fns";
 import { stripOldEvents, filterEventHorizon } from "./stripOldEvents";
-import { logWarn } from "../util/logger";
+import { logWarn } from "../../util/logger.js";
 
 const V2KEY = "fastingstate_v2";
 const LAST_DAY_KEY = "fasting_last_uploaded_day";

@@ -53,7 +53,7 @@ function ProgressScreen() {
     });
     const start = dt.startOfWeek(new Date(), { weekStartsOn: 1 });
     const end = dt.endOfWeek(start, { weekStartsOn: 1 });
-    handleWeekChange(start, end);
+    handleWeekChange(start);
   }, [navigation, theme.text, handleWeekChange, memoStyle]);
 
   const fastingHours = Math.max(schedule?.fastingHours ?? 0, 0);

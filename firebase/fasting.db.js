@@ -11,7 +11,7 @@ import {
   startAt,
   endAt,
 } from "firebase/firestore";
-import { logWarn } from "../../util/logger";
+import { logWarn } from "../util/logger";
 
 export async function getFastingSchedule(uid) {
   try {

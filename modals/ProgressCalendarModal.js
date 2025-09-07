@@ -91,15 +91,15 @@ export default function ProgressCalendarModal({ showModal, onRequestClose }) {
     if (!viewableItems?.length) return;
     const first = viewableItems[0]?.item;
     if (!first) return;
-    const start = dt.startOfMonth(dt.subMonths(first.month, 1));
-    const end = dt.endOfMonth(dt.addMonths(first.month, 1));
+    const start = dt.startOfMonth(dt.subMonths(first.month, 2));
+    const end = dt.endOfMonth(dt.addMonths(first.month, 2));
 
     refreshWeeklyStats(start, end);
     setVisibleMonth(dt.format(first.month, "MMMM yyyy"));
   }).current;
 
   const viewabilityConfig = useRef({
-    itemVisiblePercentThreshold: 100,
+    itemVisiblePercentThreshold: 80,
   }).current;
 
   const statsMap = useMemo(() => {
