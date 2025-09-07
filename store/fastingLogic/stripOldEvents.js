@@ -1,7 +1,7 @@
 import * as dt from "date-fns";
 import { EVENT } from "./events";
 import { isFasting } from "./fasting-session";
-import { logWarn } from "../util/logger";
+import { logWarn } from "../../util/logger";
 
 /**
  * Milliseconds after "now" beyond which future events are discarded.

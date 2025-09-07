@@ -7,7 +7,7 @@ import {
   deleteDoc,
   getDoc,
 } from "firebase/firestore";
-import { logWarn } from "../../util/logger";
+import { logWarn } from "../util/logger";
 
 export async function addUser({
   uid,
