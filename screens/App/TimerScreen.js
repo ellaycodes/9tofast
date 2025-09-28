@@ -89,7 +89,7 @@ function TimerScreen({ navigation }) {
           {label}
         </Title>
       ) : (
-        <Title style={[memoStyle.title, memoStyle.eating]}>
+        <Title style={[memoStyle.title, memoStyle.fasting]}>
           {themeName === 'Desk' ? label : offScheduleTitle}
         </Title>
       )}
