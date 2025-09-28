@@ -16,8 +16,8 @@ import { prefetchAvatars } from "../../assets/avatars";
 
 function TimerScreen({ navigation }) {
   const { schedule, isFasting, events, hoursFastedToday } = useFasting();
-  const { theme } = useAppTheme();
-  const memoStyle = useMemo(() => styles(theme), [theme]);
+  const { theme, themeName } = useAppTheme();
+  const memoStyle = useMemo(() => styles(theme, themeName), [theme, themeName]);
   const [readout, setReadout] = useState(null);
   const [offScheduleTitle, setOffScheduleTitle] = useState("");
 
@@ -68,22 +68,29 @@ function TimerScreen({ navigation }) {
 
   const timeUnits = readout ? Object.keys(readout.units).slice(0, -1) : [];
 
+  const label =
+    themeName === "Desk"
+      ? offSchedule
+        ? "Off-Schedule"
+        : "On-Schedule"
+      : inside
+      ? "Fasting Window"
+      : "Eating Window";
+
   return schedule ? (
     <View style={memoStyle.container}>
       {!offSchedule ? (
         <Title
           style={[
             memoStyle.title,
-            inside === offSchedule
-              ? memoStyle.eating
-              : memoStyle.fasting,
+            inside === offSchedule ? memoStyle.eating : memoStyle.fasting,
           ]}
         >
-          {inside ? "Fasting Window" : "Eating Window"}
+          {label}
         </Title>
       ) : (
         <Title style={[memoStyle.title, memoStyle.eating]}>
-          {offScheduleTitle}
+          {themeName === 'Desk' ? label : offScheduleTitle}
         </Title>
       )}
       {offSchedule ? null : (
@@ -95,13 +102,13 @@ function TimerScreen({ navigation }) {
       )}
       {offSchedule ? null : inside ? (
         <SubtitleText>
-          Ends{" "}
+          {themeName === "Desk" ? "Next Window " : "Fasting Ends "}
           {schedule &&
             dt.format(dt.parse(schedule.start, "HH:mm", new Date()), "p")}
         </SubtitleText>
       ) : (
         <SubtitleText muted>
-          Fasting Starts{" "}
+          {themeName === "Desk" ? "Next Window " : "Fasting Starts "}
           {schedule &&
             dt.format(dt.parse(schedule.end, "HH:mm", new Date()), "p")}
         </SubtitleText>
@@ -128,7 +135,7 @@ function TimerScreen({ navigation }) {
 
 export default TimerScreen;
 
-const styles = (theme) =>
+const styles = (theme, themeName) =>
   StyleSheet.create({
     container: {
       marginHorizontal: 20,
@@ -140,16 +147,19 @@ const styles = (theme) =>
     },
     title: {
       marginBottom: 12,
+      ...(themeName === "Desk" && {
+        textAlign: "left",
+        paddingLeft: 2,
+        paddingBottom: 0,
+        alignItems: "left",
+        fontSize: 14,
+        marginTop: 12,
+      }),
     },
     fasting: {
       color: theme.error,
     },
     eating: {
       color: theme.success,
-    },
-    fastedContainer: {
-      flexDirection: "row",
-      margin: 16,
-      gap: "10%",
     },
   });

@@ -39,7 +39,7 @@ export const Colors = {
     darkText: "#0A0A0A",
     muted: "#9C9C9C",
     border: "#5A5A5A",
-    success: "#4CAF83",
+    success: "#FCFFF3",
     error: "#D9534F",
     card: "#4D4D4D",
     statusbar: 'light'

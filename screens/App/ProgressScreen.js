@@ -20,7 +20,7 @@ import ProgressCalendarModal from "../../modals/ProgressCalendarModal";
 import useInterval from "../../util/useInterval";
 
 function ProgressScreen() {
-  const { theme } = useAppTheme();
+  const { theme, themeName } = useAppTheme();
   const { schedule, hoursFastedToday, events } = useFasting();
   const [, setNow] = useState(Date.now());
   const [openModal, setOpenModal] = useState(false);
@@ -110,13 +110,11 @@ function ProgressScreen() {
         </AnimatedCircularProgress>
         <View style={memoStyle.inner}>
           <SubtitleText style={memoStyle.text} size="xl">
-            Fasted
+            {themeName === "Desk" ? "Total:" : "Fasted Today:"}
           </SubtitleText>
           <Text style={memoStyle.hours}>
             {Math.round(hoursFastedToday)}
-            <Text style={memoStyle.slashAndTotal}>
-              /{fastingHours}
-            </Text>
+            <Text style={memoStyle.slashAndTotal}>/{fastingHours}</Text>
             <Text style={memoStyle.unit}> HOURS</Text>
           </Text>
         </View>
