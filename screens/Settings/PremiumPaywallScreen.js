@@ -37,7 +37,7 @@ function PremiumPaywallScreen() {
 
         <View>
           <SettingsPressable icon="not-interested" label="No Ads" />
-          <SettingsPressable icon="calendar-month" label="Calendar Sync" />
+          {/* <SettingsPressable icon="calendar-month" label="Calendar Sync" /> */}
           <SettingsPressable icon="watch" label="Future Wearable Support" />
         </View>
       </View>
