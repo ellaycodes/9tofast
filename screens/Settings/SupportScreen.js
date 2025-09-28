@@ -1,11 +1,27 @@
-import { ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View, Linking } from "react-native";
 import Title from "../../components/ui/Title";
 import SubtitleText from "../../components/ui/SubtitleText";
 import SettingsRow from "../../components/Settings/SettingsRow";
 import FAQDropdown from "../../components/Settings/FAQDropdown";
 import FlatButton from "../../components/ui/FlatButton";
+import { useContext } from "react";
+import { AuthContext } from "../../store/auth-context";
 
 function SupportScreen() {
+  const authCtx = useContext(AuthContext);
+
+  const subject = encodeURIComponent(`Support Request [Ref: ${authCtx.uid}]`);
+  const body = encodeURIComponent(
+    `Hello Support Team,
+    
+    I have a question. 
+
+    [Insert Question Here]
+
+    Thank You,
+    ${authCtx.fullName || authCtx.username || "User"}`
+  );
+
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
       <View style={styles.container}>
@@ -19,8 +35,14 @@ function SupportScreen() {
             </SubtitleText>
             <SubtitleText style={styles.subtitleText} size="l">
               Reach out to our support team at{" "}
-              <FlatButton onPress={() => console.log("TODO")}>
-                support@9tohealthapps.com
+              <FlatButton
+                onPress={() =>
+                  Linking.openURL(
+                    `mailto:9tofast@gmail.com?subject=${subject}&body=${body}`
+                  )
+                }
+              >
+                9tofast@gmail.com
               </FlatButton>
               . We're here to help!
             </SubtitleText>
