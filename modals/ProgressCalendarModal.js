@@ -69,6 +69,7 @@ function MonthGrid({ monthDate, theme, statsMap, limitDays }) {
 export default function ProgressCalendarModal({ showModal, onRequestClose }) {
   const { theme } = useAppTheme();
   const { weeklyStats, refreshWeeklyStats } = useWeeklyStats();
+  const currentMonthStart = useMemo(() => dt.startOfMonth(new Date()), []);
   const [visibleMonth, setVisibleMonth] = useState(
     dt.format(new Date(), "MMMM yyyy")
   );
@@ -95,7 +96,10 @@ export default function ProgressCalendarModal({ showModal, onRequestClose }) {
     const end = dt.endOfMonth(dt.addMonths(first.month, 2));
 
     refreshWeeklyStats(start, end);
-    setVisibleMonth(dt.format(first.month, "MMMM yyyy"));
+    const monthToDisplay = dt.isAfter(first.month, currentMonthStart)
+      ? dt.max([currentMonthStart])
+      : first.month;
+    setVisibleMonth(dt.format(monthToDisplay, "MMMM yyyy"));
   }).current;
 
   const viewabilityConfig = useRef({
