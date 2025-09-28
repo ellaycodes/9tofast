@@ -1,17 +1,22 @@
 import { ScrollView, StyleSheet, View, Text, Pressable } from "react-native";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
-import Ads from "../../components/monetising/Ads";
+import { useCallback, useEffect, useState, useMemo } from "react";
+import { useNavigation } from "@react-navigation/native";
+import * as dt from "date-fns";
+import { Ionicons } from "@expo/vector-icons";
+
 import { useAppTheme } from "../../store/app-theme-context";
 import { useFasting } from "../../store/fastingLogic/fasting-context";
+
+import Ads from "../../components/monetising/Ads";
+
 import Title from "../../components/ui/Title";
 import SubtitleText from "../../components/ui/SubtitleText";
-import { useCallback, useEffect, useState, useMemo } from "react";
+
 import WeeklyDonut from "../../components/progress/WeeklyDonut";
-import { useNavigation } from "@react-navigation/native";
-import { Ionicons } from "@expo/vector-icons";
-import ProgressCalendarModal from "../../modals/ProgressCalendarModal";
-import * as dt from "date-fns";
 import EventsChart from "../../components/progress/EventsChart";
+
+import ProgressCalendarModal from "../../modals/ProgressCalendarModal";
 import useInterval from "../../util/useInterval";
 
 function ProgressScreen() {
@@ -110,7 +115,7 @@ function ProgressScreen() {
           <Text style={memoStyle.hours}>
             {Math.round(hoursFastedToday)}
             <Text style={memoStyle.slashAndTotal}>
-              /{schedule?.fastingHours}
+              /{fastingHours}
             </Text>
             <Text style={memoStyle.unit}> HOURS</Text>
           </Text>

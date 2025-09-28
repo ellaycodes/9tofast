@@ -30,7 +30,7 @@ export default function WeeklyDonut({ onWeekChange }) {
       const start = dt.startOfWeek(dt.subWeeks(new Date(), idx), {
         weekStartsOn: 1,
       });
-      const end = dt.endOfWeek(start, { weekStartsOn: 0 });
+      const end = dt.endOfWeek(start, { weekStartsOn: 1 });
       return { key: dt.format(start, "yyyy-MM-dd"), start, end };
     });
   }, []);
@@ -54,7 +54,7 @@ export default function WeeklyDonut({ onWeekChange }) {
   }).current;
 
   const viewabilityConfig = useRef({
-    itemVisiblePercentThreshold: 90,
+    itemVisiblePercentThreshold: 50,
   }).current;
 
   const renderWeek = useCallback(
