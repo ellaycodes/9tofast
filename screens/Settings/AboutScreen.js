@@ -1,12 +1,30 @@
-import { ScrollView, StyleSheet, View, Text } from "react-native";
+import { ScrollView, StyleSheet, View, Text, Linking } from "react-native";
 import Title from "../../components/ui/Title";
 import SubtitleText from "../../components/ui/SubtitleText";
 import Disclaimer from "../../components/Settings/Disclaimer";
 import SettingsRow from "../../components/Settings/SettingsRow";
 import { useAppTheme } from "../../store/app-theme-context";
+import { useContext } from "react";
+import { AuthContext } from "../../store/auth-context";
 
 function AboutScreen() {
   const { theme } = useAppTheme();
+  const authCtx = useContext(AuthContext);
+
+  const subject = encodeURIComponent(
+    `Support Request [Ref: ${authCtx.uid}]`
+  );
+  const body = encodeURIComponent(
+    `Hello Support Team,
+    
+    I have a question. 
+
+    [Insert Question Here]
+
+    Thank You,
+    ${authCtx.fullName || authCtx.username || "User"}`
+  );
+
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
       <View style={styles.container}>
@@ -40,8 +58,12 @@ function AboutScreen() {
 
           <SettingsRow
             label="Contact"
-            right="support@9tohealthapps.com"
-            onPress={() => console.log("TODO")}
+            right="9tofast@gmail.com"
+            onPress={() =>
+              Linking.openURL(
+                `mailto:9tofast@gmail.com?subject=${subject}&body=${body}`
+              )
+            }
           />
 
           <SettingsRow
