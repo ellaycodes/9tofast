@@ -90,7 +90,7 @@ function TimerScreen({ navigation }) {
         </Title>
       ) : (
         <Title style={[memoStyle.title, memoStyle.fasting]}>
-          {themeName === 'Desk' ? label : offScheduleTitle}
+          {themeName === "Desk" ? label : offScheduleTitle}
         </Title>
       )}
       {offSchedule ? null : (
@@ -116,7 +116,7 @@ function TimerScreen({ navigation }) {
       <View>
         <ButtonsContainer fast={fasting} withinFasting={inside} />
       </View>
-      <Ads />
+      {/* <Ads />*/}
     </View>
   ) : (
     <View style={[memoStyle.container, { justifyContent: "center" }]}>

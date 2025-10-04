@@ -35,7 +35,7 @@ function EventsChart({ events = [] }) {
 
   return (
     <View style={styles.wrapper}>
-      <SubtitleText size="s" style={{textAlign: 'left', margin: 0, padding: 0}} >Fasting Events</SubtitleText>
+      <SubtitleText size="s" style={{textAlign: 'left', margin: 0, padding: 0}} >Timeline:</SubtitleText>
       <View style={styles.container}>
         {segments.map((seg, idx) => (
           <View
@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     overflow: "hidden",
     width: "100%",
-    marginVertical: 12,
+    marginBottom: 12
   },
   wrapper: {
     width: "100%",

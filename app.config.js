@@ -47,5 +47,16 @@ export default ({ config }) => ({
       },
     ],
     "expo-asset",
+    [
+      "expo-build-properties",
+      {
+        ios: {
+          useFrameworks: "static",
+        },
+      },
+    ],
   ],
+  "react-native-google-mobile-ads": {
+    ios_app_id: "ca-app-pub-2448949656898180~1378746689",
+  },
 });
