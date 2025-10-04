@@ -6,14 +6,13 @@ import SettingsRow from "../../components/Settings/SettingsRow";
 import { useAppTheme } from "../../store/app-theme-context";
 import { useContext } from "react";
 import { AuthContext } from "../../store/auth-context";
+import { Link } from "@react-navigation/native";
 
 function AboutScreen() {
   const { theme } = useAppTheme();
   const authCtx = useContext(AuthContext);
 
-  const subject = encodeURIComponent(
-    `Support Request [Ref: ${authCtx.uid}]`
-  );
+  const subject = encodeURIComponent(`Support Request [Ref: ${authCtx.uid}]`);
   const body = encodeURIComponent(
     `Hello Support Team,
     
@@ -68,12 +67,12 @@ function AboutScreen() {
 
           <SettingsRow
             label="Privacy Policy"
-            onPress={() => console.log("TODO")}
+            onPress={() => <Link href="https://9tofast.netlify.app/privacy" />}
           />
 
           <SettingsRow
             label="Terms of Service"
-            onPress={() => console.log("TODO")}
+            onPress={() => <Link href="https://9tofast.netlify.app/terms" />}
           />
         </View>
 
