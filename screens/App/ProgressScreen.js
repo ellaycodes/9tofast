@@ -118,7 +118,7 @@ function ProgressScreen() {
             <Text style={memoStyle.unit}> HOURS</Text>
           </Text>
         </View>
-        <Ads />
+        {/*<Ads />*/}
         <EventsChart events={events} />
       </View>
 
