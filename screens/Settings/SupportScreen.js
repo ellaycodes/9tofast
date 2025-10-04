@@ -77,11 +77,11 @@ function SupportScreen() {
           </Title>
           <SettingsRow
             label="Privacy Policy"
-            onPress={() => console.log("TODO")}
+            onPress={() => <Link href="https://9tofast.netlify.app/privacy" />}
           />
           <SettingsRow
             label="Terms of Service"
-            onPress={() => console.log("TODO")}
+            onPress={() => <Link href="https://9tofast.netlify.app/terms" />}
           />
         </View>
       </View>

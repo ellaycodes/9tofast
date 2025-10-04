@@ -43,12 +43,13 @@ function PremiumPaywallScreen() {
       </View>
 
       <View>
-        <PrimaryButton onPress={() => console.log("TODO")} lowlight>
+        <SubtitleText>Coming Soon</SubtitleText>
+        {/* <PrimaryButton onPress={() => console.log("TODO")} lowlight>
           Continue
         </PrimaryButton>
         <FlatButton onPress={() => console.log("TODO")} inline>
           Restore Purchase
-        </FlatButton>
+        </FlatButton> */}
       </View>
     </View>
   );
