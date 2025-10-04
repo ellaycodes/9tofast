@@ -6,7 +6,6 @@ import SettingsRow from "../../components/Settings/SettingsRow";
 import { useAppTheme } from "../../store/app-theme-context";
 import { useContext } from "react";
 import { AuthContext } from "../../store/auth-context";
-import { Link } from "@react-navigation/native";
 
 function AboutScreen() {
   const { theme } = useAppTheme();
@@ -67,12 +66,12 @@ function AboutScreen() {
 
           <SettingsRow
             label="Privacy Policy"
-            onPress={() => <Link href="https://9tofast.netlify.app/privacy" />}
+            onPress={() => Linking.openURL("https://9tofast.netlify.app/privacy")}
           />
 
           <SettingsRow
             label="Terms of Service"
-            onPress={() => <Link href="https://9tofast.netlify.app/terms" />}
+            onPress={() => Linking.openURL("https://9tofast.netlify.app/terms")}
           />
         </View>
 

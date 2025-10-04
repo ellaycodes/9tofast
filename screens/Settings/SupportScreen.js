@@ -6,7 +6,6 @@ import FAQDropdown from "../../components/Settings/FAQDropdown";
 import FlatButton from "../../components/ui/FlatButton";
 import { useContext } from "react";
 import { AuthContext } from "../../store/auth-context";
-import { Link } from "@react-navigation/native";
 
 function SupportScreen() {
   const authCtx = useContext(AuthContext);
@@ -78,11 +77,11 @@ function SupportScreen() {
           </Title>
           <SettingsRow
             label="Privacy Policy"
-            onPress={() => <Link href="https://9tofast.netlify.app/privacy" />}
+            onPress={() => Linking.openURL("https://9tofast.netlify.app/privacy")}
           />
           <SettingsRow
             label="Terms of Service"
-            onPress={() => <Link href="https://9tofast.netlify.app/terms" />}
+            onPress={() => Linking.openURL("https://9tofast.netlify.app/terms")}
           />
         </View>
       </View>
