@@ -4,12 +4,14 @@ export default ({ config }) => ({
   ...config,
   name: "9ToFast",
   slug: "9tofast",
+  owner: "horizon9tofast",
   version: "1.0.0",
   orientation: "portrait",
-  icon: "./assets/icon.png",
+  icon: "./assets/icon2.png",
+  backgroundColor: "#0F2524",
   splash: {
-    image: "./assets/splash-icon.png",
-    resizeMode: "contain",
+    image: "./assets/splash-icon2.png",
+    resizeMode: "cover",
     backgroundColor: "#0F2524",
   },
   updates: {
@@ -17,13 +19,19 @@ export default ({ config }) => ({
   },
   assetBundlePatterns: ["**/*"],
   ios: {
+    buildNumber: "1.0.0",
     supportsTablet: true,
+    bundleIdentifier: "com.horizon.x9tofast",
+    config: {
+      googleMobileAdsAppId: "ca-app-pub-2448949656898180~1378746689",
+    },
   },
   android: {
     adaptiveIcon: {
       foregroundImage: "./assets/adaptive-icon.png",
       backgroundColor: "#0F2524",
     },
+    package: "com.horizon.x9tofast",
   },
   web: {
     favicon: "./assets/favicon.png",
@@ -35,6 +43,9 @@ export default ({ config }) => ({
     firebaseStorageBucket: process.env.FIREBASE_STORAGE_BUCKET,
     firebaseMessagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
     firebaseAppId: process.env.FIREBASE_APP_ID,
+    eas: {
+      projectId: "edb449e1-65ff-4007-b24b-4404f8c7595c",
+    },
   },
   plugins: [
     "expo-font",
@@ -42,8 +53,12 @@ export default ({ config }) => ({
       "expo-splash-screen",
       {
         backgroundColor: "#0F2524",
-        image: "./assets/splash-icon.png",
-        resizeMode: "contain",
+        image: "./assets/splash-icon2.png",
+        resizeMode: "cover",
+        imageWidth: 200,
+        dark: {
+          backgroundColor: "#0F2524",
+        },
       },
     ],
     "expo-asset",
@@ -56,7 +71,4 @@ export default ({ config }) => ({
       },
     ],
   ],
-  "react-native-google-mobile-ads": {
-    ios_app_id: "ca-app-pub-2448949656898180~1378746689",
-  },
 });

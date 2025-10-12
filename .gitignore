@@ -1,13 +1,37 @@
-node_modules
+# Node modules
 node_modules/
+node_modules
 node_modules/*
 
+# Env files
 .env
+*.env
 .env/
+.xcode.env
 
 /test.json
 test.json
 test*
 test/
 
+# Expo local files
+.expo
 .expo/
+.expo/*
+.expo-shared/
+
+
+# iOS build artifacts
+ios/build/
+ios/Pods/
+ios/*.xcworkspace/xcuserdata/
+ios/*.xcodeproj/project.xcworkspace/xcuserdata/
+ios/*.xcodeproj/xcuserdata/
+ios/DerivedData/
+
+# Android build artifacts
+android/.gradle/
+android/app/build/
+android/build/
+
+
