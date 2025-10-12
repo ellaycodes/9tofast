@@ -92,14 +92,14 @@ function SettingsHomeScreen({ navigation }) {
           }
         />
       </View>
-      <View>
+      {/* <View>
         <SectionTitle>Premium</SectionTitle>
         <SettingsPressable
           label="Upgrade to Premium"
           icon="star-border"
           onPress={premiumHandler}
         />
-      </View>
+      </View> */}
       <View>
         <SectionTitle>About & Support</SectionTitle>
         <SettingsPressable
