@@ -1,4 +1,4 @@
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, Linking } from "react-native";
 import Title from "../../components/ui/Title";
 import PrimaryButton from "../../components/ui/PrimaryButton";
 import SubtitleText from "../../components/ui/SubtitleText";
@@ -18,14 +18,6 @@ function PreAuthScreen({ navigation }) {
   const [isAuthing, setIsAuthing] = useState();
 
   const authCxt = useContext(AuthContext);
-
-  function termsOfServiceHandler() {
-    console.log("Hi! I want to see the terms of service");
-  }
-
-  function privacyPolicyHandler() {
-    console.log("Hi! I want to see the privacy policy");
-  }
 
   function emailHandler() {
     navigation.navigate("LoginScreen");
@@ -75,11 +67,11 @@ function PreAuthScreen({ navigation }) {
       </View>
       <SubtitleText size={"m"} muted>
         By continuing, you agree to our{" "}
-        <FlatButton inline onPress={termsOfServiceHandler} size={"m"}>
+        <FlatButton inline onPress={() => Linking.openURL("https://9tofast.netlify.app/terms")} size={"m"}>
           Terms of Service{" "}
         </FlatButton>
         and{" "}
-        <FlatButton inline size={"m"} onPress={privacyPolicyHandler}>
+        <FlatButton inline size={"m"} onPress={() => Linking.openURL("https://9tofast.netlify.app/privacy")}>
           Privacy Policy
         </FlatButton>
       </SubtitleText>

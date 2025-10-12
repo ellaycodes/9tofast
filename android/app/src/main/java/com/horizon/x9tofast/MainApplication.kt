@@ -1,4 +1,4 @@
-package com.9tofast
+package com.horizon.x9tofast
 
 import android.app.Application
 import android.content.res.Configuration
