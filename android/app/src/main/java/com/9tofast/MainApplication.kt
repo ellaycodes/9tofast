@@ -1,4 +1,4 @@
-package com.elly.x9tofast
+package com.9tofast
 
 import android.app.Application
 import android.content.res.Configuration
