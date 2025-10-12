@@ -36,6 +36,9 @@ export default ({ config }) => ({
   web: {
     favicon: "./assets/favicon.png",
   },
+  expo: {
+    scheme: "x9tofast",
+  },
   extra: {
     firebaseApiKey: process.env.FIREBASE_API_KEY,
     firebaseAuthDomain: process.env.FIREBASE_AUTH_DOMAIN,
@@ -45,7 +48,7 @@ export default ({ config }) => ({
     firebaseAppId: process.env.FIREBASE_APP_ID,
     eas: {
       projectId: "edb449e1-65ff-4007-b24b-4404f8c7595c",
-    },
+    }
   },
   plugins: [
     "expo-font",
