@@ -53,6 +53,9 @@ export default ({ config }) => ({
     config: {
       googleMobileAdsAppId: "ca-app-pub-2448949656898180~1378746689",
     },
+    infoPlist: {
+      GADApplicationIdentifier: "ca-app-pub-2448949656898180~1378746689",
+    },
   },
   android: {
     adaptiveIcon: {
