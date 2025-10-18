@@ -1,8 +1,35 @@
 import "dotenv/config";
 
+const IS_DEV = process.env.APP_VARIANT === "development";
+const IS_PREVIEW = process.env.APP_VARIANT === "preview";
+
+const getUniqueIdentifier = () => {
+  if (IS_DEV) {
+    return "com.horizon.9tofast.dev";
+  }
+
+  if (IS_PREVIEW) {
+    return "com.horizon.9tofast.preview";
+  }
+
+  return "com.horizon.9tofast";
+};
+
+const getAppName = () => {
+  if (IS_DEV) {
+    return "9toFast (Dev)";
+  }
+
+  if (IS_PREVIEW) {
+    return "9toFast (Preview)";
+  }
+
+  return "9toFast";
+};
+
 export default ({ config }) => ({
   ...config,
-  name: "9ToFast",
+  name: getAppName(),
   slug: "9tofast",
   owner: "horizon9tofast",
   scheme: "x9tofast",
@@ -22,7 +49,7 @@ export default ({ config }) => ({
   ios: {
     buildNumber: "1.0.0",
     supportsTablet: true,
-    bundleIdentifier: "com.horizon.x9tofast",
+    bundleIdentifier: getUniqueIdentifier(),
     config: {
       googleMobileAdsAppId: "ca-app-pub-2448949656898180~1378746689",
     },
