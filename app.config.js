@@ -5,14 +5,14 @@ const IS_PREVIEW = process.env.APP_VARIANT === "preview";
 
 const getUniqueIdentifier = () => {
   if (IS_DEV) {
-    return "com.horizon.9tofast.dev";
+    return "com.horizon.x9tofast.dev";
   }
 
   if (IS_PREVIEW) {
-    return "com.horizon.9tofast.preview";
+    return "com.horizon.x9tofast.preview";
   }
 
-  return "com.horizon.9tofast";
+  return "com.horizon.x9tofast";
 };
 
 const getAppName = () => {
@@ -50,6 +50,7 @@ export default ({ config }) => ({
     buildNumber: "1.0.0",
     supportsTablet: true,
     bundleIdentifier: getUniqueIdentifier(),
+    googleServicesFile: "./plists/GoogleService-Info.plist",
     config: {
       googleMobileAdsAppId: "ca-app-pub-2448949656898180~1378746689",
     },

@@ -8,13 +8,12 @@ import { AuthContext } from "../../store/auth-context";
 import { Alert } from "react-native";
 import LoadingOverlay from "../../components/ui/LoadingOverlay";
 import randomUsername from "../../util/randomUsername";
-import {
-  signInAnonymously,
-} from "firebase/auth";
+import { signInAnonymously } from "firebase/auth";
 import { auth } from "../../firebase/app";
 import { addUser } from "../../firebase/users.db.js";
 
 function PreAuthScreen({ navigation }) {
+  console.log("Esther! PreAuth");
   const [isAuthing, setIsAuthing] = useState();
 
   const authCxt = useContext(AuthContext);
@@ -67,11 +66,19 @@ function PreAuthScreen({ navigation }) {
       </View>
       <SubtitleText size={"m"} muted>
         By continuing, you agree to our{" "}
-        <FlatButton inline onPress={() => Linking.openURL("https://9tofast.netlify.app/terms")} size={"m"}>
+        <FlatButton
+          inline
+          onPress={() => Linking.openURL("https://9tofast.netlify.app/terms")}
+          size={"m"}
+        >
           Terms of Service{" "}
         </FlatButton>
         and{" "}
-        <FlatButton inline size={"m"} onPress={() => Linking.openURL("https://9tofast.netlify.app/privacy")}>
+        <FlatButton
+          inline
+          size={"m"}
+          onPress={() => Linking.openURL("https://9tofast.netlify.app/privacy")}
+        >
           Privacy Policy
         </FlatButton>
       </SubtitleText>

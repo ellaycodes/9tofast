@@ -23,6 +23,7 @@ import { Buffer } from "buffer";
 import { logWarn } from "./util/logger.js";
 
 function isTokenExpired(token) {
+  console.log("Esther! token");
   try {
     const base64 = token.split(".")[1];
     const payload =
@@ -37,6 +38,8 @@ function isTokenExpired(token) {
 }
 
 function Navigator() {
+  console.log("Esther! Navigator");
+
   const authCxt = useContext(AuthContext);
   const [loading, setLoading] = useState(true);
 
@@ -114,6 +117,7 @@ function Navigator() {
 }
 
 export default function App() {
+  console.log("Esther! App");
   return (
     <>
       <AuthContextProvider>
@@ -126,6 +130,7 @@ export default function App() {
 }
 
 function InnerApp() {
+  console.log("inner App");
   const { theme } = useAppTheme();
   return (
     <FastingContextProvider>
