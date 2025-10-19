@@ -14,7 +14,11 @@ import FastingContextProvider from "./store/fastingLogic/fasting-context";
 import { Ionicons } from "@expo/vector-icons";
 import { auth } from "./firebase/app";
 import { getUser } from "./firebase/users.db.js";
-import { onAuthStateChanged, getIdToken, onIdTokenChanged } from "firebase/auth";
+import {
+  onAuthStateChanged,
+  getIdToken,
+  onIdTokenChanged,
+} from "firebase/auth";
 import { Buffer } from "buffer";
 import { logWarn } from "./util/logger.js";
 
@@ -37,6 +41,7 @@ function Navigator() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const timeout = setTimeout(() => setLoading(false), 8000);
     Ionicons.loadFont();
     const verifyStoredToken = async () => {
       try {
@@ -93,6 +98,7 @@ function Navigator() {
     return () => {
       unsubAuth();
       unsubToken();
+      clearTimeout(timeout);
     };
   }, [authCxt]);
 
