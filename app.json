@@ -8,7 +8,7 @@
     "icon": "./assets/icon2.png",
     "backgroundColor": "#0F2524",
     "splash": {
-      "image": "./assets/splash-icon2.png",
+      "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#0F2524"
     },
@@ -30,6 +30,17 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "firebaseApiKey": "AIzaSyBEMIDDVBcsCPy-UEw7YCMzuFbeuR1f9MU",
+      "firebaseAuthDomain": "https://identitytoolkit.googleapis.com/v1/accounts:",
+      "firebaseProjectId": "tofast-b52b7",
+      "firebaseStorageBucket": "your_project.appspot.com",
+      "firebaseMessagingSenderId": "your_sender_id",
+      "firebaseAppId": "your_app_id",
+      "eas": {
+        "projectId": "edb449e1-65ff-4007-b24b-4404f8c7595c"
+      }
     }
   }
 }
