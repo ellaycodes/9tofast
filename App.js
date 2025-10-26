@@ -45,7 +45,7 @@ function Navigator() {
 
   useEffect(() => {
     const timeout = setTimeout(() => setLoading(false), 8000);
-    Ionicons.loadFont();
+    // Ionicons.loadFont();
     const verifyStoredToken = async () => {
       try {
         const [token, storedUsername, storedUid] = await Promise.all([
@@ -130,7 +130,7 @@ export default function App() {
 }
 
 function InnerApp() {
-  console.log("inner App");
+  console.log("Esther! inner App");
   const { theme } = useAppTheme();
   return (
     <FastingContextProvider>

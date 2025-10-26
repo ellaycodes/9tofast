@@ -58,6 +58,9 @@ export default ({ config }) => ({
       GADApplicationIdentifier: "ca-app-pub-2448949656898180~1378746689",
     },
   },
+  "react-native-google-mobile-ads": {
+    ios_app_id: "ca-app-pub-2448949656898180~1378746689",
+  },
   android: {
     adaptiveIcon: {
       foregroundImage: "./assets/adaptive-icon.png",

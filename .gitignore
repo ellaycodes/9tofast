@@ -80,3 +80,6 @@ yarn-error.*
 
 #REPLACEMENTS
 replacements.txt
+
+#.ipa local build previews
+*.ipa
