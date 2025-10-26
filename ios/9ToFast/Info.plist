@@ -7,7 +7,7 @@
     <key>CFBundleDevelopmentRegion</key>
     <string>$(DEVELOPMENT_LANGUAGE)</string>
     <key>CFBundleDisplayName</key>
-    <string>9ToFast</string>
+    <string>9toFast</string>
     <key>CFBundleExecutable</key>
     <string>$(EXECUTABLE_NAME)</string>
     <key>CFBundleIdentifier</key>
@@ -29,6 +29,12 @@
         <array>
           <string>x9tofast</string>
           <string>com.horizon.x9tofast</string>
+        </array>
+      </dict>
+      <dict>
+        <key>CFBundleURLSchemes</key>
+        <array>
+          <string>com.googleusercontent.apps.438582901138-7lo7q4ggvn1q03mdmtv51ivphdng6sro</string>
         </array>
       </dict>
       <dict>

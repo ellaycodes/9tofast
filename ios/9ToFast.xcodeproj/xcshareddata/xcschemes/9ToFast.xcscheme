@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "9ToFast.app"
-               BlueprintName = "9ToFast"
-               ReferencedContainer = "container:9ToFast.xcodeproj">
+               BuildableName = "9toFast.app"
+               BlueprintName = "9toFast"
+               ReferencedContainer = "container:9toFast.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "9ToFastTests.xctest"
-               BlueprintName = "9ToFastTests"
-               ReferencedContainer = "container:9ToFast.xcodeproj">
+               BuildableName = "9toFastTests.xctest"
+               BlueprintName = "9toFastTests"
+               ReferencedContainer = "container:9toFast.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "9ToFast.app"
-            BlueprintName = "9ToFast"
-            ReferencedContainer = "container:9ToFast.xcodeproj">
+            BuildableName = "9toFast.app"
+            BlueprintName = "9toFast"
+            ReferencedContainer = "container:9toFast.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "9ToFast.app"
-            BlueprintName = "9ToFast"
-            ReferencedContainer = "container:9ToFast.xcodeproj">
+            BuildableName = "9toFast.app"
+            BlueprintName = "9toFast"
+            ReferencedContainer = "container:9toFast.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
