@@ -7,29 +7,29 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		10655A7A11CF7B3FF9BD7B88 /* Pods_9toFast.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3284422938D0BA84AF1411B4 /* Pods_9toFast.framework */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
+		3A569DD40C585595969F6C20 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08FD64A9712EE8C8542E605C /* ExpoModulesProvider.swift */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
-		73813AD3C69ED56ABD82A95E /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AC2AF1EEE56DA192DEB2A58B /* PrivacyInfo.xcprivacy */; };
-		AB524CA723FF4950AE8DBF5E /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = E3308D5351D64BD8B2B502C0 /* GoogleService-Info.plist */; };
+		5C5F300B05977148D8FBE899 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 1ED676814E4D320034F84B54 /* PrivacyInfo.xcprivacy */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
-		DE54708741D1472BF4579348 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEC1780BAA13B0B5AEAC8AD7 /* ExpoModulesProvider.swift */; };
+		E62EFE360BBE969B192EC8C6 /* Pods_9toFast.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3AB1002CACAF5F6D7A6BFC27 /* Pods_9toFast.framework */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
+		F38F14DED92A4856B2300BED /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = A581BE5F88FB45F1BC1E0E32 /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		08FD64A9712EE8C8542E605C /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-9toFast/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* 9toFast.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = 9toFast.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = 9toFast/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = 9toFast/Info.plist; sourceTree = "<group>"; };
-		3284422938D0BA84AF1411B4 /* Pods_9toFast.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_9toFast.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		1ED676814E4D320034F84B54 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = 9toFast/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		3AB1002CACAF5F6D7A6BFC27 /* Pods_9toFast.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_9toFast.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		40A908AB799AE7CC6479B4F6 /* Pods-9toFast.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-9toFast.debug.xcconfig"; path = "Target Support Files/Pods-9toFast/Pods-9toFast.debug.xcconfig"; sourceTree = "<group>"; };
+		600531ECE7F2BEA15098F9AA /* Pods-9toFast.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-9toFast.release.xcconfig"; path = "Target Support Files/Pods-9toFast/Pods-9toFast.release.xcconfig"; sourceTree = "<group>"; };
+		A581BE5F88FB45F1BC1E0E32 /* GoogleService-Info.plist */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "9toFast/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = 9toFast/SplashScreen.storyboard; sourceTree = "<group>"; };
-		AC2AF1EEE56DA192DEB2A58B /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = 9toFast/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		B4EA1482816951268B747513 /* Pods-9toFast.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-9toFast.debug.xcconfig"; path = "Target Support Files/Pods-9toFast/Pods-9toFast.debug.xcconfig"; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
-		DC68C6AE30CCF5FA1AA2FCE1 /* Pods-9toFast.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-9toFast.release.xcconfig"; path = "Target Support Files/Pods-9toFast/Pods-9toFast.release.xcconfig"; sourceTree = "<group>"; };
-		E3308D5351D64BD8B2B502C0 /* GoogleService-Info.plist */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "9toFast/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
-		EEC1780BAA13B0B5AEAC8AD7 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-9toFast/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = 9toFast/AppDelegate.swift; sourceTree = "<group>"; };
 		F11748442D0722820044C1D9 /* 9toFast-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "9toFast-Bridging-Header.h"; path = "9toFast/9toFast-Bridging-Header.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -39,13 +39,23 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				10655A7A11CF7B3FF9BD7B88 /* Pods_9toFast.framework in Frameworks */,
+				E62EFE360BBE969B192EC8C6 /* Pods_9toFast.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		033214D199B4544E91F2BDB1 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				40A908AB799AE7CC6479B4F6 /* Pods-9toFast.debug.xcconfig */,
+				600531ECE7F2BEA15098F9AA /* Pods-9toFast.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
 		13B07FAE1A68108700A75B9A /* 9toFast */ = {
 			isa = PBXGroup;
 			children = (
@@ -55,25 +65,33 @@
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
-				E3308D5351D64BD8B2B502C0 /* GoogleService-Info.plist */,
-				AC2AF1EEE56DA192DEB2A58B /* PrivacyInfo.xcprivacy */,
+				A581BE5F88FB45F1BC1E0E32 /* GoogleService-Info.plist */,
+				1ED676814E4D320034F84B54 /* PrivacyInfo.xcprivacy */,
 			);
 			name = 9toFast;
+			sourceTree = "<group>";
+		};
+		1EF4D2243F1B76B2BD73D32C /* ExpoModulesProviders */ = {
+			isa = PBXGroup;
+			children = (
+				41B374F0D77A69759B45352C /* 9toFast */,
+			);
+			name = ExpoModulesProviders;
 			sourceTree = "<group>";
 		};
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				3284422938D0BA84AF1411B4 /* Pods_9toFast.framework */,
+				3AB1002CACAF5F6D7A6BFC27 /* Pods_9toFast.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		65D98B8C47F485A18BC2ECDA /* 9toFast */ = {
+		41B374F0D77A69759B45352C /* 9toFast */ = {
 			isa = PBXGroup;
 			children = (
-				EEC1780BAA13B0B5AEAC8AD7 /* ExpoModulesProvider.swift */,
+				08FD64A9712EE8C8542E605C /* ExpoModulesProvider.swift */,
 			);
 			name = 9toFast;
 			sourceTree = "<group>";
@@ -92,8 +110,8 @@
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
-				DEC0F9F19C349827A59E98F5 /* Pods */,
-				E4E57F2FF251832FAF04CC94 /* ExpoModulesProviders */,
+				033214D199B4544E91F2BDB1 /* Pods */,
+				1EF4D2243F1B76B2BD73D32C /* ExpoModulesProviders */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -117,24 +135,6 @@
 			path = 9toFast/Supporting;
 			sourceTree = "<group>";
 		};
-		DEC0F9F19C349827A59E98F5 /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				B4EA1482816951268B747513 /* Pods-9toFast.debug.xcconfig */,
-				DC68C6AE30CCF5FA1AA2FCE1 /* Pods-9toFast.release.xcconfig */,
-			);
-			name = Pods;
-			path = Pods;
-			sourceTree = "<group>";
-		};
-		E4E57F2FF251832FAF04CC94 /* ExpoModulesProviders */ = {
-			isa = PBXGroup;
-			children = (
-				65D98B8C47F485A18BC2ECDA /* 9toFast */,
-			);
-			name = ExpoModulesProviders;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -143,13 +143,13 @@
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "9toFast" */;
 			buildPhases = (
 				08A4A3CD28434E44B6B9DE2E /* [CP] Check Pods Manifest.lock */,
-				0F17AD61A6C260C50794C0BB /* [Expo] Configure project */,
+				6494CE5F17E5CF550E37298E /* [Expo] Configure project */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */,
-				B8D150644B812C3B8BE3A1C7 /* [CP] Embed Pods Frameworks */,
+				F8CC0E11829080A0BB980415 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -199,8 +199,8 @@
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
-				AB524CA723FF4950AE8DBF5E /* GoogleService-Info.plist in Resources */,
-				73813AD3C69ED56ABD82A95E /* PrivacyInfo.xcprivacy in Resources */,
+				F38F14DED92A4856B2300BED /* GoogleService-Info.plist in Resources */,
+				5C5F300B05977148D8FBE899 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -246,7 +246,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		0F17AD61A6C260C50794C0BB /* [Expo] Configure project */ = {
+		6494CE5F17E5CF550E37298E /* [Expo] Configure project */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
@@ -322,7 +322,7 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-9toFast/Pods-9toFast-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		B8D150644B812C3B8BE3A1C7 /* [CP] Embed Pods Frameworks */ = {
+		F8CC0E11829080A0BB980415 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -352,7 +352,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */,
-				DE54708741D1472BF4579348 /* ExpoModulesProvider.swift in Sources */,
+				3A569DD40C585595969F6C20 /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -361,7 +361,7 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = B4EA1482816951268B747513 /* Pods-9toFast.debug.xcconfig */;
+			baseConfigurationReference = 40A908AB799AE7CC6479B4F6 /* Pods-9toFast.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -386,7 +386,7 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = com.horizon.x9tofast;
-				PRODUCT_NAME = 9toFast;
+				PRODUCT_NAME = "9toFast";
 				SWIFT_OBJC_BRIDGING_HEADER = "9toFast/9toFast-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -397,7 +397,7 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = DC68C6AE30CCF5FA1AA2FCE1 /* Pods-9toFast.release.xcconfig */;
+			baseConfigurationReference = 600531ECE7F2BEA15098F9AA /* Pods-9toFast.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -417,7 +417,7 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = com.horizon.x9tofast;
-				PRODUCT_NAME = 9toFast;
+				PRODUCT_NAME = "9toFast";
 				SWIFT_OBJC_BRIDGING_HEADER = "9toFast/9toFast-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
