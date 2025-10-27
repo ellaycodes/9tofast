@@ -27,7 +27,8 @@ function FastingCalendar() {
       const day = dt.addDays(startDate, i);
       const formatted = dt.format(day, "yyyy-MM-dd");
       const stat = weeklyStats.find((s) => s.day === formatted);
-      list.push({ date: day, percent: stat?.percent ?? 0 });
+      const value = stat && stat.percent != null ? stat.percent : 0;
+      list.push({ date: day, percent: value });
     }
     return list;
   }, [currentMonth, weeklyStats]);

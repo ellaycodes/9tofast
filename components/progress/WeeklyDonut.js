@@ -14,7 +14,14 @@ function buildWeekDays(weekStart, statsMap) {
   return Array.from({ length: 7 }).map((_, i) => {
     const d = dt.addDays(weekStart, i);
     const key = dt.format(d, "yyyy-MM-dd");
-    return { date: d, percent: statsMap.get(key) ?? 0 };
+    const storedPercent = statsMap.get(key);
+    return {
+      date: d,
+      percent:
+        storedPercent !== undefined && storedPercent !== null
+          ? storedPercent
+          : 0,
+    };
   });
 }
 
@@ -38,15 +45,19 @@ export default function WeeklyDonut({ onWeekChange }) {
   // map stats to quick lookup
   const statsMap = useMemo(() => {
     const m = new Map();
-    weeklyStats.forEach((s) => m.set(s.day, s.percent ?? 0));
+    weeklyStats.forEach((s) => {
+      const value = s.percent !== undefined && s.percent !== null ? s.percent : 0;
+      m.set(s.day, value);
+    });
     return m;
   }, [weeklyStats]);
 
   // load current week on mount
   // FlatList onViewableItemsChanged will lazy load other weeks as you scroll
   const onViewableItemsChanged = useRef(({ viewableItems }) => {
-    if (!viewableItems?.length) return;
-    const first = viewableItems[0]?.item;
+    if (!viewableItems || !viewableItems.length) return;
+    const firstItem = viewableItems[0];
+    const first = firstItem ? firstItem.item : undefined;
 
     if (!first) return;
     refreshWeeklyStats(first.start, first.end);

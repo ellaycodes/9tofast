@@ -28,7 +28,9 @@ export default function AppThemeContextProvider({ children }) {
       let name;
       if (auth.currentUser) {
         const prefs = await getPreferences(auth.currentUser.uid);
-        name = prefs?.theme;
+        if (prefs && prefs.theme) {
+          name = prefs.theme;
+        }
       }
       if (!name) {
         name = await AsyncStorage.getItem("theme");

@@ -14,11 +14,10 @@ export default function useWeeklyStats() {
       return;
     }
     try {
-      const end = dt.format(endDate ?? new Date(), "yyyy-MM-dd");
-      const start = dt.format(
-        startDate ?? dt.subDays(endDate ?? new Date(), 6),
-        "yyyy-MM-dd"
-      );
+      const resolvedEnd = endDate || new Date();
+      const resolvedStart = startDate || dt.subDays(resolvedEnd, 6);
+      const end = dt.format(resolvedEnd, "yyyy-MM-dd");
+      const start = dt.format(resolvedStart, "yyyy-MM-dd");
       const stats = await getDailyStatsRange(auth.currentUser.uid, start, end);
       setWeeklyStats(stats);
     } catch (error) {

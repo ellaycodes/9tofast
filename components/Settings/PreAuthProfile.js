@@ -35,7 +35,10 @@ function PreAuthProfile() {
 
       navigation.navigate("TimerScreen");
     } catch (error) {
-      const msg = error?.error?.message || "Sign up failed";
+      const msg =
+        error && error.error && error.error.message
+          ? error.error.message
+          : "Sign up failed";
       Alert.alert("Authentication Failed", msg);
       console.error(error);
       setIsAuthing(false);

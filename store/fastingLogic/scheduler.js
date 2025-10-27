@@ -56,7 +56,8 @@ export default function useScheduleBoundaryScheduler(
   const timeoutRef = useRef(null);
   const appStateRef = useRef(AppState.currentState);
   const lastEmitRef = useRef({ ts: 0, type: null });
-  const effectiveAnchor = anchorTs ?? 0;
+  const effectiveAnchor =
+    anchorTs !== undefined && anchorTs !== null ? anchorTs : 0;
 
 
   // Cancel any pending timeout
@@ -115,9 +116,11 @@ export default function useScheduleBoundaryScheduler(
     const { state } = stateAndNextBoundary(schedule, now);
 
     // Infer current app state from your store using last event in `events`
-    const last = events?.at?.(-1);
+    const hasEvents = Array.isArray(events) && events.length > 0;
+    const last = hasEvents ? events[events.length - 1] : undefined;
+    const lastType = last && last.type ? last.type : undefined;
     const isFastingInStore =
-      last?.type === EVENT.START || last?.type === "start";
+      lastType === EVENT.START || lastType === "start";
 
     const shouldBeFasting = state === "fasting";
 
@@ -139,7 +142,7 @@ export default function useScheduleBoundaryScheduler(
 
     return () => clearTimer();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [schedule?.start, schedule?.end, effectiveAnchor]);
+  }, [schedule ? schedule.start : undefined, schedule ? schedule.end : undefined, effectiveAnchor]);
 
   // Re-arm when returning to foreground to avoid missing boundaries
   useEffect(() => {
@@ -248,5 +251,5 @@ export function nextBoundaryAfter(schedule, afterTs) {
 
   const candidates = [startTs, endTs, startTs + 86400000, endTs + 86400000];
   const next = candidates.filter((ts) => ts > afterTs).sort((a, b) => a - b)[0];
-  return next ?? null;
+  return next !== undefined ? next : null;
 }

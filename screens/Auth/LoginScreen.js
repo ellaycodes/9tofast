@@ -44,9 +44,15 @@ function LoginScreen() {
         getUser(uid),
         getPreferences(uid),
       ]);
-      if (userData?.fullName) authCxt.updateFullName(userData.fullName);
-      if (userData?.avatarId) authCxt.updateAvatarId(userData.avatarId);
-      if (prefs?.fastingSchedule) setSchedule(prefs.fastingSchedule);
+      if (userData && userData.fullName) {
+        authCxt.updateFullName(userData.fullName);
+      }
+      if (userData && userData.avatarId) {
+        authCxt.updateAvatarId(userData.avatarId);
+      }
+      if (prefs && prefs.fastingSchedule) {
+        setSchedule(prefs.fastingSchedule);
+      }
     } catch (error) {
       Alert.alert("Authentication Failed", error.message);
       setIsAuthing(false);

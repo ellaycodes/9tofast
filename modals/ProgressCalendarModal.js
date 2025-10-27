@@ -28,9 +28,13 @@ function MonthGrid({ monthDate, theme, statsMap, limitDays }) {
       const d = dt.addDays(startOfMonth, i - offset);
       const key = dt.format(d, "yyyy-MM-dd");
 
+      const storedPercent = statsMap.get(key);
       return {
         date: dt.format(d, "d"),
-        percent: statsMap.get(key) ?? 0,
+        percent:
+          storedPercent !== undefined && storedPercent !== null
+            ? storedPercent
+            : 0,
       };
     });
   }, [monthDate, statsMap, limitDays, startOfMonth]);
@@ -89,8 +93,9 @@ export default function ProgressCalendarModal({ showModal, onRequestClose }) {
 
   // hydrate stats and update header on view change
   const onViewableItemsChanged = useRef(({ viewableItems }) => {
-    if (!viewableItems?.length) return;
-    const first = viewableItems[0]?.item;
+    if (!viewableItems || !viewableItems.length) return;
+    const firstItem = viewableItems[0];
+    const first = firstItem ? firstItem.item : undefined;
     if (!first) return;
     const start = dt.startOfMonth(dt.subMonths(first.month, 2));
     const end = dt.endOfMonth(dt.addMonths(first.month, 2));
@@ -108,7 +113,10 @@ export default function ProgressCalendarModal({ showModal, onRequestClose }) {
 
   const statsMap = useMemo(() => {
     const m = new Map();
-    weeklyStats.forEach((s) => m.set(s.day, s.percent ?? 0));
+    weeklyStats.forEach((s) => {
+      const value = s.percent !== undefined && s.percent !== null ? s.percent : 0;
+      m.set(s.day, value);
+    });
     return m;
   }, [weeklyStats]);
 

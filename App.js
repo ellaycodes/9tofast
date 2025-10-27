@@ -78,8 +78,12 @@ function Navigator() {
 
           try {
             const userData = await getUser(uid);
-            if (userData?.fullName) authCxt.updateFullName(userData.fullName);
-            if (userData?.avatarId) authCxt.updateAvatarId(userData.avatarId);
+            if (userData && userData.fullName) {
+              authCxt.updateFullName(userData.fullName);
+            }
+            if (userData && userData.avatarId) {
+              authCxt.updateAvatarId(userData.avatarId);
+            }
           } catch (error) {
             console.warn("hydrateUser", error);
           }
@@ -126,7 +130,7 @@ export default function App() {
       .catch((e) => console.error(e));
   }, []);
 
-  if (!ready) return <Text>Loading...</Text>
+  if (!ready) return <Text>Loading...</Text>;
 
   return (
     <>

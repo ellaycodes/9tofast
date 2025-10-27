@@ -61,7 +61,9 @@ function ProgressScreen() {
     handleWeekChange(start);
   }, [navigation, theme.text, handleWeekChange, memoStyle]);
 
-  const fastingHours = Math.max(schedule?.fastingHours ?? 0, 0);
+  const scheduleFastingHours =
+    schedule && schedule.fastingHours != null ? schedule.fastingHours : 0;
+  const fastingHours = Math.max(scheduleFastingHours, 0);
   const percent = Math.min(
     100,
     Math.max(0, (hoursFastedToday / Math.max(fastingHours, 1)) * 100)

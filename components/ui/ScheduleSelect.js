@@ -20,17 +20,22 @@ function ScheduleSelect({ settings, setWizardState, token, userName, uid }) {
   const authCxt = useContext(AuthContext);
   const navigate = useNavigation();
 
-  const [showCustom, setShowCustom] = useState(schedule?.label === "Custom");
+  const initialIsCustom = schedule && schedule.label === "Custom";
+  const defaultStart = dt.format(dt.addHours(dt.startOfHour(new Date()), 2), "HH:mm");
+  const defaultEnd = dt.format(dt.addHours(dt.startOfHour(new Date()), 10), "HH:mm");
+  const initialStart = schedule && schedule.start ? schedule.start : defaultStart;
+  const initialEnd = schedule && schedule.end ? schedule.end : defaultEnd;
+  const initialFastingHours =
+    schedule && schedule.fastingHours != null ? schedule.fastingHours : 8;
+
+  const [showCustom, setShowCustom] = useState(initialIsCustom);
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
   const [chosenSchedule, setChosenSchedule] = useState({
-    start:
-      schedule?.start ??
-      dt.format(dt.addHours(dt.startOfHour(new Date()), 2), "HH:mm"),
-    end:
-      schedule?.end ??
-      dt.format(dt.addHours(dt.startOfHour(new Date()), 10), "HH:mm"),
-    fastingHours: schedule?.fastingHours ?? 8,
+    start: initialStart,
+    end: initialEnd,
+    fastingHours: initialFastingHours,
+    label: schedule && schedule.label ? schedule.label : undefined,
   });
   const [highlightedLabel, setHighlightedLabel] = useState(null);
 
@@ -181,10 +186,10 @@ function ScheduleSelect({ settings, setWizardState, token, userName, uid }) {
 
           {showCustom && (
             <CustomContainer
-              startTime={chosenSchedule?.start}
+              startTime={chosenSchedule.start}
               onStartTimePress={() => onTimePress("start")}
               onEndTimePress={() => onTimePress("end")}
-              endTime={chosenSchedule?.end}
+              endTime={chosenSchedule.end}
             />
           )}
         </View>
@@ -219,14 +224,14 @@ function ScheduleSelect({ settings, setWizardState, token, userName, uid }) {
       <SchedulePickerModal
         showPicker={showStartPicker}
         onRequestClose={() => setShowStartPicker(false)}
-        timeDate={chosenSchedule?.start}
+        timeDate={chosenSchedule.start}
         onChange={onChangeStart}
       />
 
       <SchedulePickerModal
         showPicker={showEndPicker}
         onRequestClose={() => setShowEndPicker(false)}
-        timeDate={chosenSchedule?.end}
+        timeDate={chosenSchedule.end}
         onChange={onChangeEnd}
       />
     </ScrollView>

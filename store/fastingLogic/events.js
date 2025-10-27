@@ -5,7 +5,10 @@ export const EVENT = Object.freeze({
 });
 
 export const addEvent = (state, type, ts = Date.now(), trigger) => {
-  const last = state.events.at(-1)?.type;
+  const previous = state.events.length
+    ? state.events[state.events.length - 1]
+    : null;
+  const last = previous ? previous.type : undefined;
 
   if (type === EVENT.START && last === EVENT.START) return state;
   if (type === EVENT.END && last === EVENT.END) return state;

@@ -26,9 +26,15 @@ function AuthedProfile({ emailAddress }) {
       return authCxt.logout();
     } catch (error) {
       const message =
-        error?.response?.data?.error?.message ||
-        error?.message ||
-        "Something went wrong.";
+        error &&
+        error.response &&
+        error.response.data &&
+        error.response.data.error &&
+        error.response.data.error.message
+          ? error.response.data.error.message
+          : error && error.message
+          ? error.message
+          : "Something went wrong.";
       console.error(error);
       Alert.alert("Error", message);
     }
@@ -58,9 +64,15 @@ function AuthedProfile({ emailAddress }) {
       Alert.alert("Success", "Password updated.");
     } catch (error) {
       const message =
-        error?.response?.data?.error?.message ||
-        error?.message ||
-        "Something went wrong.";
+        error &&
+        error.response &&
+        error.response.data &&
+        error.response.data.error &&
+        error.response.data.error.message
+          ? error.response.data.error.message
+          : error && error.message
+          ? error.message
+          : "Something went wrong.";
       console.error(error);
       Alert.alert("Error", message);
     } finally {

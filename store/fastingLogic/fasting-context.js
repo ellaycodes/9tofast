@@ -82,14 +82,20 @@ export default function FastingContextProvider({ children }) {
     hoursFastedToday: hours,
     setSchedule: (data) => dispatch({ type: "SET_SCHEDULE", payload: data }),
     startFast: (trigger) => {
-      const last = state.events.at(-1)?.type;
+      const previous = state.events.length
+        ? state.events[state.events.length - 1]
+        : null;
+      const last = previous ? previous.type : undefined;
       if (last === events.EVENT.START) return;
       const ts = Date.now();
       addFastingEvent(ts, events.EVENT.START, trigger);
       dispatch({ type: "START_FAST", trigger, payload: ts });
     },
     endFast: (trigger) => {
-      const last = state.events.at(-1)?.type;
+      const previous = state.events.length
+        ? state.events[state.events.length - 1]
+        : null;
+      const last = previous ? previous.type : undefined;
       if (last === events.EVENT.END) return;
       const ts = Date.now();
       addFastingEvent(ts, events.EVENT.END, trigger);

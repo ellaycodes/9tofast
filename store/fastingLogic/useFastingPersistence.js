@@ -34,12 +34,11 @@ async function uploadPreviousDay(parsed, startOfToday, addDailyStats) {
   const lastUploaded = await AsyncStorage.getItem(LAST_DAY_KEY);
   if (lastUploaded !== prevDayStr) {
     const hoursPrev = hoursFastedToday(parsed, startOfToday - 1);
-    await addDailyStats(
-      prevDayStr,
-      hoursPrev,
-      parsed.schedule?.fastingHours,
-      prevEvents
-    );
+    const scheduleHours =
+      parsed.schedule && parsed.schedule.fastingHours != null
+        ? parsed.schedule.fastingHours
+        : undefined;
+    await addDailyStats(prevDayStr, hoursPrev, scheduleHours, prevEvents);
   }
   return { origEvents, prevEvents };
 }

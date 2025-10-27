@@ -18,7 +18,13 @@ export async function getFastingSchedule(uid) {
     const docSnap = await getDoc(
       doc(db, "users", uid, "settings", "preferences")
     );
-    return docSnap.data().fastingSchedule ?? null;
+    if (!docSnap.exists()) {
+      return null;
+    }
+    const data = docSnap.data();
+    return data && data.fastingSchedule !== undefined
+      ? data.fastingSchedule
+      : null;
   } catch (error) {
     logWarn("getFastingSchedule", error);
   }

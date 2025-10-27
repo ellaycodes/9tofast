@@ -56,7 +56,7 @@ function AuthContextProvider({ children }) {
         const lastTs = await AsyncStorage.getItem("fasting_last_ts");
         if (rawState) {
           const parsed = JSON.parse(rawState);
-          if (auth?.currentUser?.uid) {
+          if (auth && auth.currentUser && auth.currentUser.uid) {
             await setFastingStateDb(uid, {
               ...parsed,
               lastTs: lastTs ? Number(lastTs) : Date.now(),

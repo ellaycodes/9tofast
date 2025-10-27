@@ -24,12 +24,11 @@ export default function useDailyStatsSync(
       const prevDayStr = dt.format(startOfToday - 1, "yyyy-MM-dd");
       const prevEvents = state.events.filter((e) => e.ts < startOfToday);
       const hoursPrevDay = session.hoursFastedToday(state, startOfToday - 1);
-      addDailyStats(
-        prevDayStr,
-        hoursPrevDay,
-        state.schedule?.fastingHours,
-        prevEvents
-      );
+      const scheduleHours =
+        state.schedule && state.schedule.fastingHours != null
+          ? state.schedule.fastingHours
+          : undefined;
+      addDailyStats(prevDayStr, hoursPrevDay, scheduleHours, prevEvents);
 
       let remaining = state.events.filter((e) => e.ts >= startOfToday);
       if (session.isFasting(prevEvents)) {
