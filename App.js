@@ -21,6 +21,7 @@ import {
 } from "firebase/auth";
 import { Buffer } from "buffer";
 import { logWarn } from "./util/logger.js";
+import { Text } from "react-native";
 
 function isTokenExpired(token) {
   console.log("Esther! token");

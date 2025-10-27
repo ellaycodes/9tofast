@@ -10,7 +10,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Updates from "expo-updates";
 
 export async function getFirebaseConfig() {
-  if (!Constants.expoConfig?.extra && Updates?.fetchUpdateAsync) {
+  if (!Constants.expoConfig.extra && Updates.fetchUpdateAsync) {
     try {
       await Updates.fetchUpdateAsync(); // just ensures manifest is hydrated
     } catch (e) {
@@ -18,12 +18,10 @@ export async function getFirebaseConfig() {
     }
   }
 
-  const extra = Constants.expoConfig?.extra ?? Updates.manifest?.extra ?? {};
-
   const firebaseConfig = {
-    apiKey: extra?.firebaseApiKey,
-    authDomain: extra?.firebaseAuthDomain,
-    projectId: extra?.firebaseProjectId,
+    apiKey: Constants.expoConfig.extra.firebaseApiKey,
+    authDomain: Constants.expoConfig.extra.firebaseAuthDomain,
+    projectId: Constants.expoConfig.extra.firebaseProjectId,
   };
 
   const missingConfigKeys = Object.entries(firebaseConfig)
@@ -34,8 +32,8 @@ export async function getFirebaseConfig() {
     const message = `Missing Firebase configuration values for: ${missingConfigKeys.join(
       ", "
     )}`;
-    console.error(message);
-    throw new Error(message);
+   // console.error(message);
+   // throw new Error(message);
   }
   return firebaseConfig;
 }

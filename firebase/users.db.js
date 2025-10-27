@@ -20,8 +20,8 @@ export async function addUser({
 
   const data = {
     email: email ? email.toLowerCase() : null,
-    displayName: displayName ?? null,
-    fullName: fullName ?? null,
+    displayName: displayName || null,
+    fullName: fullName || null,
     isAnonymous: !!isAnonymous,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),

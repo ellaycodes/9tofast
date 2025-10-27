@@ -95,7 +95,7 @@ export async function getDailyStatsRange(uid, startDay, endDay) {
         day: docSnap.id,
         hoursFastedToday: data.hoursFastedToday,
         percent: data.percent,
-        events: data.events ?? [],
+        events: data.events || [],
       };
     });
     return stats.sort((a, b) => a.day.localeCompare(b.day));
