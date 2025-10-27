@@ -14,7 +14,7 @@ export default function Disclaimer() {
       </View>
 
       <Text style={s(theme).body}>
-        9toFast does not provide medical advice. Speak to a healthcare
+        9ToFast does not provide medical advice. Speak to a healthcare
         professional if you have any medical conditions, are pregnant, or have a
         history of eating disorders.
       </Text>

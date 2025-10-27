@@ -9,30 +9,38 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Updates from "expo-updates";
 
-const extra =
-  Constants.expoConfig?.extra ??
-  Constants.manifest?.extra ??
-  Updates.manifest?.extra ??
-  {};
+export async function getFirebaseConfig() {
+  if (!Constants.expoConfig?.extra && Updates?.fetchUpdateAsync) {
+    try {
+      await Updates.fetchUpdateAsync(); // just ensures manifest is hydrated
+    } catch (e) {
+      console.error(`Error: Update for expoConfig could not run`, e);
+    }
+  }
 
-const firebaseConfig = {
-  apiKey: extra?.firebaseApiKey,
-  authDomain: extra?.firebaseAuthDomain,
-  projectId: extra?.firebaseProjectId,
-};
+  const extra = Constants.expoConfig?.extra ?? Updates.manifest?.extra ?? {};
 
-const missingConfigKeys = Object.entries(firebaseConfig)
-  .filter(([, value]) => !value)
-  .map(([key]) => key);
+  const firebaseConfig = {
+    apiKey: extra?.firebaseApiKey,
+    authDomain: extra?.firebaseAuthDomain,
+    projectId: extra?.firebaseProjectId,
+  };
 
-if (missingConfigKeys.length) {
-  const message = `Missing Firebase configuration values for: ${missingConfigKeys.join(
-    ", "
-  )}`;
-  console.error(message);
-  throw new Error(message);
+  const missingConfigKeys = Object.entries(firebaseConfig)
+    .filter(([, value]) => !value)
+    .map(([key]) => key);
+
+  if (missingConfigKeys.length) {
+    const message = `Missing Firebase configuration values for: ${missingConfigKeys.join(
+      ", "
+    )}`;
+    console.error(message);
+    throw new Error(message);
+  }
+  return firebaseConfig;
 }
 
+const firebaseConfig = await getFirebaseConfig();
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const db = getFirestore(app);
 let auth;

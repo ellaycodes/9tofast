@@ -37,7 +37,7 @@ function AboutScreen() {
 
         <View>
           <SubtitleText style={styles.aboutStoryText} size="l">
-            9toFast helps you set a window, stay on track, and review your
+            9ToFast helps you set a window, stay on track, and review your
             progress.
           </SubtitleText>
 

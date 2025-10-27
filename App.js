@@ -12,7 +12,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import LoadingOverlay from "./components/ui/LoadingOverlay";
 import FastingContextProvider from "./store/fastingLogic/fasting-context";
 import { Ionicons } from "@expo/vector-icons";
-import { auth } from "./firebase/app";
+import { auth, getFirebaseConfig } from "./firebase/app";
 import { getUser } from "./firebase/users.db.js";
 import {
   onAuthStateChanged,
@@ -45,7 +45,7 @@ function Navigator() {
 
   useEffect(() => {
     const timeout = setTimeout(() => setLoading(false), 8000);
-    // Ionicons.loadFont();
+    Ionicons.loadFont();
     const verifyStoredToken = async () => {
       try {
         const [token, storedUsername, storedUid] = await Promise.all([
@@ -117,7 +117,16 @@ function Navigator() {
 }
 
 export default function App() {
-  console.log("Esther! App");
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    getFirebaseConfig()
+      .then(() => setReady(true))
+      .catch((e) => console.error(e));
+  }, []);
+
+  if (!ready) return <Text>Loading...</Text>
+
   return (
     <>
       <AuthContextProvider>

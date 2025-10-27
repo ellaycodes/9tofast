@@ -17,23 +17,26 @@ const getUniqueIdentifier = () => {
 
 const getAppName = () => {
   if (IS_DEV) {
-    return "9toFast (Dev)";
+    return "9ToFast (Dev)";
   }
 
   if (IS_PREVIEW) {
-    return "9toFast (Preview)";
+    return "9ToFast (Preview)";
   }
 
-  return "9toFast";
+  return "9ToFast";
 };
 
 export default ({ config }) => ({
   ...config,
   name: getAppName(),
-  slug: "9tofast",
+  slug: "9Tofast",
   owner: "horizon9tofast",
   scheme: "x9tofast",
   version: "1.0.0",
+  runtimeVersion: {
+    policy: "sdkVersion",
+  },
   orientation: "portrait",
   icon: "./assets/icon2.png",
   backgroundColor: "#0F2524",
