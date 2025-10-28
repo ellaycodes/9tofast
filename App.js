@@ -12,7 +12,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import LoadingOverlay from "./components/ui/LoadingOverlay";
 import FastingContextProvider from "./store/fastingLogic/fasting-context";
 import { Ionicons } from "@expo/vector-icons";
-import { auth, getFirebaseConfig } from "./firebase/app";
+import { auth, firebaseConfig } from "./firebase/app";
 import { getUser } from "./firebase/users.db.js";
 import {
   onAuthStateChanged,
@@ -111,7 +111,11 @@ function Navigator() {
   }, [authCxt]);
 
   if (loading) {
-    return <LoadingOverlay>Loading</LoadingOverlay>;
+    return (
+      <>
+        <LoadingOverlay>Loading</LoadingOverlay>
+      </>
+    );
   }
 
   return (
@@ -125,9 +129,9 @@ export default function App() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    getFirebaseConfig()
-      .then(() => setReady(true))
-      .catch((e) => console.error(e));
+    if (firebaseConfig.apiKey !== undefined) {
+      setReady(true);
+    }
   }, []);
 
   if (!ready) return <Text>Loading...</Text>;
@@ -147,11 +151,13 @@ function InnerApp() {
   console.log("Esther! inner App");
   const { theme } = useAppTheme();
   return (
-    <FastingContextProvider>
-      <SafeAreaProvider>
-        <StatusBar style={theme.statusbar} />
-        <Navigator />
-      </SafeAreaProvider>
-    </FastingContextProvider>
+    <>
+      <FastingContextProvider>
+        <SafeAreaProvider>
+          <StatusBar style={theme.statusbar} />
+          <Navigator />
+        </SafeAreaProvider>
+      </FastingContextProvider>
+    </>
   );
 }

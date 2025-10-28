@@ -30,13 +30,10 @@ const getAppName = () => {
 export default ({ config }) => ({
   ...config,
   name: getAppName(),
-  slug: "9Tofast",
+  slug: "9tofast",
   owner: "horizon9tofast",
-  scheme: "x9tofast",
+  // scheme: "x9tofast",
   version: "1.0.0",
-  runtimeVersion: {
-    policy: "sdkVersion",
-  },
   orientation: "portrait",
   icon: "./assets/icon2.png",
   backgroundColor: "#0F2524",
@@ -59,6 +56,7 @@ export default ({ config }) => ({
     },
     infoPlist: {
       GADApplicationIdentifier: "ca-app-pub-2448949656898180~1378746689",
+      ITSAppUsesNonExemptEncryption: false,
     },
   },
   android: {
