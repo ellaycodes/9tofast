@@ -82,7 +82,7 @@ function AuthContextProvider({ children }) {
     AsyncStorage.removeItem("avatarId");
     AsyncStorage.removeItem("onboarded");
     AsyncStorage.removeItem("fastingstate_v2");
-    AsyncStorage.removeItem("fasting_last_ts")
+    AsyncStorage.removeItem("fasting_last_ts");
   }
 
   function refreshToken(idToken) {

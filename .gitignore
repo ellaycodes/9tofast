@@ -83,3 +83,5 @@ replacements.txt
 
 #.ipa local build previews
 *.ipa
+
+*.tar.gz

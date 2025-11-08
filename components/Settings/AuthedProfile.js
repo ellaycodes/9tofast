@@ -19,11 +19,12 @@ function AuthedProfile({ emailAddress }) {
 
   const authCxt = useContext(AuthContext);
   const navigation = useNavigation();
-  const { theme } = useAppTheme();
+  const { theme, setThemeName } = useAppTheme();
 
   async function logoutHandler() {
     try {
-      return authCxt.logout();
+      authCxt.logout();
+      setThemeName('Original', true)
     } catch (error) {
       const message =
         error &&

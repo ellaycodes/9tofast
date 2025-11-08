@@ -24,7 +24,6 @@ import { logWarn } from "./util/logger.js";
 import { Text } from "react-native";
 
 function isTokenExpired(token) {
-  console.log("Esther! token");
   try {
     const base64 = token.split(".")[1];
     const payload =
@@ -39,8 +38,6 @@ function isTokenExpired(token) {
 }
 
 function Navigator() {
-  console.log("Esther! Navigator");
-
   const authCxt = useContext(AuthContext);
   const [loading, setLoading] = useState(true);
 
@@ -129,7 +126,7 @@ export default function App() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (firebaseConfig.apiKey !== undefined) {
+    if (firebaseConfig?.apiKey !== undefined) {
       setReady(true);
     }
   }, []);
@@ -148,7 +145,6 @@ export default function App() {
 }
 
 function InnerApp() {
-  console.log("Esther! inner App");
   const { theme } = useAppTheme();
   return (
     <>

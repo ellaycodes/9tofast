@@ -15,7 +15,7 @@ import { logWarn } from "../util/logger";
 export const AppThemeContext = createContext({
   themeName: "Original",
   theme: Colors.Original,
-  setThemeName: () => {},
+  setThemeName: () => {}
 });
 
 export default function AppThemeContextProvider({ children }) {
@@ -60,7 +60,7 @@ export default function AppThemeContextProvider({ children }) {
     return unsub;
   }, [loadTheme]);
 
-  async function setThemeName(name) {
+  async function setThemeName(name, logout) {
     if (!Colors[name]) {
       console.warn(`Unknown theme "${name}". Using original.`);
       name = "Original";
@@ -69,7 +69,7 @@ export default function AppThemeContextProvider({ children }) {
     setThemeNameState(name);
     try {
       await AsyncStorage.setItem("theme", name);
-      if (auth.currentUser) {
+      if (auth.currentUser && !logout) {
         await setThemeDb(auth.currentUser.uid, name);
       }
     } catch (error) {

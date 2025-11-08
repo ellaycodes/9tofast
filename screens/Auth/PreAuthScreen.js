@@ -13,7 +13,6 @@ import { auth } from "../../firebase/app";
 import { addUser } from "../../firebase/users.db.js";
 
 function PreAuthScreen({ navigation }) {
-  console.log("Esther! PreAuth");
   const [isAuthing, setIsAuthing] = useState();
 
   const authCxt = useContext(AuthContext);

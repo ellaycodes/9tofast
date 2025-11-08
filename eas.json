@@ -42,12 +42,6 @@
       "ios": {
         "simulator": true
       }
-    },
-    "local-production": {
-      "extends": "production",
-      "env": {
-        "APP_VARIANT": "local"
-      }
     }
   },
   "submit": {
