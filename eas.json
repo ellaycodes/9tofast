@@ -19,20 +19,35 @@
     },
     "preview": {
       "distribution": "internal",
+      "channel": "preview",
       "env": {
         "APP_VARIANT": "preview"
+      },
+      "ios": {
+        "simulator": false
       }
     },
     "production": {
-      "autoIncrement": true
+      "distribution": "store",
+      "autoIncrement": true,
+      "env": {
+        "APP_VARIANT": "production"
+      },
+      "ios": {
+        "simulator": false
+      }
     },
     "development-simulator": {
-      "developmentClient": true,
-      "distribution": "internal",
+      "extends": "development",
       "ios": {
         "simulator": true
-      },
-      "environment": "development"
+      }
+    },
+    "local-production": {
+      "extends": "production",
+      "env": {
+        "APP_VARIANT": "local"
+      }
     }
   },
   "submit": {
