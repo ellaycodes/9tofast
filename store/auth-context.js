@@ -74,6 +74,7 @@ function AuthContextProvider({ children }) {
     setFullName(null);
     setAvatarId(null);
     setOnboarded(false);
+    setEmail(null);
     AsyncStorage.removeItem("token");
     AsyncStorage.removeItem("username");
     AsyncStorage.removeItem("emailAddress");

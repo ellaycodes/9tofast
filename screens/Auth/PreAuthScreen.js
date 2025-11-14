@@ -49,7 +49,7 @@ function PreAuthScreen({ navigation }) {
   }
 
   return (
-    <View>
+    <View style={styles.container}>
       <Title>Welcome to 9ToFast</Title>
       <SubtitleText size={"xl"}>
         Track your Intermittent Fasting Schedule and stay on top of your health
@@ -91,4 +91,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     marginVertical: 16,
   },
+  container: {
+    padding: 12
+  }
 });

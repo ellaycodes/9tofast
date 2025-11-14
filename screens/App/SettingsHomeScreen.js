@@ -47,7 +47,6 @@ function SettingsHomeScreen({ navigation }) {
   return (
     <ScrollView style={{ padding: 16 }}>
       <View>
-        <SectionTitle>Account</SectionTitle>
         <SettingsPressable
           profile
           icon="person-outline"
@@ -58,7 +57,9 @@ function SettingsHomeScreen({ navigation }) {
               : authCxt.username
           }
           onPress={profileHandler}
+          style={{paddingBottom: 20}}
         />
+        <SectionTitle>Account</SectionTitle>
         {authCxt.emailAddress ? null : (
           <SettingsPressable
             icon="mode-edit-outline"

@@ -47,6 +47,7 @@ function ProgressScreen() {
           accessibilityLabel="Open progress calendar"
           onPress={() => setOpenModal((prev) => !prev)}
           style={memoStyle.headerButton}
+          hitSlop={10}
         >
           <Ionicons
             color={theme.text}

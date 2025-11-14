@@ -12,6 +12,7 @@ import { updatePassword, deleteUser } from "firebase/auth";
 import { auth } from "../../firebase/app";
 import { deleteCurrentUser } from "../../firebase/users.db.js";
 import AvatarSegment from "../ui/AvatarSegment";
+import { useFasting } from "../../store/fastingLogic/fasting-context.js";
 
 function AuthedProfile({ emailAddress }) {
   const [showModal, setShowModal] = useState(false);
@@ -20,11 +21,13 @@ function AuthedProfile({ emailAddress }) {
   const authCxt = useContext(AuthContext);
   const navigation = useNavigation();
   const { theme, setThemeName } = useAppTheme();
+  const { setSchedule } = useFasting();
 
   async function logoutHandler() {
     try {
       authCxt.logout();
-      setThemeName('Original', true)
+      setThemeName("Original", true);
+      setSchedule(null);
     } catch (error) {
       const message =
         error &&

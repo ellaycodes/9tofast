@@ -21,9 +21,16 @@ function ScheduleSelect({ settings, setWizardState, token, userName, uid }) {
   const navigate = useNavigation();
 
   const initialIsCustom = schedule && schedule.label === "Custom";
-  const defaultStart = dt.format(dt.addHours(dt.startOfHour(new Date()), 2), "HH:mm");
-  const defaultEnd = dt.format(dt.addHours(dt.startOfHour(new Date()), 10), "HH:mm");
-  const initialStart = schedule && schedule.start ? schedule.start : defaultStart;
+  const defaultStart = dt.format(
+    dt.addHours(dt.startOfHour(new Date()), 2),
+    "HH:mm"
+  );
+  const defaultEnd = dt.format(
+    dt.addHours(dt.startOfHour(new Date()), 10),
+    "HH:mm"
+  );
+  const initialStart =
+    schedule && schedule.start ? schedule.start : defaultStart;
   const initialEnd = schedule && schedule.end ? schedule.end : defaultEnd;
   const initialFastingHours =
     schedule && schedule.fastingHours != null ? schedule.fastingHours : 8;
@@ -157,7 +164,12 @@ function ScheduleSelect({ settings, setWizardState, token, userName, uid }) {
   }
 
   function onSkip() {
-    authCxt.authenticate(token, userName, uid);
+    try {
+      authCxt.authenticate(token, userName, uid);
+      authCxt.completeOnboarding();
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   return (
