@@ -1,9 +1,13 @@
 import { useState } from "react";
-import { View } from "react-native";
+import { Pressable, View } from "react-native";
 import Input from "./Input";
 import PrimaryButton from "../ui/PrimaryButton";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useAppTheme } from "../../store/app-theme-context";
 
 function AuthForm({ isLogin, onSubmit }) {
+  const [secure, setSecure] = useState(true);
+  const { theme } = useAppTheme();
   const [authDetails, setAuthDetails] = useState({
     email: "",
     confirmEmail: "",
@@ -71,16 +75,32 @@ function AuthForm({ isLogin, onSubmit }) {
         <Input
           label="Password"
           value={authDetails.password}
-          secure={true}
+          secure={secure}
           onUpdateText={handleInputs.bind(this, "password")}
-        />
+        >
+          <Pressable onPress={() => setSecure(!secure)}>
+            <MaterialCommunityIcons
+              name={secure ? "eye-outline" : "eye-off-outline"}
+              size={24}
+              color={theme.muted}
+            />
+          </Pressable>
+        </Input>
         {!isLogin && (
           <Input
             label="Confirm Password"
             value={authDetails.confirmPassword}
-            secure={true}
+            secure={secure}
             onUpdateText={handleInputs.bind(this, "confirmPassword")}
-          />
+          >
+            <Pressable onPress={() => setSecure(!secure)}>
+              <MaterialCommunityIcons
+                name={secure ? "eye-outline" : "eye-off-outline"}
+                size={24}
+                color={theme.muted}
+              />
+            </Pressable>
+          </Input>
         )}
         <View>
           <PrimaryButton onPress={onSubmitHandler}>

@@ -2,7 +2,7 @@ import { useAppTheme } from "../../store/app-theme-context";
 import { StyleSheet } from "react-native";
 import { TextInput, View } from "react-native";
 
-function Input({ label, value, secure, onUpdateText, keyboardType, style }) {
+function Input({ label, value, secure, onUpdateText, keyboardType, style, children }) {
   const { theme } = useAppTheme();
 
   return (
@@ -21,6 +21,7 @@ function Input({ label, value, secure, onUpdateText, keyboardType, style }) {
         placeholderTextColor={theme.muted}
         returnKeyType="next"
       />
+      {children}
     </View>
   );
 }
@@ -30,14 +31,18 @@ export default Input;
 const styles = (theme) =>
   StyleSheet.create({
     inputContainer: {
-      marginVertical: 8,
+      marginVertical: 12,
       width: "100%",
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingRight: 20,
+      backgroundColor: theme.secondary200,
+      borderRadius: 10,
     },
     textInput: {
-      padding: 20,
-      borderRadius: 10,
+      padding: 16,
       margin: 8,
       color: theme.text,
-      backgroundColor: theme.secondary200,
+      flex: 1
     }
   });
