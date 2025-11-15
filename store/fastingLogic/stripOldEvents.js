@@ -9,15 +9,6 @@ import { logWarn } from "../../util/logger";
  */
 export const HORIZON_MS = 48 * 3600 * 1000;
 
-/**
- * Remove events beyond {@link HORIZON_MS} of the provided time.
- * Logs dropped events to avoid re-saving them.
- *
- * @param {Array<{ts:number,type:string,trigger?:string}>} events
- * @param {Date} [now=new Date()]
- * @returns {Array<{ts:number,type:string,trigger?:string}>}
- */
-
 export function filterEventHorizon(events = [], now = new Date()) {
   const horizon = now.getTime() + HORIZON_MS;
   const inRange = events.filter((e) => e.ts <= horizon);
@@ -31,10 +22,6 @@ export function filterEventHorizon(events = [], now = new Date()) {
 /**
  * Keep only today's events and those within the horizon, adding a START event
  * at midnight if fasting spans midnight.
- *
- * @param {Array<{ts:number,type:string,trigger?:string}>} events
- * @param {Date} [nowDate=new Date()]
- * @returns {Array<{ts:number,type:string,trigger?:string}>}
  */
 export function stripOldEvents(events = [], nowDate = new Date()) {
   const startOfToday = dt.startOfDay(nowDate).getTime();

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { View } from "react-native";
 import * as dt from "date-fns";
 import { useFasting } from "../../store/fastingLogic/fasting-context";
@@ -13,6 +13,7 @@ import Ads from "../../components/monetising/Ads";
 import { getRandomOffScheduleTitle } from "../../util/offScheduleTitles";
 import PrimaryButton from "../../components/ui/PrimaryButton";
 import { prefetchAvatars } from "../../assets/avatars";
+import { stateAt } from "../../store/fastingLogic/scheduler";
 
 function TimerScreen({ navigation }) {
   const { schedule, isFasting, events, hoursFastedToday } = useFasting();
@@ -38,23 +39,9 @@ function TimerScreen({ navigation }) {
     };
   }, [schedule, fasting]);
 
-  const withinFasting = useCallback(() => {
-    if (!schedule) return false;
-
-    const toMin = (h, m) => h * 60 + m;
-    const [sh, sm] = schedule.start.split(":").map(Number);
-    const [eh, em] = schedule.end.split(":").map(Number);
-
-    const start = toMin(sh, sm);
-    const end = toMin(eh, em);
-    const now = toMin(new Date().getHours(), new Date().getMinutes());
-
-    if (start < end) return now < start || now >= end;
-
-    return now >= start || now < end;
-  }, [schedule]);
-
-  const inside = withinFasting();
+  const inside = schedule
+    ? stateAt(schedule, Date.now()) === "fasting"
+    : false;
 
   const offSchedule = fasting !== inside;
 

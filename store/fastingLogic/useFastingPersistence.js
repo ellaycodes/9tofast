@@ -1,11 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCallback } from "react";
-import {
-  getInitialState,
-  hoursFastedToday,
-  isFasting,
-} from "./fasting-session";
-import { EVENT } from "./events";
+import { getInitialState, hoursFastedToday } from "./fasting-session";
 import {
   addDailyStatsDb,
   getFastingSchedule,
@@ -41,20 +36,6 @@ async function uploadPreviousDay(parsed, startOfToday, addDailyStats) {
     await addDailyStats(prevDayStr, hoursPrev, scheduleHours, prevEvents);
   }
   return { origEvents, prevEvents };
-}
-
-function rebuildEvents(origEvents, prevEvents, startOfToday) {
-  let remaining = origEvents;
-  if (prevEvents.length) {
-    remaining = origEvents.filter((e) => e.ts >= startOfToday);
-    if (isFasting(prevEvents)) {
-      remaining = [
-        { type: EVENT.START, ts: startOfToday, trigger: EVENT.TRIGGER },
-        ...remaining,
-      ];
-    }
-  }
-  return remaining;
 }
 
 async function commitEvents(
@@ -160,7 +141,8 @@ export default function useFastingPersistence() {
         startOfToday,
         addDailyStats
       );
-      const remaining = rebuildEvents(origEvents, prevEvents, startOfToday);
+      const todayEvents = stripOldEvents(origEvents, now);
+      const remaining = filterEventHorizon(todayEvents, now);
       await commitEvents(
         parsed,
         origEvents,

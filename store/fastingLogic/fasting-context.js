@@ -16,6 +16,7 @@ export const FastingContext = createContext({
   loading: true,
   schedule: null,
   events: [],
+  state: null,
   hoursFastedToday: null,
   setSchedule: () => {},
   setBaselineAnchor: () => {},
@@ -79,6 +80,7 @@ export default function FastingContextProvider({ children }) {
     loading: state.loading,
     schedule: state.schedule,
     events: state.events,
+    state: state,
     hoursFastedToday: hours,
     setSchedule: (data) => dispatch({ type: "SET_SCHEDULE", payload: data }),
     startFast: (trigger) => {

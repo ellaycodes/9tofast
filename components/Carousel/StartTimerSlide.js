@@ -10,6 +10,7 @@ import { AuthContext } from "../../store/auth-context";
 import { useFasting } from "../../store/fastingLogic/fasting-context";
 import { auth } from "../../firebase/app";
 import { calcReadout, msToHms } from "../../util/formatTime";
+import { setFastingStateDb } from "../../firebase/fasting.db.js";
 
 export default function StartTimerSlide({
   setWizardState,
@@ -20,7 +21,7 @@ export default function StartTimerSlide({
   const { theme } = useAppTheme();
   const memoStyle = useMemo(() => styles(theme), [theme]);
   const authCxt = useContext(AuthContext);
-  const { setSchedule, startFast, schedule, endFast, setBaselineAnchor } =
+  const { setSchedule, startFast, schedule, endFast, setBaselineAnchor, state } =
     useFasting();
 
   const [started, setStarted] = useState(false);
@@ -61,7 +62,7 @@ export default function StartTimerSlide({
   const startFastHandler = () => {
     if (started) return;
 
-    const run = () => {
+    const run = async () => {
       const now = Date.now();
       setBaselineAnchor(now);
 
@@ -85,6 +86,8 @@ export default function StartTimerSlide({
 
       setSchedule(schedule);
       setStarted(true);
+
+      await setFastingStateDb(authCxt.uid, state)
     };
 
     if (authReady) {

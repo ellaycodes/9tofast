@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Pressable, View } from "react-native";
+import { Pressable, View, KeyboardAvoidingView } from "react-native";
 import Input from "./Input";
 import PrimaryButton from "../ui/PrimaryButton";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -7,6 +7,7 @@ import { useAppTheme } from "../../store/app-theme-context";
 
 function AuthForm({ isLogin, onSubmit }) {
   const [secure, setSecure] = useState(true);
+  const [secure2, setSecure2] = useState(true);
   const { theme } = useAppTheme();
   const [authDetails, setAuthDetails] = useState({
     email: "",
@@ -55,7 +56,7 @@ function AuthForm({ isLogin, onSubmit }) {
 
   return (
     <View>
-      <View>
+      <KeyboardAvoidingView>
         <Input
           label="Email"
           value={authDetails.email}
@@ -77,6 +78,7 @@ function AuthForm({ isLogin, onSubmit }) {
           value={authDetails.password}
           secure={secure}
           onUpdateText={handleInputs.bind(this, "password")}
+          keyboardType="default"
         >
           <Pressable onPress={() => setSecure(!secure)}>
             <MaterialCommunityIcons
@@ -90,12 +92,13 @@ function AuthForm({ isLogin, onSubmit }) {
           <Input
             label="Confirm Password"
             value={authDetails.confirmPassword}
-            secure={secure}
+            secure={secure2}
             onUpdateText={handleInputs.bind(this, "confirmPassword")}
+            keyboardType="default"
           >
-            <Pressable onPress={() => setSecure(!secure)}>
+            <Pressable onPress={() => setSecure2(!secure2)}>
               <MaterialCommunityIcons
-                name={secure ? "eye-outline" : "eye-off-outline"}
+                name={secure2 ? "eye-outline" : "eye-off-outline"}
                 size={24}
                 color={theme.muted}
               />
@@ -107,7 +110,7 @@ function AuthForm({ isLogin, onSubmit }) {
             {isLogin ? "Log In" : "Create Account"}
           </PrimaryButton>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </View>
   );
 }

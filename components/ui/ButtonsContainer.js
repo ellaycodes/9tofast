@@ -1,21 +1,26 @@
 import { StyleSheet, View } from "react-native";
 import PrimaryButton from "./PrimaryButton";
 import { useFasting } from "../../store/fastingLogic/fasting-context";
-import { useMemo, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import { useAppTheme } from "../../store/app-theme-context";
 import { Ionicons } from "@expo/vector-icons";
+import { setFastingStateDb } from "../../firebase/fasting.db.js";
+import { AuthContext } from "../../store/auth-context";
 
 function ButtonsContainer({ withinFasting }) {
-  const { startFast, endFast, isFasting } = useFasting();
+  const { startFast, endFast, isFasting, state } = useFasting();
   const { setThemeName, themeName, theme } = useAppTheme();
   const [tempTheme, setTempTheme] = useState(null);
+  const { uid } = useContext(AuthContext);
 
-  function toggleFastHandler() {
+  async function toggleFastHandler() {
     if (isFasting()) {
       endFast("manual");
     } else {
       startFast("manual");
     }
+
+    await setFastingStateDb(uid, state);
   }
 
   const fasting = isFasting();
