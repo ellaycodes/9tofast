@@ -1,4 +1,5 @@
 import "dotenv/config";
+import { runtimeVersion } from "expo-updates";
 
 const IS_DEV = process.env.APP_VARIANT === "development";
 const IS_PREVIEW = process.env.APP_VARIANT === "preview";
@@ -33,7 +34,7 @@ export default ({ config }) => ({
   slug: "9tofast",
   owner: "horizon9tofast",
   // scheme: "x9tofast",
-  version: "1.0.0",
+  version: "1.1.0",
   orientation: "portrait",
   icon: "./assets/icon2.png",
   backgroundColor: "#0F2524",
@@ -44,10 +45,14 @@ export default ({ config }) => ({
   },
   updates: {
     fallbackToCacheTimeout: 0,
+    url: "https://u.expo.dev/edb449e1-65ff-4007-b24b-4404f8c7595c",
+  },
+  runtimeVersion: {
+    policy: "appVersion",
   },
   assetBundlePatterns: ["**/*"],
   ios: {
-    buildNumber: "1.0.0",
+    buildNumber: "1.1.0",
     supportsTablet: true,
     bundleIdentifier: getUniqueIdentifier(),
     googleServicesFile: "./plists/GoogleService-Info.plist",
