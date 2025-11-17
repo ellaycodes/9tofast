@@ -55,11 +55,13 @@ function reducer(state, action) {
 }
 
 export default function FastingContextProvider({ children }) {
-  const { load, persist, addFastingEvent, addDailyStats, flushDailyEvents } =
-    useFastingPersistence();
   const [state, dispatch] = useReducer(reducer, session.getInitialState());
 
+  const { load, persist, addFastingEvent, addDailyStats, flushDailyEvents } =
+    useFastingPersistence();
+
   useFastingLoader(load, dispatch);
+
   useDailyStatsSync(state, addDailyStats, flushDailyEvents, persist, dispatch);
 
   const hours = useMemo(() => session.hoursFastedToday(state), [state]);
@@ -76,36 +78,51 @@ export default function FastingContextProvider({ children }) {
     state.baselineAnchorTs || 0
   );
 
+  function setSchedule(data) {
+    dispatch({ type: "SET_SCHEDULE", payload: data });
+  }
+
+  function startFast(trigger) {
+    const previousEvents = state.events.length
+      ? state.events[state.events.length - 1]
+      : null;
+    const last = previousEvents ? previousEvents.type : undefined;
+    if (last === events.EVENT.START) return;
+    const ts = Date.now();
+    addFastingEvent(ts, events.EVENT.START, trigger);
+    dispatch({ type: "START_FAST", trigger, payload: ts });
+  }
+
+  function endFast(trigger) {
+    const previousEvents = state.events.length
+      ? state.events[state.events.length - 1]
+      : null;
+    const last = previousEvents ? previousEvents.type : undefined;
+    if (last === events.EVENT.END) return;
+    const ts = Date.now();
+    addFastingEvent(ts, events.EVENT.END, trigger);
+    dispatch({ type: "END_FAST", trigger, payload: ts });
+  }
+
+  function setBaselineAnchor(timestamp) {
+    dispatch({ type: "SET_BASELINE_ANCHOR", payload: timestamp });
+  }
+
+  function clearFast() {
+    dispatch({ type: "CLEAR_ALL" });
+  }
+
   const value = {
     loading: state.loading,
     schedule: state.schedule,
     events: state.events,
     state: state,
     hoursFastedToday: hours,
-    setSchedule: (data) => dispatch({ type: "SET_SCHEDULE", payload: data }),
-    startFast: (trigger) => {
-      const previous = state.events.length
-        ? state.events[state.events.length - 1]
-        : null;
-      const last = previous ? previous.type : undefined;
-      if (last === events.EVENT.START) return;
-      const ts = Date.now();
-      addFastingEvent(ts, events.EVENT.START, trigger);
-      dispatch({ type: "START_FAST", trigger, payload: ts });
-    },
-    endFast: (trigger) => {
-      const previous = state.events.length
-        ? state.events[state.events.length - 1]
-        : null;
-      const last = previous ? previous.type : undefined;
-      if (last === events.EVENT.END) return;
-      const ts = Date.now();
-      addFastingEvent(ts, events.EVENT.END, trigger);
-      dispatch({ type: "END_FAST", trigger, payload: ts });
-    },
-    setBaselineAnchor: (ts) =>
-      dispatch({ type: "SET_BASELINE_ANCHOR", payload: ts }),
-    clearFast: () => dispatch({ type: "CLEAR_ALL" }),
+    setSchedule: setSchedule,
+    startFast: startFast,
+    endFast: endFast,
+    setBaselineAnchor: setBaselineAnchor,
+    clearFast: clearFast,
     isFasting: () => isFasting(),
   };
 
