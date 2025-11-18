@@ -84,6 +84,25 @@ async function updateStoredEvents(
   parsedState.events = validEvents;
 }
 
+// helper that computes the current day stats from the current state
+export function buildCurrentDayStats(state, now = new Date()) {
+  const dayString = date.format(now, "yyyy-MM-dd");
+  const hoursToday = hoursFastedToday(state, now.getTime());
+  const scheduleHours = state.schedule?.fastingHours ?? undefined;
+
+  // You can choose if you want to pass today’s events or not
+  const eventsToday = (state.events || []).filter(
+    event => event.ts >= date.startOfDay(now).getTime()
+  );
+
+  return {
+    day: dayString,
+    hoursFasted: hoursToday,
+    scheduleHours,
+    events: eventsToday,
+  };
+}
+
 /**
  * Main hook: manages loading, saving, cleaning, and syncing fasting data.
  */

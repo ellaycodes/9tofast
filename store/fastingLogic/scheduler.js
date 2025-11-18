@@ -43,6 +43,7 @@ function stateAndNextBoundary(schedule, nowTs = Date.now()) {
   return { state, nextBoundaryTs };
 }
 
+//helper
 function eventAtBoundary(prevState) {
   return prevState === "eating" ? EVENT.START : EVENT.END;
 }
