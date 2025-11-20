@@ -33,7 +33,7 @@ export default ({ config }) => ({
   name: getAppName(),
   slug: "9tofast",
   owner: "horizon9tofast",
-  // scheme: "x9tofast",
+  scheme: "com.googleusercontent.apps.128918843006-hrpgvhahugjeq9868t1ln3n7euo4l9ar",
   version: "1.1.0",
   orientation: "portrait",
   icon: "./assets/icon2.png",
@@ -55,7 +55,9 @@ export default ({ config }) => ({
     buildNumber: "1.1.0",
     supportsTablet: true,
     bundleIdentifier: getUniqueIdentifier(),
-    googleServicesFile: "./plists/GoogleService-Info.plist",
+    googleServicesFile: IS_PREVIEW
+      ? "./plists/GoogleService-Info-Staging.plist"
+      : "./plists/GoogleService-Info.plist",
     config: {
       googleMobileAdsAppId: "ca-app-pub-2448949656898180~1378746689",
     },
@@ -81,6 +83,8 @@ export default ({ config }) => ({
     firebaseStorageBucket: process.env.FIREBASE_STORAGE_BUCKET,
     firebaseMessagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
     firebaseAppId: process.env.FIREBASE_APP_ID,
+    iosClientId: process.env.IOS_CLIENT_ID,
+    expoClientId: process.env.EXPO_CLIENT_ID,
     eas: {
       projectId: "edb449e1-65ff-4007-b24b-4404f8c7595c",
     },
@@ -108,5 +112,6 @@ export default ({ config }) => ({
         },
       },
     ],
+    "expo-web-browser",
   ],
 });

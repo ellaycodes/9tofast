@@ -14,7 +14,12 @@ function PrimaryButton({ children, onPress, lowlight, style, disabled }) {
       onPress={onPress}
       disabled={disabled}
     >
-      <View>
+      <View
+        style={{
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         <Text style={styles(theme, lowlight).buttonText}>{children}</Text>
       </View>
     </Pressable>
@@ -45,6 +50,6 @@ const styles = (theme, lowlight) =>
     },
     disabled: {
       opacity: 0.5,
-      backgroundColor: theme.muted
+      backgroundColor: theme.muted,
     },
   });

@@ -1,21 +1,74 @@
-import { StyleSheet, View, Linking } from "react-native";
+import { StyleSheet, View, Linking, Alert } from "react-native";
+import { useContext, useEffect, useState } from "react";
+
 import Title from "../../components/ui/Title";
 import PrimaryButton from "../../components/ui/PrimaryButton";
 import SubtitleText from "../../components/ui/SubtitleText";
 import FlatButton from "../../components/ui/FlatButton";
-import { useContext, useState } from "react";
 import { AuthContext } from "../../store/auth-context";
-import { Alert } from "react-native";
 import LoadingOverlay from "../../components/ui/LoadingOverlay";
 import randomUsername from "../../util/randomUsername";
-import { signInAnonymously } from "firebase/auth";
+import {
+  GoogleAuthProvider,
+  signInAnonymously,
+  signInWithCredential,
+} from "firebase/auth";
 import { auth } from "../../firebase/app";
 import { addUser } from "../../firebase/users.db.js";
 
+import * as Google from "expo-auth-session/providers/google";
+import { makeRedirectUri } from "expo-auth-session";
+import * as WebBrowser from "expo-web-browser";
+import Constants from "expo-constants";
+import { Ionicons } from "@expo/vector-icons";
+
+WebBrowser.maybeCompleteAuthSession();
+
 function PreAuthScreen({ navigation }) {
   const [isAuthing, setIsAuthing] = useState();
-
   const authCxt = useContext(AuthContext);
+
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    iosClientId: Constants?.expoConfig.extra.iosClientId,
+    expoClientId: Constants?.expoConfig.extra.expoClientId,
+    redirectUri: makeRedirectUri({
+      useProxy: true,
+    }),
+  });
+
+  useEffect(() => {
+    const signInWithGoogle = async () => {
+      if (response?.type === "success") {
+        setIsAuthing(true);
+
+        try {
+          const { id_token } = response.params;
+          const credential = GoogleAuthProvider.credential(id_token);
+
+          const { user } = await signInWithCredential(auth, credential);
+          const userName = randomUsername();
+          await addUser({
+            uid: user.uid,
+            email: null,
+            displayName: userName,
+            isAnonymous: false,
+          });
+
+          navigation.navigate("OnboardingCarousel", {
+            token: user.stsTokenManager.accessToken,
+            userName: userName,
+            localId: user.uid,
+          });
+          
+        } catch (err) {
+          console.log("Google sign-in error:", err);
+          Alert.alert("Google sign in failed");
+          setIsAuthing(false);
+        }
+      }
+    };
+    signInWithGoogle();
+  }, [response]);
 
   function emailHandler() {
     navigation.navigate("LoginScreen");
@@ -44,6 +97,14 @@ function PreAuthScreen({ navigation }) {
     }
   }
 
+  async function googleHandler() {
+    await promptAsync();
+  }
+
+  function appleHandler() {
+    console.log("Todo");
+  }
+
   if (isAuthing) {
     return <LoadingOverlay>Logging you in</LoadingOverlay>;
   }
@@ -56,7 +117,25 @@ function PreAuthScreen({ navigation }) {
         goals.
       </SubtitleText>
       <View style={styles.buttonContainer}>
+        <PrimaryButton
+          onPress={googleHandler}
+          style={{ backgroundColor: "white" }}
+        >
+          <Ionicons name="logo-google" size={24} color="black" />
+          <View style={{ width: 8 }} />
+          Continue with Google
+        </PrimaryButton>
+        <PrimaryButton
+          onPress={appleHandler}
+          style={{ backgroundColor: "white" }}
+        >
+          <Ionicons name="logo-apple" size={24} color="black" />
+          <View style={{ width: 8 }} />
+          Continue with Apple
+        </PrimaryButton>
         <PrimaryButton onPress={emailHandler}>
+          <Ionicons name="mail" size={24} color="black" />
+          <View style={{ width: 12 }} />
           Continue with Email
         </PrimaryButton>
         <PrimaryButton lowlight onPress={signInAnonymouslyHandler}>
@@ -92,6 +171,6 @@ const styles = StyleSheet.create({
     marginVertical: 16,
   },
   container: {
-    padding: 12
-  }
+    padding: 12,
+  },
 });

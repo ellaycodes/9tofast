@@ -19,23 +19,7 @@ import {
   getIdToken,
   onIdTokenChanged,
 } from "firebase/auth";
-import { Buffer } from "buffer";
-import { logWarn } from "./util/logger.js";
 import { Text } from "react-native";
-
-function isTokenExpired(token) {
-  try {
-    const base64 = token.split(".")[1];
-    const payload =
-      typeof atob === "function"
-        ? atob(base64)
-        : Buffer.from(base64, "base64").toString("utf8");
-    const { exp } = JSON.parse(payload);
-    return exp * 1000 <= Date.now();
-  } catch (e) {
-    return true;
-  }
-}
 
 function Navigator() {
   const authCxt = useContext(AuthContext);
@@ -44,31 +28,11 @@ function Navigator() {
   useEffect(() => {
     const timeout = setTimeout(() => setLoading(false), 8000);
     Ionicons.loadFont();
-    const verifyStoredToken = async () => {
-      try {
-        const [token, storedUsername, storedUid] = await Promise.all([
-          AsyncStorage.getItem("token"),
-          AsyncStorage.getItem("username"),
-          AsyncStorage.getItem("uid"),
-        ]);
-        if (token && storedUsername && storedUid) {
-          if (isTokenExpired(token)) {
-            authCxt.logout();
-          } else {
-            authCxt.authenticate(token, storedUsername, storedUid);
-          }
-        }
-      } catch (err) {
-        logWarn("verifyStoredToken", err);
-        authCxt.logout();
-      }
-    };
-    verifyStoredToken();
 
     const unsubAuth = onAuthStateChanged(auth, async (user) => {
       if (user) {
         try {
-          const token = await getIdToken(user, true);
+          const token = await getIdToken(user);
           const { displayName, email, uid } = user;
           authCxt.authenticate(token, displayName, uid);
           if (email) authCxt.setEmailAddress(email);
@@ -94,9 +58,10 @@ function Navigator() {
         setLoading(false);
       }
     });
+
     const unsubToken = onIdTokenChanged(auth, async (user) => {
       if (user) {
-        const token = await getIdToken(user, true);
+        const token = await getIdToken(user);
         authCxt.refreshToken(token);
       }
     });
