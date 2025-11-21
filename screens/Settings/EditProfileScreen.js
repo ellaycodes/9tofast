@@ -1,4 +1,4 @@
-import { StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import AvatarSegment from "../../components/ui/AvatarSegment";
 import { AuthContext } from "../../store/auth-context";
 import { useNavigation } from "@react-navigation/native";
@@ -12,6 +12,9 @@ import { auth } from "../../firebase/app";
 import { updateUser } from "../../firebase/users.db.js";
 import AvatarPickerModal from "../../modals/AvatarPickerModal";
 import FlatButton from "../../components/ui/FlatButton";
+import { MaterialIcons } from "@expo/vector-icons";
+import { AppThemeContext } from "../../store/app-theme-context.js";
+import randomUsername from "../../util/randomUsername.js";
 
 function EditProfileScreen() {
   const [showInputs, setShowInputs] = useState({
@@ -21,6 +24,7 @@ function EditProfileScreen() {
   const [openModal, setOpenModal] = useState(false);
   const navigation = useNavigation();
   const authCxt = useContext(AuthContext);
+  const { theme } = useContext(AppThemeContext);
   const [inputDetails, setInputDetails] = useState({
     name: authCxt.fullName || "",
     username: authCxt.username || "",
@@ -46,12 +50,8 @@ function EditProfileScreen() {
   async function handleOnSubmit() {
     const { name, username } = inputDetails;
     try {
-      await updateProfile(auth.currentUser, {
-        displayName: username,
-      });
-
       await updateUser(auth.currentUser.uid, {
-        displayName: username ? username : auth.currentUser.displayName,
+        displayName: username ? username : authCxt.username,
         email: auth.currentUser.email,
         fullName: name ? name : authCxt.fullName,
       });
@@ -77,6 +77,14 @@ function EditProfileScreen() {
     } catch (error) {
       throw error;
     }
+  }
+
+  function renewUsername() {
+    const username = randomUsername();
+    setInputDetails((inputDetails) => ({
+      ...inputDetails,
+      username: username,
+    }));
   }
 
   return (
@@ -125,19 +133,25 @@ function EditProfileScreen() {
                   username: !showInputs.username,
                 }))
               }
-              right={
-                auth.currentUser.displayName
-                  ? auth.currentUser.displayName
-                  : "Add"
-              }
+              right={authCxt.username ? authCxt.username : "Add"}
               open={showInputs.username}
             />
             {showInputs.username && (
-              <Input
-                label="Change Username"
-                onUpdateText={updateDetails.bind(this, "username")}
-                value={inputDetails.username}
-              />
+              <>
+                <Input
+                  label="Change Username"
+                  onUpdateText={updateDetails.bind(this, "username")}
+                  value={inputDetails.username}
+                >
+                  <Pressable onPress={renewUsername}>
+                    <MaterialIcons
+                      name="autorenew"
+                      size={24}
+                      color={theme.muted}
+                    />
+                  </Pressable>
+                </Input>
+              </>
             )}
           </View>
         </View>

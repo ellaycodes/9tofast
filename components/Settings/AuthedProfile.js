@@ -10,7 +10,7 @@ import FlatButton from "../ui/FlatButton";
 import { useNavigation } from "@react-navigation/native";
 import { updatePassword, deleteUser } from "firebase/auth";
 import { auth } from "../../firebase/app";
-import { deleteCurrentUser } from "../../firebase/users.db.js";
+import { deleteCurrentUser, updateUser } from "../../firebase/users.db.js";
 import AvatarSegment from "../ui/AvatarSegment";
 import { useFasting } from "../../store/fastingLogic/fasting-context.js";
 
@@ -44,11 +44,47 @@ function AuthedProfile({ emailAddress }) {
     }
   }
 
-  function deleteHandler() {
-    deleteUser(auth.currentUser);
-    deleteCurrentUser();
-    authCxt.isAuthed = false;
+async function deleteHandler() {
+  try {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const uid = user.uid;
+    const providerId = user.providerData[0]?.providerId;
+
+    // Google account: mark for deletion instead of deleting immediately
+    if (providerId === "google.com") {
+      Alert.alert(
+        "Account Scheduled for Deletion",
+        "Your account has been marked for deletion and will be processed soon.",
+        [
+          {
+            text: "OK",
+            onPress: async () => {
+              try {
+                await updateUser(uid, { markedForDeletion: true });
+                authCxt.logout();
+              } catch (err) {
+                Alert.alert(
+                  "We couldn’t schedule deletion just now. Please try again or contact support."
+                );
+              }
+            },
+          },
+        ]
+      );
+      return;
+    }
+    await deleteUser(user);
+    await deleteCurrentUser(uid);
+
+    authCxt.logout();
+    return;
+
+  } catch (err) {
+    Alert.alert("Delete error. Please contact support.");
   }
+}
 
   async function changePasswordHandler(password) {
     const passwordIsValid = password.newPassword.length > 6;

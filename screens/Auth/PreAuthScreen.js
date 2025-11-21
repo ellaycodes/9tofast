@@ -12,29 +12,25 @@ import {
   GoogleAuthProvider,
   signInAnonymously,
   signInWithCredential,
+  getIdToken,
 } from "firebase/auth";
 import { auth } from "../../firebase/app";
-import { addUser } from "../../firebase/users.db.js";
+import { addUser, getUser } from "../../firebase/users.db.js";
 
-import * as Google from "expo-auth-session/providers/google";
-import { makeRedirectUri } from "expo-auth-session";
 import * as WebBrowser from "expo-web-browser";
-import Constants from "expo-constants";
 import { Ionicons } from "@expo/vector-icons";
+import { getPreferences } from "../../firebase/fasting.db.js";
+import { useFasting } from "../../store/fastingLogic/fasting-context.js";
+import useGoogleAuth from "../../hooks/useGoogleAuth.js";
 
 WebBrowser.maybeCompleteAuthSession();
 
 function PreAuthScreen({ navigation }) {
   const [isAuthing, setIsAuthing] = useState();
   const authCxt = useContext(AuthContext);
+  const { setSchedule } = useFasting();
 
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    iosClientId: Constants?.expoConfig.extra.iosClientId,
-    expoClientId: Constants?.expoConfig.extra.expoClientId,
-    redirectUri: makeRedirectUri({
-      useProxy: true,
-    }),
-  });
+  const { request, response, promptAsync } = useGoogleAuth();
 
   useEffect(() => {
     const signInWithGoogle = async () => {
@@ -46,23 +42,48 @@ function PreAuthScreen({ navigation }) {
           const credential = GoogleAuthProvider.credential(id_token);
 
           const { user } = await signInWithCredential(auth, credential);
-          const userName = randomUsername();
-          await addUser({
-            uid: user.uid,
-            email: null,
-            displayName: userName,
-            isAnonymous: false,
-          });
 
-          navigation.navigate("OnboardingCarousel", {
-            token: user.stsTokenManager.accessToken,
-            userName: userName,
-            localId: user.uid,
-          });
-          
+          const existingUser = await getUser(user.uid);
+
+          if (!existingUser) {
+            const userName = randomUsername();
+
+            await addUser({
+              uid: user.uid,
+              email: user.email,
+              displayName: userName,
+              isAnonymous: false,
+              fullName: user.displayName,
+            });
+
+            authCxt.setEmailAddress(user.email);
+            authCxt.updateFullName(user.displayName);
+
+            navigation.navigate("OnboardingCarousel", {
+              token: user.stsTokenManager.accessToken,
+              userName: userName,
+              localId: user.uid,
+            });
+          } else {
+            const token = await getIdToken(user, true);
+
+            const prefs = await getPreferences(user.uid);
+
+            authCxt.authenticate(token, existingUser.displayName, user.uid);
+            authCxt.setEmailAddress(existingUser.email);
+            authCxt.setOnboarded(true);
+            authCxt.updateFullName(existingUser.fullName);
+
+            if (existingUser.avatarId) {
+              authCxt.updateAvatarId(existingUser.avatarId);
+            }
+            
+            if (prefs && prefs.fastingSchedule) {
+              setSchedule(prefs.fastingSchedule);
+            }
+          }
         } catch (err) {
-          console.log("Google sign-in error:", err);
-          Alert.alert("Google sign in failed");
+          Alert.alert("Google sign in failed: Please contact support");
           setIsAuthing(false);
         }
       }

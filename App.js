@@ -33,23 +33,37 @@ function Navigator() {
       if (user) {
         try {
           const token = await getIdToken(user);
-          const { displayName, email, uid } = user;
-          authCxt.authenticate(token, displayName, uid);
-          if (email) authCxt.setEmailAddress(email);
+          const { email, uid } = user;
 
+          let userData = null;
           try {
-            const userData = await getUser(uid);
-            if (userData && userData.fullName) {
-              authCxt.updateFullName(userData.fullName);
-            }
-            if (userData && userData.avatarId) {
-              authCxt.updateAvatarId(userData.avatarId);
-            }
-          } catch (error) {
-            console.warn("hydrateUser", error);
+            userData = await getUser(uid);
+          } catch (err) {
+            console.warn("getUser failed:", err);
           }
+          const dbDisplayName = userData?.displayName || "";
+          const dbAvatarId = userData?.avatarId || null;
+
+          const authDisplayName = authFullName || "";
+
+          authCxt.authenticate(token, dbDisplayName, uid);
+
+          if (email) {
+            authCxt.setEmailAddress(email);
+          }
+
+          if (authDisplayName) {
+            authCxt.updateFullName(authDisplayName);
+          }
+
+          if (dbAvatarId) {
+            authCxt.updateAvatarId(dbAvatarId);
+          }
+
           const storedOnboarded = await AsyncStorage.getItem("onboarded");
-          if (storedOnboarded === "true") authCxt.setOnboarded(true);
+          if (storedOnboarded === "true") {
+            authCxt.setOnboarded(true);
+          }
         } finally {
           setLoading(false);
         }
