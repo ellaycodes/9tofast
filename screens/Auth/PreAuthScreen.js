@@ -1,34 +1,37 @@
 import { StyleSheet, View, Linking, Alert } from "react-native";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import Title from "../../components/ui/Title";
 import PrimaryButton from "../../components/ui/PrimaryButton";
 import SubtitleText from "../../components/ui/SubtitleText";
 import FlatButton from "../../components/ui/FlatButton";
-import { AuthContext } from "../../store/auth-context";
 import LoadingOverlay from "../../components/ui/LoadingOverlay";
-import randomUsername from "../../util/randomUsername";
 import {
   GoogleAuthProvider,
   signInAnonymously,
   signInWithCredential,
-  getIdToken,
+  OAuthProvider,
 } from "firebase/auth";
 import { auth } from "../../firebase/app";
-import { addUser, getUser } from "../../firebase/users.db.js";
+import { getUser } from "../../firebase/users.db.js";
 
 import * as WebBrowser from "expo-web-browser";
 import { Ionicons } from "@expo/vector-icons";
-import { getPreferences } from "../../firebase/fasting.db.js";
 import { useFasting } from "../../store/fastingLogic/fasting-context.js";
 import useGoogleAuth from "../../hooks/useGoogleAuth.js";
+import * as AppleAuthentication from "expo-apple-authentication";
+import useAuthHelpers from "../../hooks/useAuthHelpers.js";
 
 WebBrowser.maybeCompleteAuthSession();
 
 function PreAuthScreen({ navigation }) {
-  const [isAuthing, setIsAuthing] = useState();
-  const authCxt = useContext(AuthContext);
+  const [isAuthing, setIsAuthing] = useState(false);
   const { setSchedule } = useFasting();
+  const {
+    handleExistingUserLogin,
+    handleNewProviderUser,
+    handleNewAnonymousUser,
+  } = useAuthHelpers();
 
   const { request, response, promptAsync } = useGoogleAuth();
 
@@ -36,60 +39,36 @@ function PreAuthScreen({ navigation }) {
     const signInWithGoogle = async () => {
       if (response?.type === "success") {
         setIsAuthing(true);
-
         try {
           const { id_token } = response.params;
           const credential = GoogleAuthProvider.credential(id_token);
 
           const { user } = await signInWithCredential(auth, credential);
-
           const existingUser = await getUser(user.uid);
 
           if (!existingUser) {
-            const userName = randomUsername();
-
-            await addUser({
-              uid: user.uid,
-              email: user.email,
-              displayName: userName,
-              isAnonymous: false,
-              fullName: user.displayName,
-            });
-
-            authCxt.setEmailAddress(user.email);
-            authCxt.updateFullName(user.displayName);
-
-            navigation.navigate("OnboardingCarousel", {
-              token: user.stsTokenManager.accessToken,
-              userName: userName,
-              localId: user.uid,
-            });
-          } else {
-            const token = await getIdToken(user, true);
-
-            const prefs = await getPreferences(user.uid);
-
-            authCxt.authenticate(token, existingUser.displayName, user.uid);
-            authCxt.setEmailAddress(existingUser.email);
-            authCxt.setOnboarded(true);
-            authCxt.updateFullName(existingUser.fullName);
-
-            if (existingUser.avatarId) {
-              authCxt.updateAvatarId(existingUser.avatarId);
-            }
-            
-            if (prefs && prefs.fastingSchedule) {
-              setSchedule(prefs.fastingSchedule);
-            }
+            await handleNewProviderUser(
+              user,
+              user.email,
+              user.displayName,
+              navigation
+            );
+            return;
           }
+          await handleExistingUserLogin(user, existingUser);
         } catch (err) {
-          Alert.alert("Google sign in failed: Please contact support");
+          Alert.alert(
+            "There was an error while logging you in",
+            "Please contact support if this continues"
+          );
+          setIsAuthing(false);
+        } finally {
           setIsAuthing(false);
         }
       }
     };
     signInWithGoogle();
-  }, [response]);
+  }, [response, navigation, setSchedule]);
 
   function emailHandler() {
     navigation.navigate("LoginScreen");
@@ -99,21 +78,14 @@ function PreAuthScreen({ navigation }) {
     setIsAuthing(true);
     try {
       const { user } = await signInAnonymously(auth);
-      const userName = randomUsername();
-      await addUser({
-        uid: user.uid,
-        email: null,
-        displayName: userName,
-        isAnonymous: true,
-      });
-
-      navigation.navigate("OnboardingCarousel", {
-        token: user.stsTokenManager.accessToken,
-        userName: userName,
-        localId: user.uid,
-      });
+      await handleNewAnonymousUser(user, navigation);
     } catch (error) {
-      Alert.alert("Authentication Failed", `Could not log you in! ${error}`);
+      Alert.alert(
+        "There was an error signing you in",
+        "Please try again or contact support if the issue persists."
+      );
+      setIsAuthing(false);
+    } finally {
       setIsAuthing(false);
     }
   }
@@ -122,8 +94,48 @@ function PreAuthScreen({ navigation }) {
     await promptAsync();
   }
 
-  function appleHandler() {
-    console.log("Todo");
+  async function appleHandler() {
+    setIsAuthing(true);
+    try {
+      const appleResult = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+      });
+
+      const provider = new OAuthProvider("apple.com");
+
+      const credential = provider.credential({
+        idToken: appleResult.identityToken,
+      });
+
+      const { user } = await signInWithCredential(auth, credential);
+
+      const fullName =
+        appleResult.fullName?.givenName && appleResult.fullName?.familyName
+          ? `${appleResult.fullName.givenName} ${appleResult.fullName.familyName}`
+          : null;
+
+      const email = appleResult.email || user.email;
+
+      const existing = await getUser(user.uid);
+
+      if (!existing) {
+        await handleNewProviderUser(user, email, fullName, navigation);
+        return;
+      }
+      await handleExistingUserLogin(user, existing);
+    } catch (err) {
+      setIsAuthing(false);
+      if (err.code === "ERR_REQUEST_CANCELED") return;
+      Alert.alert(
+        "There was an error signing you in",
+        "Please try again or contact support if the issue persists."
+      );
+    } finally {
+      setIsAuthing(false);
+    }
   }
 
   if (isAuthing) {

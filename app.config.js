@@ -55,6 +55,7 @@ export default ({ config }) => ({
     buildNumber: "1.1.0",
     supportsTablet: true,
     bundleIdentifier: getUniqueIdentifier(),
+    usesAppleSignIn: true,
     googleServicesFile: IS_PREVIEW
       ? "./plists/GoogleService-Info-Staging.plist"
       : "./plists/GoogleService-Info.plist",
@@ -113,5 +114,6 @@ export default ({ config }) => ({
       },
     ],
     "expo-web-browser",
+    "expo-apple-authentication",
   ],
 });
