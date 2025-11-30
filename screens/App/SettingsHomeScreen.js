@@ -44,6 +44,10 @@ function SettingsHomeScreen({ navigation }) {
     navigation.navigate("SupportScreen");
   }
 
+  function statsScreenHandler() {
+    navigation.navigate("StatsScreen");
+  }
+
   return (
     <ScrollView style={{ padding: 16 }}>
       <View>
@@ -58,7 +62,7 @@ function SettingsHomeScreen({ navigation }) {
               : authCxt.username
           }
           onPress={profileHandler}
-          style={{paddingBottom: 20}}
+          style={{ paddingBottom: 20 }}
         />
         {authCxt.emailAddress ? null : (
           <SettingsPressable
@@ -67,6 +71,11 @@ function SettingsHomeScreen({ navigation }) {
             onPress={manageAccountHandler}
           />
         )}
+        <SettingsPressable
+          label="Stats"
+          icon="query-stats"
+          onPress={statsScreenHandler}
+        />
       </View>
       <View>
         <SectionTitle>Preferences</SectionTitle>

@@ -9,6 +9,7 @@ import EditThemeScreen from "../screens/Settings/EditThemeScreen";
 import ProfileScreen from "../screens/Settings/ProfileScreen";
 import SupportScreen from "../screens/Settings/SupportScreen";
 import EditProfileScreen from "../screens/Settings/EditProfileScreen";
+import Stats from "../screens/Settings/StatsScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -88,6 +89,13 @@ function SettingsStack() {
         component={EditProfileScreen}
         options={{
           title: "Edit Profile",
+        }}
+      />
+      <Stack.Screen
+        name="StatsScreen"
+        component={Stats}
+        options={{
+          title: "Stats",
         }}
       />
     </Stack.Navigator>

@@ -20,6 +20,7 @@ import {
   onIdTokenChanged,
 } from "firebase/auth";
 import { Text } from "react-native";
+import StatsContextProvider from "./store/statsLogic/stats-context.js";
 
 function Navigator() {
   const authCxt = useContext(AuthContext);
@@ -128,10 +129,12 @@ function InnerApp() {
   return (
     <>
       <FastingContextProvider>
-        <SafeAreaProvider>
-          <StatusBar style={theme.statusbar} />
-          <Navigator />
-        </SafeAreaProvider>
+        <StatsContextProvider>
+          <SafeAreaProvider>
+            <StatusBar style={theme.statusbar} />
+            <Navigator />
+          </SafeAreaProvider>
+        </StatsContextProvider>
       </FastingContextProvider>
     </>
   );

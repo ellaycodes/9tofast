@@ -11,6 +11,7 @@ import * as events from "./events";
  *  - Carrying over ongoing fasts into the new day
  *  - Regularly persisting the current fasting state
  */
+
 export default function useDailyStatsSync(
   fastingState, // Current fasting state from your app
   uploadDailyStats, // Function to send yesterday’s stats to Firebase

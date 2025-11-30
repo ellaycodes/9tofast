@@ -14,6 +14,7 @@ import { getRandomOffScheduleTitle } from "../../util/offScheduleTitles";
 import PrimaryButton from "../../components/ui/PrimaryButton";
 import { prefetchAvatars } from "../../assets/avatars";
 import { stateAt } from "../../store/fastingLogic/scheduler";
+import Streaks from "../../components/Home/Streaks.js";
 
 function TimerScreen({ navigation }) {
   const { schedule, isFasting, events, hoursFastedToday } = useFasting();
@@ -39,9 +40,7 @@ function TimerScreen({ navigation }) {
     };
   }, [schedule, fasting]);
 
-  const inside = schedule
-    ? stateAt(schedule, Date.now()) === "fasting"
-    : false;
+  const inside = schedule ? stateAt(schedule, Date.now()) === "fasting" : false;
 
   const offSchedule = fasting !== inside;
 
@@ -54,6 +53,16 @@ function TimerScreen({ navigation }) {
   }, [offSchedule, fasting, inside, events, hoursFastedToday]);
 
   const timeUnits = readout ? Object.keys(readout.units).slice(0, -1) : [];
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <View style={styles(theme, themeName).streaks}>
+          <Streaks />
+        </View>
+      ),
+    });
+  }, []);
 
   const label =
     themeName === "Desk"
@@ -148,5 +157,8 @@ const styles = (theme, themeName) =>
     },
     eating: {
       color: theme.success,
+    },
+    streaks: {
+      paddingHorizontal: 30,
     },
   });

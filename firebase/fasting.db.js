@@ -1,17 +1,19 @@
 import { db } from "./app";
 import {
-  setDoc,
   doc,
-  getDoc,
-  query,
-  collection,
-  orderBy,
-  documentId,
-  getDocs,
-  startAt,
   endAt,
+  query,
+  setDoc,
+  getDoc,
+  orderBy,
+  startAt,
+  getDocs,
+  collection,
+  documentId,
+  waitForPendingWrites,
 } from "firebase/firestore";
 import { logWarn } from "../util/logger";
+import { hoursFastedToday } from "../store/fastingLogic/fasting-session";
 
 export async function getFastingSchedule(uid) {
   try {
@@ -83,6 +85,18 @@ export async function addDailyStatsDb(
     });
   } catch (error) {
     logWarn("addDailyStatsDb", error);
+  }
+}
+
+export async function getDailyStatsDb(uid, day) {
+  try {
+    const docSnap = await getDoc(doc(db, "users", uid, "daily_stats", day));
+    await waitForPendingWrites(db);
+    const data = docSnap.exists() ? docSnap.data() : null;
+    console.log(data);
+    return data;
+  } catch (error) {
+    logWarn("getDailyStatsDb", error);
   }
 }
 
