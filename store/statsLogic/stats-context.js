@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { format } from "date-fns";
 import { createContext, useState, useEffect } from "react";
-import { setStreak } from "../../firebase/stats.db.js";
+import { getStreak, setStreak } from "../../firebase/stats.db.js";
 import { auth } from "../../firebase/app.js";
 import { dayQualifier, fastingQualifier } from "./qualifier.js";
 import { useFasting } from "../fastingLogic/fasting-context.js";
@@ -40,16 +40,20 @@ function StatsContextProvider({ children }) {
     async function loadStreak() {
       if (!auth.currentUser) return;
 
-      const raw = await AsyncStorage.getItem(STREAK_DATA);
-      if (!raw) return;
+      let dbData;
 
-      const data = JSON.parse(raw);
+      dbData = await getStreak(auth?.currentUser?.uid);
+      if (!dbData) {
+        const raw = await AsyncStorage.getItem(STREAK_DATA);
+        if (!raw) return;
+        dbData = JSON.parse(raw);
+      }
 
-      setCurrentStreak(data.currentStreak ?? 0);
-      setLongestStreak(data.longestStreak ?? 0);
-      setPreviousStreak(data.previousStreak ?? 0);
-      setLastStreakDate(data.lastStreakDate ?? null);
-      setLastOverrideDate(data.lastOverrideDate ?? null);
+      setCurrentStreak(dbData.currentStreak ?? 0);
+      setLongestStreak(dbData.longestStreak ?? 0);
+      setPreviousStreak(dbData.previousStreak ?? 0);
+      setLastStreakDate(dbData.lastStreakDate ?? null);
+      setLastOverrideDate(dbData.lastOverrideDate ?? null);
     }
 
     async function yesterdayHoursFromDb() {
@@ -127,9 +131,10 @@ function StatsContextProvider({ children }) {
     if (!lastOverrideDate) return true;
     const last = new Date(lastOverrideDate);
     const now = new Date(today);
-    const diffInDays = Math.floor((now - last) / oneDay);
+    const diffInDays = Number(Math.floor((now - last) / oneDay));
+
     const canOverride = diffInDays >= cooldownDays;
-    return { canOverride, diffInDays};
+    return { canOverride, diffInDays };
   }
 
   //Main Streak Effect

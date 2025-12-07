@@ -21,6 +21,27 @@ import {
 } from "firebase/auth";
 import { Text } from "react-native";
 import StatsContextProvider from "./store/statsLogic/stats-context.js";
+import * as Notifications from "expo-notifications";
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => {
+    return {
+      shouldPlaySound: true,
+      shouldSetBadge: true,
+      shouldShowBanner: true,
+    };
+  },
+});
+
+export async function allowNotificationsAsync() {
+  const settings = await Notifications.getPermissionsAsync();
+  console.log(settings);
+
+  return (
+    settings.granted ||
+    settings.ios?.status === Notifications.IosAuthorizationStatus.PROVISIONAL
+  );
+}
 
 function Navigator() {
   const authCxt = useContext(AuthContext);
@@ -86,6 +107,15 @@ function Navigator() {
       clearTimeout(timeout);
     };
   }, [authCxt]);
+
+  useEffect(() => {
+    async function setup() {
+      const granted = await Notifications.requestPermissionsAsync();
+      console.log("notification permission:", granted);
+    }
+    setup();
+    allowNotificationsAsync();
+  }, []);
 
   if (loading) {
     return (

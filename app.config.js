@@ -33,7 +33,8 @@ export default ({ config }) => ({
   name: getAppName(),
   slug: "9tofast",
   owner: "horizon9tofast",
-  scheme: "com.googleusercontent.apps.128918843006-hrpgvhahugjeq9868t1ln3n7euo4l9ar",
+  scheme:
+    "com.googleusercontent.apps.128918843006-hrpgvhahugjeq9868t1ln3n7euo4l9ar",
   version: "1.1.0",
   orientation: "portrait",
   icon: "./assets/icon2.png",
@@ -115,5 +116,14 @@ export default ({ config }) => ({
     ],
     "expo-web-browser",
     "expo-apple-authentication",
+    [
+      "expo-notifications",
+      {
+        icon: "./local/assets/adaptive-icon2.png",
+        color: "#ffffff",
+        defaultChannel: "default",
+        enableBackgroundRemoteNotifications: false,
+      },
+    ],
   ],
 });

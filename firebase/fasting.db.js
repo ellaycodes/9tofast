@@ -92,7 +92,8 @@ export async function getDailyStatsDb(uid, day) {
   try {
     const docSnap = await getDoc(doc(db, "users", uid, "daily_stats", day));
     await waitForPendingWrites(db);
-    const data = docSnap.exists() ? docSnap.data() : null;
+    const data = docSnap.exists() ? docSnap?.data() : null;
+    if (!data) return;
     return data;
   } catch (error) {
     logWarn("getDailyStatsDb", error);

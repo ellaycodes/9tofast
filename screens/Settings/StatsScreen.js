@@ -8,6 +8,18 @@ import Section from "../../components/ui/Section";
 import StatsCard from "../../components/ui/StatsCard";
 import { StatsContext } from "../../store/statsLogic/stats-context";
 import OverrideStreakModal from "../../modals/OverrideStreakModal";
+import * as Notifications from "expo-notifications";
+import SectionTitle from "../../components/Settings/SectionTitle";
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => {
+    return {
+      shouldPlaySound: true,
+      shouldSetBadge: true,
+      shouldShowBanner: true,
+    };
+  },
+});
 
 export default function Stats() {
   const { theme } = useContext(AppThemeContext);
@@ -30,6 +42,19 @@ export default function Stats() {
     setOpenModal(false);
   }
 
+  function notificationTester() {
+    Notifications.scheduleNotificationAsync({
+      content: {
+        title: "my first notification",
+        body: "body of my first notification",
+        data: { userName: "esther" },
+      },
+      trigger: {
+        seconds: 1,
+      },
+    });
+  }
+
   return (
     <ScrollView>
       <View style={styles(theme).container}>
@@ -48,7 +73,7 @@ export default function Stats() {
             content={longestStreak}
           ></StatsCard>
         </Section>
-        <Title>Streak Management</Title>
+        <SectionTitle>Streak Management</SectionTitle>
         <SettingsPressable
           icon="local-fire-department"
           label="Get your streak back"
@@ -56,12 +81,17 @@ export default function Stats() {
             canOverride
               ? `Manually add a missed day to maintain your streak. ${"\n"}This feature can only be used once every 30 days`
               : `You have already used Override within the last 30 days. ${"\n"}You can override again in ${
-                  30 - canOverrideStreak().diffInDays
+                  30 - (canOverrideStreak().diffInDays || 0)
                 } days`
           }
           iconColour={canOverride ? theme.success : theme.muted}
           style={{ lineHeight: 0, width: "auto" }}
           onPress={() => (canOverride ? openOverrideStreakModal("open") : null)}
+        />
+        <SettingsPressable
+          icon="person"
+          label="Schedule Notification"
+          onPress={notificationTester}
         />
       </View>
 
