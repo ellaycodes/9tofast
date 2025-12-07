@@ -18,7 +18,7 @@ export default function Stats() {
   const [canOverride, setCanOverride] = useState();
 
   useEffect(() => {
-    setCanOverride(canOverrideStreak());
+    setCanOverride(canOverrideStreak().canOverride);
   }, []);
 
   function openOverrideStreakModal(toggle) {
@@ -55,7 +55,9 @@ export default function Stats() {
           subtitle={
             canOverride
               ? `Manually add a missed day to maintain your streak. ${"\n"}This feature can only be used once every 30 days`
-              : `You have already used Override within the last 30 days. ${"\n"}You won't be able to override again until the next period.`
+              : `You have already used Override within the last 30 days. ${"\n"}You can override again in ${
+                  30 - canOverrideStreak().diffInDays
+                } days`
           }
           iconColour={canOverride ? theme.success : theme.muted}
           style={{ lineHeight: 0, width: "auto" }}

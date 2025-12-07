@@ -104,7 +104,7 @@ function StatsContextProvider({ children }) {
   }
 
   async function overrideStreak() {
-    if (!canOverrideStreak()) return;
+    if (!canOverrideStreak().canOverride) return;
 
     const restoredStreak = previousStreak + 1;
     const newLongestStreak = Math.max(restoredStreak, longestStreak);
@@ -128,7 +128,8 @@ function StatsContextProvider({ children }) {
     const last = new Date(lastOverrideDate);
     const now = new Date(today);
     const diffInDays = Math.floor((now - last) / oneDay);
-    return diffInDays >= cooldownDays;
+    const canOverride = diffInDays >= cooldownDays;
+    return { canOverride, diffInDays};
   }
 
   //Main Streak Effect

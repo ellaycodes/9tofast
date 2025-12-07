@@ -168,7 +168,7 @@ function ScheduleSelect({ settings, setWizardState, token, userName, uid }) {
       authCxt.authenticate(token, userName, uid);
       authCxt.completeOnboarding();
     } catch (err) {
-      console.log(err);
+      console.warn(err);
     }
   }
 
