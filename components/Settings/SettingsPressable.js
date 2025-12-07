@@ -39,7 +39,7 @@ function SettingsPressable({
           <SubtitleText
             size="xs"
             muted
-            style={{ padding: 0, marginVertical: 0, textAlign: "left" }}
+            style={[{ padding: 0, marginVertical: 0, textAlign: "left" }, style]}
           >
             {subtitle}
           </SubtitleText>

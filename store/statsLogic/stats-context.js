@@ -107,7 +107,7 @@ function StatsContextProvider({ children }) {
     if (!canOverrideStreak()) return;
 
     const restoredStreak = previousStreak + 1;
-    const newLongestStreak = Math.max(restored, longestStreak);
+    const newLongestStreak = Math.max(restoredStreak, longestStreak);
 
     setCurrentStreak(restoredStreak);
     setLongestStreak(newLongestStreak);
