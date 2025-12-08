@@ -22,6 +22,7 @@ import {
 import { Text } from "react-native";
 import StatsContextProvider from "./store/statsLogic/stats-context.js";
 import * as Notifications from "expo-notifications";
+import { scheduleStreakNotifications } from "./notifications/streakNotifications.js";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => {
@@ -32,16 +33,6 @@ Notifications.setNotificationHandler({
     };
   },
 });
-
-export async function allowNotificationsAsync() {
-  const settings = await Notifications.getPermissionsAsync();
-  console.log(settings);
-
-  return (
-    settings.granted ||
-    settings.ios?.status === Notifications.IosAuthorizationStatus.PROVISIONAL
-  );
-}
 
 function Navigator() {
   const authCxt = useContext(AuthContext);
@@ -108,14 +99,7 @@ function Navigator() {
     };
   }, [authCxt]);
 
-  useEffect(() => {
-    async function setup() {
-      const granted = await Notifications.requestPermissionsAsync();
-      console.log("notification permission:", granted);
-    }
-    setup();
-    allowNotificationsAsync();
-  }, []);
+  scheduleStreakNotifications(["08:00", "20:00"]);
 
   if (loading) {
     return (

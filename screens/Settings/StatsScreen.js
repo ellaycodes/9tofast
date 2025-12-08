@@ -17,6 +17,7 @@ Notifications.setNotificationHandler({
       shouldPlaySound: true,
       shouldSetBadge: true,
       shouldShowBanner: true,
+      shouldShowList: true,
     };
   },
 });
@@ -40,19 +41,6 @@ export default function Stats() {
   async function handleOverride() {
     overrideStreak();
     setOpenModal(false);
-  }
-
-  function notificationTester() {
-    Notifications.scheduleNotificationAsync({
-      content: {
-        title: "my first notification",
-        body: "body of my first notification",
-        data: { userName: "esther" },
-      },
-      trigger: {
-        seconds: 1,
-      },
-    });
   }
 
   return (
@@ -87,11 +75,6 @@ export default function Stats() {
           iconColour={canOverride ? theme.success : theme.muted}
           style={{ lineHeight: 0, width: "auto" }}
           onPress={() => (canOverride ? openOverrideStreakModal("open") : null)}
-        />
-        <SettingsPressable
-          icon="person"
-          label="Schedule Notification"
-          onPress={notificationTester}
         />
       </View>
 
