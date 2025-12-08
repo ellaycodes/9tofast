@@ -1,8 +1,10 @@
 import * as Notifications from "expo-notifications";
+import randomNotificationMessage from "../util/randomNotificationMessage";
 
 export async function scheduleStreakNotifications(times) {
   if (!Array.isArray(times)) return console.warn("Times must be an array");
 
+  await Notifications.cancelAllScheduledNotificationsAsync();
   for (const time of times) {
     const [hour, minute] = time.split(":").map(Number);
 
@@ -11,14 +13,13 @@ export async function scheduleStreakNotifications(times) {
       continue;
     }
 
-    const displayHour = hour % 12 === 0 ? 12 : hour % 12;
-    const period = hour < 12 ? "am" : "pm";
+    const category = hour < 12 ? "morning" : "evening";
+    const { title, body } = randomNotificationMessage(category);
 
-    await Notifications.cancelAllScheduledNotificationsAsync();
     await Notifications.scheduleNotificationAsync({
       content: {
-        title: "Don't let today slip",
-        body: `It's ${displayHour}${period}! Open the app and keep the momentum you've built.`,
+        title,
+        body,
         vibrate: true,
         interruptionLevel: "timeSensitive",
       },

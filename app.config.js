@@ -122,8 +122,9 @@ export default ({ config }) => ({
         icon: "./local/assets/adaptive-icon2.png",
         color: "#ffffff",
         defaultChannel: "default",
-        enableBackgroundRemoteNotifications: false,
+        enableBackgroundRemoteNotifications: true,
       },
     ],
+    "expo-background-task"
   ],
 });
