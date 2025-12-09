@@ -20,6 +20,13 @@ import * as Notifications from "expo-notifications";
 export async function allowNotificationsAsync() {
   const settings = await Notifications.getPermissionsAsync();
 
+  if (
+    !settings.granted &&
+    settings.ios?.status !== Notifications.IosAuthorizationStatus.PROVISIONAL
+  ) {
+    settings = await Notifications.requestPermissionsAsync();
+  }
+
   return (
     settings.granted ||
     settings.ios?.status === Notifications.IosAuthorizationStatus.PROVISIONAL
@@ -34,14 +41,6 @@ function TimerScreen({ navigation }) {
   const [offScheduleTitle, setOffScheduleTitle] = useState("");
 
   const fasting = isFasting();
-
-  useEffect(() => {
-    async function setup() {
-      const granted = await Notifications.requestPermissionsAsync();
-    }
-    setup();
-    allowNotificationsAsync();
-  }, []);
 
   useEffect(() => {
     if (!schedule) return;

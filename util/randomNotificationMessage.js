@@ -1,5 +1,3 @@
-import { StreakMessages } from "../constants/NotificationsMessages";
-
 function randomNotificationMessage(category) {
   const group = messages[category];
   if (!group?.length) return { title: "", body: "" };

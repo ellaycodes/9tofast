@@ -1,27 +1,32 @@
-import { StatusBar } from "expo-status-bar";
-import AuthStack from "./navigation/AuthStack";
-import AppThemeContextProvider, {
-  useAppTheme,
-} from "./store/app-theme-context";
 import { useContext, useEffect, useState } from "react";
+import { Text } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import AuthContextProvider, { AuthContext } from "./store/auth-context";
 import { NavigationContainer } from "@react-navigation/native";
-import AppTabs from "./navigation/AppTabs";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import LoadingOverlay from "./components/ui/LoadingOverlay";
-import FastingContextProvider from "./store/fastingLogic/fasting-context";
 import { Ionicons } from "@expo/vector-icons";
-import { auth, firebaseConfig } from "./firebase/app";
-import { getUser } from "./firebase/users.db.js";
+import * as Notifications from "expo-notifications";
+import { StatusBar } from "expo-status-bar";
 import {
   onAuthStateChanged,
   getIdToken,
   onIdTokenChanged,
 } from "firebase/auth";
-import { Text } from "react-native";
+
+import AuthStack from "./navigation/AuthStack";
+import AppTabs from "./navigation/AppTabs";
+
+import AppThemeContextProvider, {
+  useAppTheme,
+} from "./store/app-theme-context";
+import AuthContextProvider, { AuthContext } from "./store/auth-context";
+import FastingContextProvider from "./store/fastingLogic/fasting-context";
 import StatsContextProvider from "./store/statsLogic/stats-context.js";
-import * as Notifications from "expo-notifications";
+
+import LoadingOverlay from "./components/ui/LoadingOverlay";
+
+import { auth, firebaseConfig } from "./firebase/app";
+import { getUser } from "./firebase/users.db.js";
+
 import { scheduleStreakNotifications } from "./notifications/streakNotifications.js";
 
 Notifications.setNotificationHandler({
@@ -99,7 +104,24 @@ function Navigator() {
     };
   }, [authCxt]);
 
-  scheduleStreakNotifications(["08:00", "20:00"]);
+  useEffect(() => {
+    async function setupNotifications() {
+      const { status } = await Notifications.requestPermissionsAsync();
+      if (status !== "granted") return;
+
+      const alreadyScheduled = await AsyncStorage.getItem(
+        "streakNotifsScheduled"
+      );
+      if (alreadyScheduled) return;
+
+      await scheduleStreakNotifications(["08:00", "20:00"]);
+      await AsyncStorage.setItem("streakNotifsScheduled", "true");
+    }
+
+    if (authCxt.isAuthed && authCxt.onboarded) {
+      setupNotifications();
+    }
+  }, [authCxt.isAuthed, authCxt.onboarded]);
 
   if (loading) {
     return (
