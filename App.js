@@ -61,8 +61,9 @@ function Navigator() {
           }
           const dbDisplayName = userData?.displayName || "";
           const dbAvatarId = userData?.avatarId || null;
+          const authFullName = userData?.fullName || "";
 
-          const authDisplayName = authFullName || "";
+          const authDisplayName = authFullName;
 
           authCxt.authenticate(token, dbDisplayName, uid);
 

@@ -27,7 +27,7 @@ export async function scheduleStreakNotifications(times) {
         repeats: true,
         hour,
         minute,
-        type: SchedulableTriggerInputTypes.DAILY,
+        type: Notifications.SchedulableTriggerInputTypes.DAILY,
       },
     });
   }
