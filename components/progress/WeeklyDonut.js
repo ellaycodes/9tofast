@@ -9,8 +9,10 @@ import {
 } from "react-native";
 import * as dt from "date-fns";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
+
 import { useAppTheme } from "../../store/app-theme-context";
-import useWeeklyStats from "../../store/fastingLogic/useWeeklyStats";
+import { buildWeekPages } from "../../util/progress/dateRanges";
+import { buildDayLookupValue, buildStatsMap } from "../../util/progress/stats";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const CIRCLE_SIZE = Math.floor(SCREEN_WIDTH / 9);
@@ -19,15 +21,10 @@ const CIRCLE_WIDTH = Math.max(4, Math.round(CIRCLE_SIZE * 0.25));
 // helper to build 7-day array for a given week start
 function buildWeekDays(weekStart, statsMap) {
   return Array.from({ length: 7 }).map((_, i) => {
-    const d = dt.addDays(weekStart, i);
-    const key = dt.format(d, "yyyy-MM-dd");
-    const data = statsMap.get(key);
-    return {
-      date: d,
-      percent: data !== undefined ? data.percent : 0,
-      hoursFastedToday: data !== undefined ? data.hoursFastedToday : 0,
-      events: data !== undefined ? data.events : [],
-    };
+    const date = dt.addDays(weekStart, i);
+    const key = dt.format(date, "yyyy-MM-dd");
+    const data = buildDayLookupValue(statsMap.get(key));
+    return { date, ...data };
   });
 }
 
@@ -42,35 +39,14 @@ export default function WeeklyDonut({
   const listRef = useRef(null);
 
   // page index 0 is current week, 1 is previous week, etc
-  const pages = useMemo(() => {
-    // prebuild 12 weeks including current
-    return Array.from({ length: 12 }).map((_, idx) => {
-      const start = dt.startOfWeek(dt.subWeeks(new Date(), idx), {
-        weekStartsOn: 1,
-      });
-      const end = dt.endOfWeek(start, { weekStartsOn: 1 });
-      return { key: dt.format(start, "yyyy-MM-dd"), start, end };
-    });
-  }, []);
+  const pages = useMemo(() => buildWeekPages(12), []);
 
   // map stats to quick lookup
-  const statsMap = useMemo(() => {
-    const m = new Map();
-    weeklyStats.forEach((s) => {
-      const value = {
-        percent: s.percent,
-        hoursFastedToday: s.hoursFastedToday,
-        events: s.events,
-      };
-      m.set(s.day, value);
-    });
-    return m;
-  }, [weeklyStats]);
+  const statsMap = useMemo(() => buildStatsMap(weeklyStats), [weeklyStats]);
 
   // load current week on mount
   // FlatList onViewableItemsChanged will lazy load other weeks as you scroll
   const onViewableItemsChanged = useRef(({ viewableItems }) => {
-    console.log("view", viewableItems);
     if (!viewableItems || !viewableItems.length) return;
     const firstItem = viewableItems[0];
     const first = firstItem ? firstItem.item : undefined;
@@ -209,7 +185,7 @@ const styles = StyleSheet.create({
   weekDay: {
     textAlign: "center",
     fontSize: 12,
-    paddingHorizontal: 8
+    paddingHorizontal: 8,
   },
   circlesRow: {
     flexDirection: "row",

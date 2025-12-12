@@ -13,14 +13,16 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAppTheme } from "../../store/app-theme-context";
 import { useFasting } from "../../store/fastingLogic/fasting-context";
 
-import Ads from "../../components/monetising/Ads";
-
 import WeeklyDonut from "../../components/progress/WeeklyDonut";
 
 import ProgressCalendarModal from "../../modals/ProgressCalendarModal";
 import useInterval from "../../util/useInterval";
 import MainProgess from "../../components/progress/ProgressContent";
 import useWeeklyStats from "../../store/fastingLogic/useWeeklyStats";
+import {
+  buildRecentWeekRanges,
+  getWeekRange,
+} from "../../util/progress/dateRanges";
 
 function ProgressScreen() {
   const { theme } = useAppTheme();
@@ -65,8 +67,7 @@ function ProgressScreen() {
         </Pressable>
       ),
     });
-    const start = dt.startOfWeek(new Date(), { weekStartsOn: 1 });
-    const end = dt.endOfWeek(start, { weekStartsOn: 1 });
+    const { start } = getWeekRange(new Date());
     handleWeekChange(start);
   }, [navigation, theme.text, handleWeekChange, memoStyle]);
 
@@ -85,13 +86,7 @@ function ProgressScreen() {
   const onRefresh = async () => {
     setRefreshing(true);
 
-    const weeks = Array.from({ length: 3 }).map((_, i) => {
-      const start = dt.startOfWeek(dt.subWeeks(new Date(), i), {
-        weekStartsOn: 1,
-      });
-      const end = dt.endOfWeek(start, { weekStartsOn: 1 });
-      return { start, end };
-    });
+    const weeks = buildRecentWeekRanges(3);
 
     for (const w of weeks) {
       await refreshWeeklyStats(w.start, w.end);
