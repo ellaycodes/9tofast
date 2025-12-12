@@ -5,10 +5,10 @@ import * as dt from "date-fns";
 import SubtitleText from "../ui/SubtitleText";
 
 // Chart shows fasting/eating segments for current day based on events array
-function EventsChart({ events = [] }) {
+function EventsChart({ events = [], date }) {
   const { theme } = useAppTheme();
-  const start = dt.startOfDay(new Date()).getTime();
-  const end = dt.endOfDay(new Date()).getTime();
+  const start = dt.startOfDay(date).getTime();
+  const end = dt.endOfDay(date).getTime();
   const total = end - start;
 
   // Filter events within the day and pre-compute segments
@@ -35,7 +35,12 @@ function EventsChart({ events = [] }) {
 
   return (
     <View style={styles.wrapper}>
-      <SubtitleText size="s" style={{textAlign: 'left', margin: 0, padding: 0}} >Timeline:</SubtitleText>
+      <SubtitleText
+        size="s"
+        style={{ textAlign: "left", margin: 0, padding: 0 }}
+      >
+        Timeline:
+      </SubtitleText>
       <View style={styles.container}>
         {segments.map((seg, idx) => (
           <View
@@ -71,7 +76,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     overflow: "hidden",
     width: "100%",
-    marginBottom: 12
+    marginBottom: 12,
   },
   wrapper: {
     width: "100%",

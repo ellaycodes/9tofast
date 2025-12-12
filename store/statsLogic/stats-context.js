@@ -147,16 +147,16 @@ function StatsContextProvider({ children }) {
     if (dayStatus === "same") return;
 
     if (dayStatus === "yesterday") {
-      const qualifies = fastingQualifier(
-        hoursFastedYesterday,
-        fastingGoalHours
-      );
+      // const qualifies = fastingQualifier(
+      //   hoursFastedYesterday,
+      //   fastingGoalHours
+      // );
 
-      if (qualifies) {
-        incrementStreak();
-      } else {
-        breakStreak();
-      }
+      // if (qualifies) {
+      incrementStreak();
+      // } else {
+      //   breakStreak();
+      // }
       return;
     }
 

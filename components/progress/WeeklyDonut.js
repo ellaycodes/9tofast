@@ -1,5 +1,12 @@
-import { useMemo, useRef, useCallback } from "react";
-import { Dimensions, FlatList, StyleSheet, View, Text } from "react-native";
+import { useMemo, useRef, useCallback, useEffect } from "react";
+import {
+  Dimensions,
+  FlatList,
+  StyleSheet,
+  View,
+  Text,
+  Pressable,
+} from "react-native";
 import * as dt from "date-fns";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
 import { useAppTheme } from "../../store/app-theme-context";
@@ -14,20 +21,24 @@ function buildWeekDays(weekStart, statsMap) {
   return Array.from({ length: 7 }).map((_, i) => {
     const d = dt.addDays(weekStart, i);
     const key = dt.format(d, "yyyy-MM-dd");
-    const storedPercent = statsMap.get(key);
+    const data = statsMap.get(key);
     return {
       date: d,
-      percent:
-        storedPercent !== undefined && storedPercent !== null
-          ? storedPercent
-          : 0,
+      percent: data !== undefined ? data.percent : 0,
+      hoursFastedToday: data !== undefined ? data.hoursFastedToday : 0,
+      events: data !== undefined ? data.events : [],
     };
   });
 }
 
-export default function WeeklyDonut({ onWeekChange }) {
+export default function WeeklyDonut({
+  onWeekChange,
+  onDaySelect,
+  weeklyStats,
+  refreshWeeklyStats,
+  selectedDay,
+}) {
   const { theme } = useAppTheme();
-  const { weeklyStats, refreshWeeklyStats } = useWeeklyStats();
   const listRef = useRef(null);
 
   // page index 0 is current week, 1 is previous week, etc
@@ -46,7 +57,11 @@ export default function WeeklyDonut({ onWeekChange }) {
   const statsMap = useMemo(() => {
     const m = new Map();
     weeklyStats.forEach((s) => {
-      const value = s.percent !== undefined && s.percent !== null ? s.percent : 0;
+      const value = {
+        percent: s.percent,
+        hoursFastedToday: s.hoursFastedToday,
+        events: s.events,
+      };
       m.set(s.day, value);
     });
     return m;
@@ -55,6 +70,7 @@ export default function WeeklyDonut({ onWeekChange }) {
   // load current week on mount
   // FlatList onViewableItemsChanged will lazy load other weeks as you scroll
   const onViewableItemsChanged = useRef(({ viewableItems }) => {
+    console.log("view", viewableItems);
     if (!viewableItems || !viewableItems.length) return;
     const firstItem = viewableItems[0];
     const first = firstItem ? firstItem.item : undefined;
@@ -68,6 +84,35 @@ export default function WeeklyDonut({ onWeekChange }) {
     itemVisiblePercentThreshold: 50,
   }).current;
 
+  useEffect(() => {
+    if (!selectedDay || !listRef.current) {
+      return;
+    }
+
+    // start of the selected day's week
+    const targetWeekStart = dt.startOfWeek(selectedDay.date, {
+      weekStartsOn: 1,
+    });
+
+    // find which page index has that week start
+    const index = pages.findIndex((p) =>
+      dt.isSameDay(p.start, targetWeekStart)
+    );
+
+    if (index === -1) {
+      return;
+    }
+
+    try {
+      listRef.current.scrollToIndex({
+        index,
+        animated: true,
+      });
+    } catch (err) {
+      console.warn("scrollToIndex failed", index, err);
+    }
+  }, [selectedDay, pages]);
+
   const renderWeek = useCallback(
     ({ item }) => {
       const days = buildWeekDays(item.start, statsMap);
@@ -79,13 +124,15 @@ export default function WeeklyDonut({ onWeekChange }) {
               <View key={idx} style={[styles.circleWrap]}>
                 <View style={styles.weekRow}>
                   <Text
-                    key={idx}
                     style={[
                       styles.weekDay,
                       {
                         color: theme.text,
                         backgroundColor: dt.isSameDay(day.date, new Date())
                           ? theme.card
+                          : selectedDay &&
+                            dt.isSameDay(day.date, selectedDay?.date)
+                          ? theme.primary200
                           : null,
                         paddingVertical: 6,
                         borderRadius: 100,
@@ -95,17 +142,19 @@ export default function WeeklyDonut({ onWeekChange }) {
                     {dt.format(day.date, "EEEEEE")}
                   </Text>
                 </View>
-                <AnimatedCircularProgress
-                  size={CIRCLE_SIZE}
-                  width={CIRCLE_WIDTH}
-                  fill={Math.min(100, Math.max(0, day.percent))}
-                  tintColor={theme.success}
-                  backgroundColor={theme.secondary100}
-                  lineCap="round"
-                  rotation={0}
-                />
+                <Pressable onPress={() => onDaySelect(day)}>
+                  <AnimatedCircularProgress
+                    key={`${day.date}-${day.percent}`}
+                    size={CIRCLE_SIZE}
+                    width={CIRCLE_WIDTH}
+                    fill={Math.min(100, Math.max(0, day.percent))}
+                    tintColor={theme.success}
+                    backgroundColor={theme.secondary100}
+                    lineCap="round"
+                    rotation={0}
+                  />
+                </Pressable>
                 <Text
-                  key={idx}
                   style={[
                     styles.weekDay,
                     {
@@ -122,7 +171,7 @@ export default function WeeklyDonut({ onWeekChange }) {
         </View>
       );
     },
-    [statsMap, theme]
+    [statsMap, theme, selectedDay]
   );
 
   return (
@@ -130,6 +179,7 @@ export default function WeeklyDonut({ onWeekChange }) {
       ref={listRef}
       data={pages}
       horizontal
+      extraData={{ statsMap, selectedDay }}
       pagingEnabled
       inverted
       showsHorizontalScrollIndicator={false}
@@ -159,7 +209,7 @@ const styles = StyleSheet.create({
   weekDay: {
     textAlign: "center",
     fontSize: 12,
-    flex: 1,
+    paddingHorizontal: 8
   },
   circlesRow: {
     flexDirection: "row",

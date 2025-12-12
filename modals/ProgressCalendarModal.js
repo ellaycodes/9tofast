@@ -13,7 +13,7 @@ import { useMemo, useRef, useState } from "react";
 import useWeeklyStats from "../store/fastingLogic/useWeeklyStats";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
 
-function MonthGrid({ monthDate, theme, statsMap, limitDays }) {
+function MonthGrid({ monthDate, theme, statsMap, limitDays, onDayPress }) {
   const startOfMonth = dt.startOfMonth(monthDate);
 
   const days = useMemo(() => {
@@ -21,20 +21,22 @@ function MonthGrid({ monthDate, theme, statsMap, limitDays }) {
     const count = limitDays ? Math.min(limitDays, total) : total;
     const startDay = dt.getDay(startOfMonth);
     const offset = (startDay + 6) % 7;
+
     return Array.from({ length: offset + count }).map((_, i) => {
       if (i < offset) {
-        return { placeholder: true, date: "", percent: 0 };
+        return { placeholder: true };
       }
+
       const d = dt.addDays(startOfMonth, i - offset);
       const key = dt.format(d, "yyyy-MM-dd");
+      const stat = statsMap.get(key);
 
-      const storedPercent = statsMap.get(key);
       return {
-        date: dt.format(d, "d"),
-        percent:
-          storedPercent !== undefined && storedPercent !== null
-            ? storedPercent
-            : 0,
+        placeholder: false,
+        date: d,
+        percent: stat?.percent ?? 0,
+        hoursFastedToday: stat?.hoursFastedToday ?? 0,
+        events: stat?.events ?? [],
       };
     });
   }, [monthDate, statsMap, limitDays, startOfMonth]);
@@ -49,18 +51,20 @@ function MonthGrid({ monthDate, theme, statsMap, limitDays }) {
                 <Text
                   style={{ color: theme.text, fontSize: 12, paddingBottom: 6 }}
                 >
-                  {item.date}
+                  {dt.format(item.date, "d")}
                 </Text>
-                <AnimatedCircularProgress
-                  size={35}
-                  width={8}
-                  fill={Math.min(100, Math.max(0, item.percent))}
-                  tintColor={theme.success}
-                  backgroundColor={theme.secondary100}
-                  lineCap="round"
-                  rotation={0}
-                  duration={0}
-                />
+                <Pressable onPress={() => onDayPress && onDayPress(item)}>
+                  <AnimatedCircularProgress
+                    size={35}
+                    width={8}
+                    fill={Math.min(100, Math.max(0, item.percent))}
+                    tintColor={theme.success}
+                    backgroundColor={theme.secondary100}
+                    lineCap="round"
+                    rotation={0}
+                    duration={0}
+                  />
+                </Pressable>
               </>
             )}
           </View>
@@ -70,7 +74,11 @@ function MonthGrid({ monthDate, theme, statsMap, limitDays }) {
   );
 }
 
-export default function ProgressCalendarModal({ showModal, onRequestClose }) {
+export default function ProgressCalendarModal({
+  showModal,
+  onRequestClose,
+  onDaySelect,
+}) {
   const { theme } = useAppTheme();
   const { weeklyStats, refreshWeeklyStats } = useWeeklyStats();
   const currentMonthStart = useMemo(() => dt.startOfMonth(new Date()), []);
@@ -114,11 +122,22 @@ export default function ProgressCalendarModal({ showModal, onRequestClose }) {
   const statsMap = useMemo(() => {
     const m = new Map();
     weeklyStats.forEach((s) => {
-      const value = s.percent !== undefined && s.percent !== null ? s.percent : 0;
-      m.set(s.day, value);
+      m.set(s.day, s);
     });
     return m;
   }, [weeklyStats]);
+
+  const handleDayPress = (day) => {
+    if (onDaySelect) {
+      onDaySelect({
+        date: day.date,
+        percent: day.percent,
+        hoursFastedToday: day.hoursFastedToday,
+        events: day.events,
+      });
+    }
+    onRequestClose();
+  };
 
   const renderMonth = ({ item }) => (
     <View style={styles.monthContainer}>
@@ -130,6 +149,7 @@ export default function ProgressCalendarModal({ showModal, onRequestClose }) {
         theme={theme}
         statsMap={statsMap}
         limitDays={item.limit}
+        onDayPress={handleDayPress}
       />
     </View>
   );

@@ -1,5 +1,10 @@
-import { ScrollView, StyleSheet, View, Text, Pressable } from "react-native";
-import { AnimatedCircularProgress } from "react-native-circular-progress";
+import {
+  ScrollView,
+  StyleSheet,
+  View,
+  RefreshControl,
+  Pressable,
+} from "react-native";
 import { useCallback, useEffect, useState, useMemo } from "react";
 import { useNavigation } from "@react-navigation/native";
 import * as dt from "date-fns";
@@ -10,20 +15,23 @@ import { useFasting } from "../../store/fastingLogic/fasting-context";
 
 import Ads from "../../components/monetising/Ads";
 
-import Title from "../../components/ui/Title";
-import SubtitleText from "../../components/ui/SubtitleText";
-
 import WeeklyDonut from "../../components/progress/WeeklyDonut";
-import EventsChart from "../../components/progress/EventsChart";
 
 import ProgressCalendarModal from "../../modals/ProgressCalendarModal";
 import useInterval from "../../util/useInterval";
+import MainProgess from "../../components/progress/ProgressContent";
+import useWeeklyStats from "../../store/fastingLogic/useWeeklyStats";
 
 function ProgressScreen() {
-  const { theme, themeName } = useAppTheme();
+  const { theme } = useAppTheme();
+  const { weeklyStats, refreshWeeklyStats } = useWeeklyStats();
   const { schedule, hoursFastedToday, events } = useFasting();
   const [, setNow] = useState(Date.now());
   const [openModal, setOpenModal] = useState(false);
+  const [selectedDay, setSelectedDay] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [donutKey, setDonutKey] = useState(0);
+
   const navigation = useNavigation();
 
   const memoStyle = useMemo(() => styles(theme), [theme]);
@@ -70,64 +78,66 @@ function ProgressScreen() {
     Math.max(0, (hoursFastedToday / Math.max(fastingHours, 1)) * 100)
   );
 
+  function handleDaySelect(dayData) {
+    setSelectedDay(dayData);
+  }
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+
+    const weeks = Array.from({ length: 3 }).map((_, i) => {
+      const start = dt.startOfWeek(dt.subWeeks(new Date(), i), {
+        weekStartsOn: 1,
+      });
+      const end = dt.endOfWeek(start, { weekStartsOn: 1 });
+      return { start, end };
+    });
+
+    for (const w of weeks) {
+      await refreshWeeklyStats(w.start, w.end);
+    }
+
+    // clear selection
+    setSelectedDay(null);
+
+    // force WeeklyDonut to remount and go back to initialScrollIndex=0
+    setDonutKey((k) => k + 1);
+
+    setRefreshing(false);
+  };
+
   return (
-    <ScrollView>
+    <ScrollView
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
       <View style={memoStyle.container}>
-        <WeeklyDonut onWeekChange={handleWeekChange} />
-        <Title>Today, {dt.format(new Date(), "d MMM")}</Title>
-        <AnimatedCircularProgress
-          size={250}
-          width={50}
-          fill={percent}
-          tintColor={
-            percent < 20
-              ? theme.muted
-              : percent > 20 && percent < 50
-              ? theme.primary100
-              : theme.success
-          }
-          backgroundColor={theme.secondary100}
-          style={memoStyle.mainProgress}
-          rotation={0}
-          lineCap="round"
-          duration={2000}
-          renderCap={({ center }) => (
-            <Ionicons
-              name="flame"
-              size={36}
-              color={theme.secondary200}
-              style={{
-                position: "absolute",
-                left: center.x - 16,
-                top: center.y - 16,
-              }}
-            />
-          )}
-        >
-          {() => (
-            <Text style={memoStyle.hours}>
-              {Math.round(hoursFastedToday)}
-              <Text style={memoStyle.unit}> HOURS</Text>
-            </Text>
-          )}
-        </AnimatedCircularProgress>
-        <View style={memoStyle.inner}>
-          <SubtitleText style={memoStyle.text} size="xl">
-            {themeName === "Desk" ? "Total:" : "Fasted Today:"}
-          </SubtitleText>
-          <Text style={memoStyle.hours}>
-            {Math.round(hoursFastedToday)}
-            <Text style={memoStyle.slashAndTotal}>/{fastingHours}</Text>
-            <Text style={memoStyle.unit}> HOURS</Text>
-          </Text>
-        </View>
-        {/*<Ads />*/}
-        <EventsChart events={events} />
+        <WeeklyDonut
+          weeklyStats={weeklyStats}
+          refreshWeeklyStats={refreshWeeklyStats}
+          onWeekChange={handleWeekChange}
+          onDaySelect={handleDaySelect}
+          selectedDay={selectedDay}
+          key={donutKey}
+        />
+        <MainProgess
+          selectedDay={selectedDay}
+          defaultToday={{
+            percent,
+            hoursFastedToday,
+            fastingHours,
+            events,
+            date: new Date(),
+          }}
+          fastingHours={fastingHours}
+        />
       </View>
 
       <ProgressCalendarModal
         showModal={openModal}
         onRequestClose={() => setOpenModal((prev) => !prev)}
+        onDaySelect={handleDaySelect}
       />
     </ScrollView>
   );
