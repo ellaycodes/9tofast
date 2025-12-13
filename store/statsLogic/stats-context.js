@@ -16,6 +16,8 @@ export const StatsContext = createContext({
   breakStreak: () => {},
   overrideStreak: () => {},
   canOverrideStreak: () => {},
+  loadStreak: () => {},
+  statsLogout: async () => {},
 });
 
 function StatsContextProvider({ children }) {
@@ -35,27 +37,28 @@ function StatsContextProvider({ children }) {
 
   const STREAK_DATA = "streak_data";
 
-  //Load Data on app open
-  useEffect(() => {
-    async function loadStreak() {
-      if (!auth.currentUser) return;
+  async function loadStreak() {
+    if (!auth.currentUser) return;
 
-      let dbData;
+    let dbData;
 
-      dbData = await getStreak(auth?.currentUser?.uid);
-      if (!dbData) {
-        const raw = await AsyncStorage.getItem(STREAK_DATA);
-        if (!raw) return;
-        dbData = JSON.parse(raw);
-      }
+    dbData = await getStreak(auth?.currentUser?.uid);
 
-      setCurrentStreak(dbData.currentStreak ?? 0);
-      setLongestStreak(dbData.longestStreak ?? 0);
-      setPreviousStreak(dbData.previousStreak ?? 0);
-      setLastStreakDate(dbData.lastStreakDate ?? null);
-      setLastOverrideDate(dbData.lastOverrideDate ?? null);
+    if (!dbData) {
+      const raw = await AsyncStorage.getItem(STREAK_DATA);
+      if (!raw) return;
+      dbData = JSON.parse(raw);
     }
 
+    setCurrentStreak(dbData.currentStreak ?? 0);
+    setLongestStreak(dbData.longestStreak ?? 0);
+    setPreviousStreak(dbData.previousStreak ?? 0);
+    setLastStreakDate(dbData.lastStreakDate ?? null);
+    setLastOverrideDate(dbData.lastOverrideDate ?? null);
+  }
+
+  //Load Data on app open
+  useEffect(() => {
     async function yesterdayHoursFromDb() {
       const yesterdayData = await yesterdayHoursFasted();
       setHoursFastedYesterday(yesterdayData);
@@ -128,13 +131,39 @@ function StatsContextProvider({ children }) {
   }
 
   function canOverrideStreak(cooldownDays = 30) {
-    if (!lastOverrideDate) return true;
-    const last = new Date(lastOverrideDate);
-    const now = new Date(today);
-    const diffInDays = Number(Math.floor((now - last) / oneDay));
-
-    const canOverride = diffInDays >= cooldownDays;
+    let canOverride;
+    let diffInDays;
+    if (lastOverrideDate === null || lastOverrideDate === undefined) {
+      canOverride = true;
+      diffInDays = null;
+    } else {
+      const last = new Date(lastOverrideDate);
+      const now = new Date(today);
+      diffInDays = Number(Math.floor((now - last) / oneDay));
+      canOverride = diffInDays >= cooldownDays;
+    }
     return { canOverride, diffInDays };
+  }
+
+  async function statsLogout() {
+    setCurrentStreak(0);
+    setLongestStreak(0);
+    setPreviousStreak(0);
+    setLastStreakDate(null);
+    setLastOverrideDate(null);
+
+    const streakData = {
+      currentStreak,
+      longestStreak,
+      previousStreak,
+      lastStreakDate,
+      lastOverrideDate,
+    };
+
+    await setStreak(auth.currentUser.uid, streakData);
+    AsyncStorage.removeItem(STREAK_DATA);
+
+    return true;
   }
 
   //Main Streak Effect
@@ -175,6 +204,8 @@ function StatsContextProvider({ children }) {
     breakStreak: breakStreak,
     overrideStreak: overrideStreak,
     canOverrideStreak: canOverrideStreak,
+    loadStreak: loadStreak,
+    statsLogout: statsLogout,
   };
 
   return (

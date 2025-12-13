@@ -7,7 +7,6 @@ import SubtitleText from "../../components/ui/SubtitleText";
 import SettingsRow from "../../components/Settings/SettingsRow";
 import PrimaryButton from "../../components/ui/PrimaryButton";
 import Input from "../../components/Auth/Input";
-import { updateProfile } from "firebase/auth";
 import { auth } from "../../firebase/app";
 import { updateUser } from "../../firebase/users.db.js";
 import AvatarPickerModal from "../../modals/AvatarPickerModal";

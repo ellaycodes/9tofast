@@ -13,17 +13,20 @@ import { auth } from "../../firebase/app";
 import { deleteCurrentUser, updateUser } from "../../firebase/users.db.js";
 import AvatarSegment from "../ui/AvatarSegment";
 import { useFasting } from "../../store/fastingLogic/fasting-context.js";
+import { StatsContext } from "../../store/statsLogic/stats-context.js";
 
 function AuthedProfile({ emailAddress }) {
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const authCxt = useContext(AuthContext);
+  const { statsLogout } = useContext(StatsContext);
   const navigation = useNavigation();
   const { theme, setThemeName } = useAppTheme();
   const { setSchedule } = useFasting();
 
   async function logoutHandler() {
+    await statsLogout();
     try {
       authCxt.logout();
       setThemeName("Original", true);
@@ -44,47 +47,46 @@ function AuthedProfile({ emailAddress }) {
     }
   }
 
-async function deleteHandler() {
-  try {
-    const user = auth.currentUser;
-    if (!user) return;
+  async function deleteHandler() {
+    try {
+      const user = auth.currentUser;
+      if (!user) return;
 
-    const uid = user.uid;
-    const providerId = user.providerData[0]?.providerId;
+      const uid = user.uid;
+      const providerId = user.providerData[0]?.providerId;
 
-    // Google account: mark for deletion instead of deleting immediately
-    if (providerId === "google.com") {
-      Alert.alert(
-        "Account Scheduled for Deletion",
-        "Your account has been marked for deletion and will be processed soon.",
-        [
-          {
-            text: "OK",
-            onPress: async () => {
-              try {
-                await updateUser(uid, { markedForDeletion: true });
-                authCxt.logout();
-              } catch (err) {
-                Alert.alert(
-                  "We couldn’t schedule deletion just now. Please try again or contact support."
-                );
-              }
+      // Google account: mark for deletion instead of deleting immediately
+      if (providerId === "google.com") {
+        Alert.alert(
+          "Account Scheduled for Deletion",
+          "Your account has been marked for deletion and will be processed soon.",
+          [
+            {
+              text: "OK",
+              onPress: async () => {
+                try {
+                  await updateUser(uid, { markedForDeletion: true });
+                  authCxt.logout();
+                } catch (err) {
+                  Alert.alert(
+                    "We couldn’t schedule deletion just now. Please try again or contact support."
+                  );
+                }
+              },
             },
-          },
-        ]
-      );
+          ]
+        );
+        return;
+      }
+      await deleteUser(user);
+      await deleteCurrentUser(uid);
+
+      authCxt.logout();
       return;
+    } catch (err) {
+      Alert.alert("Delete error. Please contact support.");
     }
-    await deleteUser(user);
-    await deleteCurrentUser(uid);
-
-    authCxt.logout();
-    return;
-
-  } catch (err) {
-    Alert.alert("Delete error. Please contact support.");
   }
-}
 
   async function changePasswordHandler(password) {
     const passwordIsValid = password.newPassword.length > 6;

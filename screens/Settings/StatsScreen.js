@@ -10,6 +10,7 @@ import { StatsContext } from "../../store/statsLogic/stats-context";
 import OverrideStreakModal from "../../modals/OverrideStreakModal";
 import * as Notifications from "expo-notifications";
 import SectionTitle from "../../components/Settings/SectionTitle";
+import { useNavigation } from "@react-navigation/native";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => {
@@ -29,6 +30,7 @@ export default function Stats() {
 
   const [openModal, setOpenModal] = useState(false);
   const [canOverride, setCanOverride] = useState();
+  const navigation = useNavigation()
 
   useEffect(() => {
     setCanOverride(canOverrideStreak().canOverride);
@@ -41,6 +43,7 @@ export default function Stats() {
   async function handleOverride() {
     overrideStreak();
     setOpenModal(false);
+    navigation.goBack()
   }
 
   return (

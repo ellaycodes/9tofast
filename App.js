@@ -20,7 +20,7 @@ import AppThemeContextProvider, {
 } from "./store/app-theme-context";
 import AuthContextProvider, { AuthContext } from "./store/auth-context";
 import FastingContextProvider from "./store/fastingLogic/fasting-context";
-import StatsContextProvider from "./store/statsLogic/stats-context.js";
+import StatsContextProvider, { StatsContext } from "./store/statsLogic/stats-context.js";
 
 import LoadingOverlay from "./components/ui/LoadingOverlay";
 
@@ -42,10 +42,12 @@ Notifications.setNotificationHandler({
 function Navigator() {
   const authCxt = useContext(AuthContext);
   const [loading, setLoading] = useState(true);
+  const { loadStreak } = useContext(StatsContext);
 
   useEffect(() => {
     const timeout = setTimeout(() => setLoading(false), 8000);
     Ionicons.loadFont();
+    loadStreak();
 
     const unsubAuth = onAuthStateChanged(auth, async (user) => {
       if (user) {

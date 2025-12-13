@@ -62,7 +62,6 @@ function SettingsHomeScreen({ navigation }) {
               : authCxt.username
           }
           onPress={profileHandler}
-          style={{ paddingBottom: 20 }}
         />
         {authCxt.emailAddress ? null : (
           <SettingsPressable
@@ -71,13 +70,13 @@ function SettingsHomeScreen({ navigation }) {
             onPress={manageAccountHandler}
           />
         )}
+      </View>
+      <View>
         <SettingsPressable
           label="Stats"
           icon="query-stats"
           onPress={statsScreenHandler}
         />
-      </View>
-      <View>
         <SectionTitle>Preferences</SectionTitle>
         <SettingsPressable
           label="Theme"

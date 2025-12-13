@@ -35,7 +35,7 @@ export default ({ config }) => ({
   owner: "horizon9tofast",
   scheme:
     "com.googleusercontent.apps.128918843006-hrpgvhahugjeq9868t1ln3n7euo4l9ar",
-  version: "1.1.0",
+  version: "1.2.0",
   orientation: "portrait",
   icon: "./assets/icon2.png",
   backgroundColor: "#0F2524",

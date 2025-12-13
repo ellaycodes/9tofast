@@ -7,8 +7,8 @@ export default function useGoogleAuth() {
     iosClientId: Constants.expoConfig.extra.iosClientId,
     expoClientId: Constants.expoConfig.extra.expoClientId,
     redirectUri: makeRedirectUri({
-      useProxy: true
-    })
+      useProxy: Constants.executionEnvironment === "expo",
+    }),
   });
 
   return { request, response, promptAsync };

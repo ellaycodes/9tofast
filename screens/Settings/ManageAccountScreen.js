@@ -3,12 +3,15 @@ import SettingsPressable from "../../components/Settings/SettingsPressable";
 import { AuthContext } from "../../store/auth-context";
 import { ScrollView, StyleSheet } from "react-native";
 import { useFasting } from "../../store/fastingLogic/fasting-context";
+import { StatsContext } from "../../store/statsLogic/stats-context";
 
 function ManageAccountScreen({ navigation }) {
   const authCxt = useContext(AuthContext);
+  const { statsLogout } = useContext(StatsContext);
   const { clearFast, setBaselineAnchor } = useFasting();
 
-  function logoutHandler() {
+  async function logoutHandler() {
+    await statsLogout();
     clearFast();
     return authCxt.logout();
   }
@@ -16,6 +19,7 @@ function ManageAccountScreen({ navigation }) {
   function clearAllHandler() {
     clearFast();
     setBaselineAnchor(Date.now());
+    statsLogout();
     navigation.navigate("TimerScreen");
   }
 

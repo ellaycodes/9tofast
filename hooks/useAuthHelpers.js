@@ -5,11 +5,13 @@ import { getPreferences } from "../firebase/fasting.db.js";
 import randomUsername from "../util/randomUsername.js";
 import { useFasting } from "../store/fastingLogic/fasting-context.js";
 import { getIdToken } from "firebase/auth";
+import { StatsContext } from "../store/statsLogic/stats-context.js";
 
 export default function useAuthHelpers() {
   const authCxt = useContext(AuthContext);
   const { setSchedule } = useFasting();
   const username = randomUsername();
+  const { loadStreak } = useContext(StatsContext);
 
   async function handleExistingUserLogin(user, existingUser) {
     const token = await getIdToken(user, true);
@@ -19,6 +21,7 @@ export default function useAuthHelpers() {
     authCxt.setEmailAddress(existingUser.email);
     authCxt.setOnboarded(true);
     authCxt.updateFullName(existingUser.fullName);
+    loadStreak();
 
     if (existingUser.avatarId) {
       authCxt.updateAvatarId(existingUser.avatarId);
