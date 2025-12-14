@@ -8,12 +8,13 @@ import ChangePasswordModal from "../../modals/ChangePasswordModal";
 import LoadingOverlay from "../ui/LoadingOverlay";
 import FlatButton from "../ui/FlatButton";
 import { useNavigation } from "@react-navigation/native";
-import { updatePassword, deleteUser } from "firebase/auth";
+import { updatePassword, deleteUser, unlink } from "firebase/auth";
 import { auth } from "../../firebase/app";
 import { deleteCurrentUser, updateUser } from "../../firebase/users.db.js";
 import AvatarSegment from "../ui/AvatarSegment";
 import { useFasting } from "../../store/fastingLogic/fasting-context.js";
 import { StatsContext } from "../../store/statsLogic/stats-context.js";
+import Title from "../ui/Title.js";
 
 function AuthedProfile({ emailAddress }) {
   const [showModal, setShowModal] = useState(false);
@@ -47,43 +48,71 @@ function AuthedProfile({ emailAddress }) {
     }
   }
 
+  function confirmDeleteAccount() {
+    Alert.alert(
+      "Delete account?",
+      "This will permanently delete your account and all associated data. This action cannot be undone.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete account",
+          style: "destructive",
+          onPress: deleteHandler,
+        },
+      ]
+    );
+  }
+
   async function deleteHandler() {
     try {
       const user = auth.currentUser;
       if (!user) return;
 
       const uid = user.uid;
-      const providerId = user.providerData[0]?.providerId;
+      const providerIds = user.providerData.map((p) => p.providerId);
 
-      // Google account: mark for deletion instead of deleting immediately
-      if (providerId === "google.com") {
-        Alert.alert(
-          "Account Scheduled for Deletion",
-          "Your account has been marked for deletion and will be processed soon.",
-          [
-            {
-              text: "OK",
-              onPress: async () => {
-                try {
-                  await updateUser(uid, { markedForDeletion: true });
-                  authCxt.logout();
-                } catch (err) {
-                  Alert.alert(
-                    "We couldn’t schedule deletion just now. Please try again or contact support."
-                  );
-                }
-              },
-            },
-          ]
-        );
-        return;
-      }
-      await deleteUser(user);
       await deleteCurrentUser(uid);
 
-      authCxt.logout();
-      return;
+      // Unlink all providers first
+      for (const providerId of providerIds) {
+        try {
+          await unlink(user, providerId);
+        } catch (err) {
+          console.warn("DELETE UNLINKING ERROR:", err);
+          Alert.alert("Delete error. Please contact support.");
+        }
+      }
+
+      await deleteUser(user);
+
+      Alert.alert(
+        "Account deleted",
+        "Your account has been deleted successfully.\n\nYou can sign up again at any time using Apple, Google, or email. This will create a brand new account.",
+        [
+          {
+            text: "OK",
+            onPress: async () => {
+              await statsLogout();
+              authCxt.logout();
+            },
+          },
+        ]
+      );
     } catch (err) {
+      if (err.code === "auth/requires-recent-login") {
+        Alert.alert(
+          "Please reauthenticate",
+          "For security reasons, please sign in again and retry account deletion."
+        );
+        await statsLogout();
+        authCxt.logout();
+        return;
+      }
+
+      console.warn("DELETE ERROR:", err);
       Alert.alert("Delete error. Please contact support.");
     }
   }
@@ -105,6 +134,14 @@ function AuthedProfile({ emailAddress }) {
       setShowModal(false);
       Alert.alert("Success", "Password updated.");
     } catch (error) {
+      if (error.code === "auth/requires-recent-login") {
+        Alert.alert(
+          "Please reauthenticate",
+          "For security reasons, please sign in again before changing your password."
+        );
+        return;
+      }
+
       const message =
         error &&
         error.response &&
@@ -127,41 +164,64 @@ function AuthedProfile({ emailAddress }) {
   }
 
   if (loading) {
-    return <LoadingOverlay>Changing Password</LoadingOverlay>;
+    return <LoadingOverlay>Please Wait...</LoadingOverlay>;
   }
 
   return (
-    <ScrollView>
-      <View>
-        <AvatarSegment small={false} avatarId={authCxt.avatarId} />
-        <SubtitleText muted style={{ marginTop: 2 }} size="m">
-          {authCxt.username}
-        </SubtitleText>
-        <FlatButton
-          onPress={() => navigation.navigate("EditProfileScreen")}
-          style={{ padding: 0, margin: 0 }}
-        >
-          Edit Profile
-        </FlatButton>
-      </View>
-      <View style={styles(theme).profileInfoContainer}>
-        <SettingsPressable label="Email" icon="email" subtitle={emailAddress} />
-        <SettingsPressable
-          icon="password"
-          onPress={() => modalToggle("open")}
-          label="Change Password"
-        />
-        <SettingsPressable
-          icon="logout"
-          onPress={logoutHandler}
-          label="Logout"
-        />
-        <SettingsPressable
+    <ScrollView contentContainerStyle={{ paddingBottom: 40, flexGrow: 1 }}>
+      <View style={styles(theme).container}>
+        <View>
+          <View>
+            <AvatarSegment small={false} avatarId={authCxt.avatarId} />
+            <SubtitleText muted style={{ marginTop: 2 }} size="m">
+              {authCxt.username}
+            </SubtitleText>
+            <FlatButton
+              onPress={() => navigation.navigate("EditProfileScreen")}
+              style={{ padding: 0, margin: 0 }}
+            >
+              Edit Profile
+            </FlatButton>
+          </View>
+          <View>
+            <SettingsPressable
+              label="Email"
+              icon="email"
+              subtitle={emailAddress}
+            />
+            <SettingsPressable
+              icon="password"
+              onPress={() => modalToggle("open")}
+              label="Change Password"
+            />
+            <SettingsPressable
+              icon="logout"
+              onPress={logoutHandler}
+              label="Logout"
+            />
+            {/* <SettingsPressable
           icon="delete"
-          onPress={deleteHandler}
+          onPress={confirmDeleteAccount}
           label="Delete Account"
           iconColour={theme.error}
-        />
+        /> */}
+          </View>
+        </View>
+        <View>
+          <Title size="20" style={{ paddingLeft: 0, color: theme.error }}>
+            Danger Zone
+          </Title>
+          <View style={styles(theme).divider} />
+          <View style={styles(theme).dangerZone}>
+            <FlatButton
+              size="s"
+              onPress={confirmDeleteAccount}
+              style={{ textAlign: "left", paddingLeft: 0 }}
+            >
+              Delete Account
+            </FlatButton>
+          </View>
+        </View>
       </View>
 
       <ChangePasswordModal
@@ -184,7 +244,17 @@ const styles = (theme) =>
       padding: 20,
       marginTop: 24,
     },
-    profileInfoContainer: {
+    container: {
       margin: 24,
+      flex: 1,
+      justifyContent: "space-between",
+    },
+    dangerZone: {
+      alignSelf: "flex-start",
+    },
+    divider: {
+      height: 1,
+      backgroundColor: theme.border || theme.secondary200,
+      marginBottom: 12,
     },
   });

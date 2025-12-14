@@ -96,6 +96,7 @@ function PreAuthScreen({ navigation }) {
 
   async function appleHandler() {
     setIsAuthing(true);
+    console.log("APPLE HANDLER BEGIN");
     try {
       const appleResult = await AppleAuthentication.signInAsync({
         requestedScopes: [
@@ -104,22 +105,32 @@ function PreAuthScreen({ navigation }) {
         ],
       });
 
+      console.log("APPLE HANDLER - RESULT", appleResult);
+
       const provider = new OAuthProvider("apple.com");
 
       const credential = provider.credential({
         idToken: appleResult.identityToken,
       });
 
+      console.log("APPLE HANDLER - CREDENTIAL", credential);
+
       const { user } = await signInWithCredential(auth, credential);
+
+      console.log("APPLE HANDLER - USER", user);
 
       const fullName =
         appleResult.fullName?.givenName && appleResult.fullName?.familyName
           ? `${appleResult.fullName.givenName} ${appleResult.fullName.familyName}`
           : null;
 
+      console.log("APPLE HANDLER - FULLNAME", fullName);
+
       const email = appleResult.email || user.email;
 
       const existing = await getUser(user.uid);
+
+      console.log("APPLE HANDLER - EXISTING?", existing);
 
       if (!existing) {
         await handleNewProviderUser(user, email, fullName, navigation);
@@ -129,9 +140,11 @@ function PreAuthScreen({ navigation }) {
     } catch (err) {
       setIsAuthing(false);
       if (err.code === "ERR_REQUEST_CANCELED") return;
+      console.warn("APPLE ERROR HERE =>", err);
       Alert.alert(
-        "There was an error signing you in",
-        "Please try again or contact support if the issue persists."
+        "There was an error signing you in with Apple.",
+        err.code
+        //  "Please try signing in a different way or contact support if the issue persists."
       );
     } finally {
       setIsAuthing(false);
