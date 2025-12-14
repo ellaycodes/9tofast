@@ -96,7 +96,6 @@ function PreAuthScreen({ navigation }) {
 
   async function appleHandler() {
     setIsAuthing(true);
-    console.log("APPLE HANDLER BEGIN");
     try {
       const appleResult = await AppleAuthentication.signInAsync({
         requestedScopes: [
@@ -105,32 +104,22 @@ function PreAuthScreen({ navigation }) {
         ],
       });
 
-      console.log("APPLE HANDLER - RESULT", appleResult);
-
       const provider = new OAuthProvider("apple.com");
 
       const credential = provider.credential({
         idToken: appleResult.identityToken,
       });
 
-      console.log("APPLE HANDLER - CREDENTIAL", credential);
-
       const { user } = await signInWithCredential(auth, credential);
-
-      console.log("APPLE HANDLER - USER", user);
 
       const fullName =
         appleResult.fullName?.givenName && appleResult.fullName?.familyName
           ? `${appleResult.fullName.givenName} ${appleResult.fullName.familyName}`
           : null;
 
-      console.log("APPLE HANDLER - FULLNAME", fullName);
-
       const email = appleResult.email || user.email;
 
       const existing = await getUser(user.uid);
-
-      console.log("APPLE HANDLER - EXISTING?", existing);
 
       if (!existing) {
         await handleNewProviderUser(user, email, fullName, navigation);

@@ -34,7 +34,7 @@ export default ({ config }) => ({
   slug: "9tofast",
   owner: "horizon9tofast",
   scheme:
-    "com.googleusercontent.apps.128918843006-hrpgvhahugjeq9868t1ln3n7euo4l9ar",
+    "com.googleusercontent.apps.438582901138-7lo7q4ggvn1q03mdmtv51ivphdng6sro",
   version: "1.2.0",
   orientation: "portrait",
   icon: "./assets/icon2.png",
@@ -53,7 +53,7 @@ export default ({ config }) => ({
   },
   assetBundlePatterns: ["**/*"],
   ios: {
-    buildNumber: "1.1.0",
+    buildNumber: "1.2.0",
     supportsTablet: true,
     bundleIdentifier: getUniqueIdentifier(),
     usesAppleSignIn: true,

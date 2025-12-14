@@ -6,9 +6,7 @@ export default function useGoogleAuth() {
   const [request, response, promptAsync] = Google.useAuthRequest({
     iosClientId: Constants.expoConfig.extra.iosClientId,
     expoClientId: Constants.expoConfig.extra.expoClientId,
-    redirectUri: makeRedirectUri({
-      useProxy: Constants.executionEnvironment === "expo",
-    }),
+    redirectUri: makeRedirectUri(),
   });
 
   return { request, response, promptAsync };
