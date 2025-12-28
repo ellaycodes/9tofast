@@ -77,10 +77,12 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     width: "100%",
     marginBottom: 12,
+    
   },
   wrapper: {
     width: "100%",
     marginVertical: 12,
+    paddingHorizontal: 20,
   },
   axis: {
     flexDirection: "row",

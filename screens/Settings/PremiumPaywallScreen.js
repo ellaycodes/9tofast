@@ -1,15 +1,37 @@
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, Platform } from "react-native";
+import Purchases, { LOG_LEVEL } from "react-native-purchases";
 import Title from "../../components/ui/Title";
 import SubtitleText from "../../components/ui/SubtitleText";
 import SettingsPressable from "../../components/Settings/SettingsPressable";
 import PrimaryButton from "../../components/ui/PrimaryButton";
 import FlatButton from "../../components/ui/FlatButton";
 import { useAppTheme } from "../../store/app-theme-context";
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
+import Constants from "expo-constants";
 
 function PremiumPaywallScreen() {
   const { theme } = useAppTheme();
   const memoStyle = useMemo(() => styles(theme), [theme]);
+
+  useEffect(() => {
+    Purchases.setLogLevel(LOG_LEVEL.VERBOSE);
+
+    // Platform-specific API keys
+    const iosApiKey = Constants.expoConfig.extra.revenueCatApiKey;
+
+    if (Platform.OS === "ios") {
+      Purchases.configure({ apiKey: iosApiKey });
+    } else if (Platform.OS === "android") {
+      Purchases.configure({ apiKey: androidApiKey });
+    }
+  }, []);
+
+  function handleContinuePremium() {
+    console.log(Purchases.LOG_LEVEL)
+  }
+
+  function handleRestorePurchase() {}
+  
   return (
     <View style={memoStyle.container}>
       <View>
@@ -25,13 +47,13 @@ function PremiumPaywallScreen() {
 
         <View style={memoStyle.pricesContainer}>
           <SubtitleText style={memoStyle.SubtitleText}>
-            £1.49 Per Month
+            £0.49 Per Month
           </SubtitleText>
           <SubtitleText style={memoStyle.SubtitleText}>
-            £14.99 Annual
+            £4.99 Annual
           </SubtitleText>
           <SubtitleText style={memoStyle.SubtitleText}>
-            £19.99 Forever
+            £9.99 Forever
           </SubtitleText>
         </View>
 
@@ -43,13 +65,13 @@ function PremiumPaywallScreen() {
       </View>
 
       <View>
-        <SubtitleText>Coming Soon</SubtitleText>
-        {/* <PrimaryButton onPress={() => console.log("TODO")} lowlight>
+        {/* <SubtitleText>Coming Soon</SubtitleText> */}
+        <PrimaryButton onPress={handleContinuePremium} lowlight>
           Continue
         </PrimaryButton>
-        <FlatButton onPress={() => console.log("TODO")} inline>
+        <FlatButton onPress={handleRestorePurchase} inline>
           Restore Purchase
-        </FlatButton> */}
+        </FlatButton>
       </View>
     </View>
   );

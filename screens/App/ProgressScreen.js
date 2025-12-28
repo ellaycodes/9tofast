@@ -142,41 +142,8 @@ export default ProgressScreen;
 
 const styles = (theme) =>
   StyleSheet.create({
-    container: {
-      marginHorizontal: 20,
-    },
-    mainProgress: {
-      alignSelf: "center",
-      marginVertical: 10,
-    },
-    inner: {
-      alignItems: "flex-start",
-      justifyContent: "center",
-    },
-    hours: {
-      fontSize: 32,
-      fontWeight: "500",
-      color: theme.primary200,
-    },
     headerButton: {
       paddingHorizontal: 10,
       flex: 1,
-    },
-    text: {
-      textAlign: "left",
-      padding: 0,
-      margin: 0,
-      fontWeight: "bold",
-    },
-    slashAndTotal: {
-      fontSize: 32,
-      fontWeight: "400",
-      color: theme.primary200,
-    },
-    unit: {
-      fontSize: 16,
-      fontWeight: "600",
-      color: theme.primary200,
-      textTransform: "uppercase",
-    },
+    }
   });

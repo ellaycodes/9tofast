@@ -59,6 +59,7 @@ export default function MainProgess({
           </Text>
         )}
       </AnimatedCircularProgress>
+      <Ads />
       <View style={memoStyle.inner}>
         <SubtitleText style={memoStyle.text} size="xl">
           {themeName === "Desk" ? "Total:" : "Fasted Today:"}
@@ -69,7 +70,6 @@ export default function MainProgess({
           <Text style={memoStyle.unit}> HOURS</Text>
         </Text>
       </View>
-      {/*<Ads />*/}
       <EventsChart events={day.events} date={day.date} />
     </>
   );
@@ -95,6 +95,7 @@ const styles = (theme) =>
     inner: {
       alignItems: "flex-start",
       justifyContent: "center",
+      marginHorizontal: 20,
     },
     text: {
       textAlign: "left",
@@ -106,5 +107,5 @@ const styles = (theme) =>
       fontSize: 32,
       fontWeight: "400",
       color: theme.primary200,
-    },
+    }
   });

@@ -126,10 +126,10 @@ function TimerScreen({ navigation }) {
             dt.format(dt.parse(schedule.end, "HH:mm", new Date()), "p")}
         </SubtitleText>
       )}
-      <View>
+      <Ads />
+      <View style={memoStyle.buttonsContainer}>
         <ButtonsContainer fast={fasting} withinFasting={inside} />
       </View>
-      {/* <Ads />*/}
     </View>
   ) : (
     <View style={[memoStyle.container, { justifyContent: "center" }]}>
@@ -151,12 +151,13 @@ export default TimerScreen;
 const styles = (theme, themeName) =>
   StyleSheet.create({
     container: {
-      marginHorizontal: 20,
+      // marginHorizontal: 20,
     },
     countdownContainer: {
       flexDirection: "row",
       justifyContent: "space-between",
       gap: "5%",
+      marginHorizontal: 20,
     },
     title: {
       marginBottom: 12,
@@ -168,6 +169,9 @@ const styles = (theme, themeName) =>
         fontSize: 14,
         marginTop: 12,
       }),
+    },
+    buttonsContainer: {
+      marginHorizontal: 20,
     },
     fasting: {
       color: theme.error,

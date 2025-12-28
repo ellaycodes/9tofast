@@ -1,21 +1,40 @@
-import { AntDesign } from "@expo/vector-icons";
-import { Text, View } from "react-native";
-import { useAppTheme } from "../../store/app-theme-context";
+import { Platform, StyleSheet, View } from "react-native";
+import {
+  BannerAd,
+  BannerAdSize,
+  TestIds,
+  useForeground,
+} from "react-native-google-mobile-ads";
+import { useRef } from "react";
+import Constants from "expo-constants";
 
 function Ads() {
-  const { theme } = useAppTheme();
+  const bannerRef = useRef(null);
+
+  useForeground(() => {
+    Platform.OS === "ios" && bannerRef.current?.load();
+  });
+
   return (
-    <View
-      style={{
-        flexDirection: "row",
-        justifyContent: "space-between",
-        paddingVertical: 18,
-      }}
-    >
-      <Text style={{ color: theme.text, fontSize: 18 }}>Ad Placeholder</Text>
-      <AntDesign name="right" color={theme.text} size={20} />
+    <View style={styles.conatiner}>
+      <BannerAd
+        ref={bannerRef}
+        size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+        unitId={TestIds.BANNER}
+        // unitId={Constants.expoConfig.extra.bannerAdUnitId}
+        onAdFailedToLoad={(error) => {
+          console.log("Banner failed to load:", error);
+        }}
+        onAdLoaded={() => console.log("Banner loaded")}
+      />
     </View>
   );
 }
 
 export default Ads;
+
+const styles = StyleSheet.create({
+  conatiner: {
+    paddingVertical: 15,
+  },
+});

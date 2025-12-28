@@ -176,6 +176,7 @@ export default function WeeklyDonut({
 const styles = StyleSheet.create({
   page: {
     paddingVertical: 15,
+    marginHorizontal: 20,
   },
   weekRow: {
     flexDirection: "row",

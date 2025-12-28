@@ -7,6 +7,7 @@ import { useFasting } from "../../store/fastingLogic/fasting-context";
 import SectionTitle from "../../components/Settings/SectionTitle";
 import SettingsPressable from "../../components/Settings/SettingsPressable";
 import { auth } from "../../firebase/app";
+import Ads from "../../components/monetising/Ads";
 
 function SettingsHomeScreen({ navigation }) {
   const authCxt = useContext(AuthContext);
@@ -49,7 +50,7 @@ function SettingsHomeScreen({ navigation }) {
   }
 
   return (
-    <ScrollView style={{ padding: 16 }}>
+    <ScrollView style={{ margin: 10 }}>
       <View>
         <SectionTitle>Account</SectionTitle>
         <SettingsPressable
@@ -101,6 +102,7 @@ function SettingsHomeScreen({ navigation }) {
           }
         />
       </View>
+      <Ads />
       {/* <View>
         <SectionTitle>Premium</SectionTitle>
         <SettingsPressable

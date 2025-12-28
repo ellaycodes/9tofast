@@ -20,7 +20,9 @@ import AppThemeContextProvider, {
 } from "./store/app-theme-context";
 import AuthContextProvider, { AuthContext } from "./store/auth-context";
 import FastingContextProvider from "./store/fastingLogic/fasting-context";
-import StatsContextProvider, { StatsContext } from "./store/statsLogic/stats-context.js";
+import StatsContextProvider, {
+  StatsContext,
+} from "./store/statsLogic/stats-context.js";
 
 import LoadingOverlay from "./components/ui/LoadingOverlay";
 
@@ -28,6 +30,7 @@ import { auth, firebaseConfig } from "./firebase/app";
 import { getUser } from "./firebase/users.db.js";
 
 import { scheduleStreakNotifications } from "./notifications/streakNotifications.js";
+import MobileAdsConfig from "./components/monetising/AdsConfig.js";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => {
@@ -145,9 +148,11 @@ export default function App() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (firebaseConfig?.apiKey !== undefined) {
-      setReady(true);
-    }
+    const init = async () => {
+      if (firebaseConfig?.apiKey !== undefined) setReady(true);
+      await MobileAdsConfig();
+    };
+    init();
   }, []);
 
   if (!ready) return <Text>Loading...</Text>;
