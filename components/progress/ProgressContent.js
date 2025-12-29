@@ -8,6 +8,9 @@ import SubtitleText from "../ui/SubtitleText";
 import Ads from "../../components/monetising/Ads";
 import EventsChart from "./EventsChart";
 import * as dt from "date-fns";
+import { usePremium } from "../../hooks/usePremium";
+import FlatButton from "../ui/FlatButton";
+import { useNavigation } from "@react-navigation/native";
 
 export default function MainProgess({
   fastingHours,
@@ -16,6 +19,8 @@ export default function MainProgess({
 }) {
   const { theme, themeName } = useContext(AppThemeContext);
   const memoStyle = useMemo(() => styles(theme), [theme]);
+  const { isPremium } = usePremium();
+  const navigation = useNavigation();
 
   const day = selectedDay || defaultToday;
 
@@ -59,7 +64,22 @@ export default function MainProgess({
           </Text>
         )}
       </AnimatedCircularProgress>
-      <Ads />
+      {isPremium ? null : (
+        <>
+          <Ads />
+          <FlatButton
+            size="xs"
+            style={{ paddingTop: 0, paddingBottom: 24 }}
+            onPress={() =>
+              navigation.navigate("Settings", {
+                screen: "PremiumPaywallScreen",
+              })
+            }
+          >
+            Want to get rid of ads? Subscribe to Premium
+          </FlatButton>
+        </>
+      )}
       <View style={memoStyle.inner}>
         <SubtitleText style={memoStyle.text} size="xl">
           {themeName === "Desk" ? "Total:" : "Fasted Today:"}
@@ -107,5 +127,5 @@ const styles = (theme) =>
       fontSize: 32,
       fontWeight: "400",
       color: theme.primary200,
-    }
+    },
   });

@@ -16,6 +16,8 @@ import { prefetchAvatars } from "../../assets/avatars";
 import { stateAt } from "../../store/fastingLogic/scheduler";
 import Streaks from "../../components/Home/Streaks.js";
 import * as Notifications from "expo-notifications";
+import { usePremium } from "../../hooks/usePremium.js";
+import FlatButton from "../../components/ui/FlatButton.js";
 
 export async function allowNotificationsAsync() {
   const settings = await Notifications.getPermissionsAsync();
@@ -39,6 +41,7 @@ function TimerScreen({ navigation }) {
   const memoStyle = useMemo(() => styles(theme, themeName), [theme, themeName]);
   const [readout, setReadout] = useState(null);
   const [offScheduleTitle, setOffScheduleTitle] = useState("");
+  const { isPremium } = usePremium();
 
   const fasting = isFasting();
 
@@ -126,7 +129,22 @@ function TimerScreen({ navigation }) {
             dt.format(dt.parse(schedule.end, "HH:mm", new Date()), "p")}
         </SubtitleText>
       )}
-      <Ads />
+      {isPremium ? null : (
+        <>
+          <Ads />
+          <FlatButton
+            size="xs"
+            style={{ paddingTop: 0, paddingBottom: 24 }}
+            onPress={() =>
+              navigation.navigate("Settings", {
+                screen: "PremiumPaywallScreen",
+              })
+            }
+          >
+            Want to get rid of ads? Subscribe to Premium
+          </FlatButton>
+        </>
+      )}
       <View style={memoStyle.buttonsContainer}>
         <ButtonsContainer fast={fasting} withinFasting={inside} />
       </View>

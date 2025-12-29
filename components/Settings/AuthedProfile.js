@@ -1,4 +1,11 @@
-import { Alert, ScrollView, StyleSheet, View } from "react-native";
+import {
+  Alert,
+  Linking,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
 import SubtitleText from "../../components/ui/SubtitleText";
 import { useContext, useState } from "react";
 import { AuthContext } from "../../store/auth-context";
@@ -15,6 +22,7 @@ import AvatarSegment from "../ui/AvatarSegment";
 import { useFasting } from "../../store/fastingLogic/fasting-context.js";
 import { StatsContext } from "../../store/statsLogic/stats-context.js";
 import Title from "../ui/Title.js";
+import { usePremium } from "../../hooks/usePremium.js";
 
 function AuthedProfile({ emailAddress }) {
   const [showModal, setShowModal] = useState(false);
@@ -25,6 +33,7 @@ function AuthedProfile({ emailAddress }) {
   const navigation = useNavigation();
   const { theme, setThemeName } = useAppTheme();
   const { setSchedule } = useFasting();
+  const { isPremium } = usePremium();
 
   async function logoutHandler() {
     await statsLogout();
@@ -76,7 +85,6 @@ function AuthedProfile({ emailAddress }) {
 
       await deleteCurrentUser(uid);
 
-      // Unlink all providers first
       for (const providerId of providerIds) {
         try {
           await unlink(user, providerId);
@@ -166,7 +174,7 @@ function AuthedProfile({ emailAddress }) {
   if (loading) {
     return <LoadingOverlay>Please Wait...</LoadingOverlay>;
   }
-
+  
   return (
     <ScrollView contentContainerStyle={{ paddingBottom: 40, flexGrow: 1 }}>
       <View style={styles(theme).container}>
@@ -199,12 +207,36 @@ function AuthedProfile({ emailAddress }) {
               onPress={logoutHandler}
               label="Logout"
             />
-            {/* <SettingsPressable
-          icon="delete"
-          onPress={confirmDeleteAccount}
-          label="Delete Account"
-          iconColour={theme.error}
-        /> */}
+            {isPremium ? <SettingsPressable
+              icon="subscriptions"
+              label="Manage Subscriptions"
+              onPress={() => {
+                Alert.alert(
+                  "Subscriptions are managed through the App Store.",
+                  "If you wish to cancel your subscription you can do this by selecting the 'App Store' button below.",
+                  [
+                    {
+                      isPreferred: true,
+                      style: "cancel",
+                      text: "Cancel",
+                    },
+                    {
+                      isPreferred: false,
+                      style: "default",
+                      text: "App Store",
+                      onPress: () => {
+                        const url =
+                          Platform.OS === "ios"
+                            ? "https://apps.apple.com/account/subscriptions"
+                            : "https://play.google.com/store/account/subscriptions";
+
+                        Linking.openURL(url);
+                      },
+                    },
+                  ]
+                );
+              }}
+            /> : null }
           </View>
         </View>
         <View>

@@ -31,6 +31,10 @@ import { getUser } from "./firebase/users.db.js";
 
 import { scheduleStreakNotifications } from "./notifications/streakNotifications.js";
 import MobileAdsConfig from "./components/monetising/AdsConfig.js";
+import Subscriptions from "./components/monetising/RevenueCat.js";
+import { usePremium } from "./hooks/usePremium.js";
+import { PremiumProvider } from "./store/premium-context.js";
+import configureRevenueCat from "./components/monetising/RevenueCat.js";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => {
@@ -151,6 +155,7 @@ export default function App() {
     const init = async () => {
       if (firebaseConfig?.apiKey !== undefined) setReady(true);
       await MobileAdsConfig();
+      await configureRevenueCat();
     };
     init();
   }, []);
@@ -161,7 +166,9 @@ export default function App() {
     <>
       <AuthContextProvider>
         <AppThemeContextProvider>
-          <InnerApp />
+          <PremiumProvider>
+            <InnerApp />
+          </PremiumProvider>
         </AppThemeContextProvider>
       </AuthContextProvider>
     </>
@@ -170,6 +177,14 @@ export default function App() {
 
 function InnerApp() {
   const { theme } = useAppTheme();
+  const { refresh } = usePremium();
+
+  useEffect(() => {
+    const init = async () => {
+      await refresh();
+    };
+    init();
+  }, []);
   return (
     <>
       <FastingContextProvider>

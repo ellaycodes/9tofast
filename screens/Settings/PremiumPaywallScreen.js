@@ -1,37 +1,60 @@
-import { StyleSheet, View, Platform } from "react-native";
-import Purchases, { LOG_LEVEL } from "react-native-purchases";
+import { Alert, StyleSheet, View } from "react-native";
 import Title from "../../components/ui/Title";
 import SubtitleText from "../../components/ui/SubtitleText";
 import SettingsPressable from "../../components/Settings/SettingsPressable";
 import PrimaryButton from "../../components/ui/PrimaryButton";
 import FlatButton from "../../components/ui/FlatButton";
 import { useAppTheme } from "../../store/app-theme-context";
-import { useMemo, useEffect } from "react";
-import Constants from "expo-constants";
+import { useMemo } from "react";
+import { setOptimisticPremium, usePremium } from "../../hooks/usePremium";
+import RevenueCatUI from "react-native-purchases-ui";
+import Purchases from "react-native-purchases";
 
-function PremiumPaywallScreen() {
+function PremiumPaywallScreen({ navigation }) {
   const { theme } = useAppTheme();
   const memoStyle = useMemo(() => styles(theme), [theme]);
+  const { refresh } = usePremium();
 
-  useEffect(() => {
-    Purchases.setLogLevel(LOG_LEVEL.VERBOSE);
+  async function handleContinuePremium() {
+    try {
+      const paywallResult = await RevenueCatUI.presentPaywall();
 
-    // Platform-specific API keys
-    const iosApiKey = Constants.expoConfig.extra.revenueCatApiKey;
-
-    if (Platform.OS === "ios") {
-      Purchases.configure({ apiKey: iosApiKey });
-    } else if (Platform.OS === "android") {
-      Purchases.configure({ apiKey: androidApiKey });
+      if (paywallResult === "PURCHASED" || paywallResult === "RESTORED") {
+        setOptimisticPremium(true);
+        await refresh();
+        navigation.navigate("TimerScreen");
+      } else if (paywallResult === "CANCELLED") {
+        throw new Error("App Error");
+      }
+    } catch (err) {
+      console.warn(err);
+      Alert.alert(
+        "Error with Premium Subscription",
+        "We're very sorry but we could not subscribe you to Premium. Please try again later or contact support if this persists.",
+        [
+          {
+            text: "Contact Support",
+            onPress: () => navigation.navigate("SupportScreen"),
+            style: "default",
+          },
+          {
+            text: "Cancel",
+            style: "cancel",
+          },
+        ]
+      );
     }
-  }, []);
-
-  function handleContinuePremium() {
-    console.log(Purchases.LOG_LEVEL)
   }
 
-  function handleRestorePurchase() {}
-  
+  async function handleRestorePurchase() {
+    const restoreResult = await Purchases.restorePurchases();
+    if (restoreResult) {
+      setOptimisticPremium(true);
+      await refresh();
+      navigation.navigate("TimerScreen");
+    }
+  }
+
   return (
     <View style={memoStyle.container}>
       <View>
@@ -47,25 +70,27 @@ function PremiumPaywallScreen() {
 
         <View style={memoStyle.pricesContainer}>
           <SubtitleText style={memoStyle.SubtitleText}>
-            £0.49 Per Month
+            £0.99 Per Month
           </SubtitleText>
           <SubtitleText style={memoStyle.SubtitleText}>
-            £4.99 Annual
+            £9.99 Annual
           </SubtitleText>
           <SubtitleText style={memoStyle.SubtitleText}>
-            £9.99 Forever
+            £19.99 Forever
           </SubtitleText>
         </View>
 
         <View>
           <SettingsPressable icon="not-interested" label="No Ads" />
-          {/* <SettingsPressable icon="calendar-month" label="Calendar Sync" /> */}
+          <SettingsPressable
+            icon="new-releases"
+            label="Early Access to New Features"
+          />
           <SettingsPressable icon="watch" label="Future Wearable Support" />
         </View>
       </View>
 
       <View>
-        {/* <SubtitleText>Coming Soon</SubtitleText> */}
         <PrimaryButton onPress={handleContinuePremium} lowlight>
           Continue
         </PrimaryButton>

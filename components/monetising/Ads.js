@@ -6,7 +6,6 @@ import {
   useForeground,
 } from "react-native-google-mobile-ads";
 import { useRef } from "react";
-import Constants from "expo-constants";
 
 function Ads() {
   const bannerRef = useRef(null);
@@ -25,7 +24,6 @@ function Ads() {
         onAdFailedToLoad={(error) => {
           console.log("Banner failed to load:", error);
         }}
-        onAdLoaded={() => console.log("Banner loaded")}
       />
     </View>
   );

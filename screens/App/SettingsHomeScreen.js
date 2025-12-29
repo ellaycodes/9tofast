@@ -1,4 +1,4 @@
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { ScrollView, View } from "react-native";
 import * as dt from "date-fns";
 import { AuthContext } from "../../store/auth-context";
@@ -6,13 +6,15 @@ import { useAppTheme } from "../../store/app-theme-context";
 import { useFasting } from "../../store/fastingLogic/fasting-context";
 import SectionTitle from "../../components/Settings/SectionTitle";
 import SettingsPressable from "../../components/Settings/SettingsPressable";
-import { auth } from "../../firebase/app";
 import Ads from "../../components/monetising/Ads";
+import { usePremium } from "../../hooks/usePremium";
+import FlatButton from "../../components/ui/FlatButton";
 
 function SettingsHomeScreen({ navigation }) {
   const authCxt = useContext(AuthContext);
   const { schedule } = useFasting();
   const { themeName } = useAppTheme();
+  const { isPremium } = usePremium();
 
   function editScheduleHandler() {
     navigation.navigate("EditScheduleScreen");
@@ -102,15 +104,30 @@ function SettingsHomeScreen({ navigation }) {
           }
         />
       </View>
-      <Ads />
-      {/* <View>
-        <SectionTitle>Premium</SectionTitle>
-        <SettingsPressable
-          label="Upgrade to Premium"
-          icon="star-border"
-          onPress={premiumHandler}
-        />
-      </View> */}
+      {isPremium ? null : (
+        <>
+          <Ads />
+          <FlatButton
+            size="xs"
+            style={{ paddingTop: 0, paddingBottom: 24 }}
+            onPress={() =>
+              navigation.navigate("Settings", {
+                screen: "PremiumPaywallScreen",
+              })
+            }
+          >
+            Want to get rid of ads? Subscribe to Premium
+          </FlatButton>
+          <View>
+            <SectionTitle>Premium</SectionTitle>
+            <SettingsPressable
+              label="Upgrade to Premium"
+              icon="star-border"
+              onPress={premiumHandler}
+            />
+          </View>
+        </>
+      )}
       <View>
         <SectionTitle>About & Support</SectionTitle>
         <SettingsPressable

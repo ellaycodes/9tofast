@@ -18,7 +18,5 @@ export default async function MobileAdsConfig() {
   }
 
   const adapterStatuses = await mobileAds().initialize();
-  console.log(adapterStatuses);
-
   return adapterStatuses;
 }
