@@ -52,6 +52,9 @@ function PremiumPaywallScreen({ navigation }) {
       setOptimisticPremium(true);
       await refresh();
       navigation.navigate("TimerScreen");
+      console.log(restoreResult);
+    } else {
+      console.log('todo');
     }
   }
 

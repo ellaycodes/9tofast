@@ -31,7 +31,6 @@ import { getUser } from "./firebase/users.db.js";
 
 import { scheduleStreakNotifications } from "./notifications/streakNotifications.js";
 import MobileAdsConfig from "./components/monetising/AdsConfig.js";
-import Subscriptions from "./components/monetising/RevenueCat.js";
 import { usePremium } from "./hooks/usePremium.js";
 import { PremiumProvider } from "./store/premium-context.js";
 import configureRevenueCat from "./components/monetising/RevenueCat.js";
@@ -177,14 +176,7 @@ export default function App() {
 
 function InnerApp() {
   const { theme } = useAppTheme();
-  const { refresh } = usePremium();
 
-  useEffect(() => {
-    const init = async () => {
-      await refresh();
-    };
-    init();
-  }, []);
   return (
     <>
       <FastingContextProvider>
