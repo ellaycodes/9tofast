@@ -176,7 +176,7 @@ export default function FastingContextProvider({ children }) {
 
     await addFastingEvent(ts, events.EVENT.END, trigger);
 
-    const tempState = events.startFast(stateRef.current, trigger, ts);
+    const tempState = events.endFast(stateRef.current, trigger, ts);
     dispatch({ type: "END_FAST", trigger, payload: ts });
 
     await uploadCurrentDaySnapshot(tempState);

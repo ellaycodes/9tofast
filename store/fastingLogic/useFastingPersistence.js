@@ -19,6 +19,17 @@ const LAST_UPLOADED_DAY_KEY = "fasting_last_uploaded_day";
 const LAST_SAVED_TIMESTAMP_KEY = "fasting_last_ts";
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
+function normalizeEventTimestamps(events = []) {
+  return events.map((event) => {
+    if (event.ts !== undefined) return event;
+    if (event.timestamp !== undefined) {
+      const { timestamp, ...rest } = event;
+      return { ...rest, ts: timestamp };
+    }
+    return event;
+  });
+}
+
 /**
  * Get the last time the fasting data was saved.
  * Returns a timestamp or 0 if not available.
@@ -39,10 +50,9 @@ async function uploadPreviousDayIfNeeded(
   startOfToday,
   uploadDailyStats
 ) {
-  const allEvents = parsedState.events || [];
-  const yesterdayEvents = allEvents.filter(
-    (event) => event.timestamp < startOfToday
-  );
+  const allEvents = normalizeEventTimestamps(parsedState.events || []);
+  parsedState.events = allEvents;
+  const yesterdayEvents = allEvents.filter((event) => event.ts < startOfToday);
   const previousDayString = date.format(startOfToday - 1, "yyyy-MM-dd");
 
   const lastUploadedDay = await AsyncStorage.getItem(LAST_UPLOADED_DAY_KEY);
