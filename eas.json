@@ -42,6 +42,13 @@
       "ios": {
         "simulator": true
       }
+    },
+    "rc-test": {
+      "extends": "development",
+      "distribution": "internal",
+      "env": {
+        "APP_VARIANT": "production"
+      }
     }
   },
   "submit": {

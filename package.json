@@ -10,7 +10,8 @@
     "eject": "expo eject",
     "test": "jest --watchAll",
     "dev": "APP_VARIANT=development npx expo start",
-    "preview": "APP_VARIANT=preview npx expo start"
+    "preview": "APP_VARIANT=preview npx expo start",
+    "sudoPro": "APP_VARIANT=production npx expo start"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
