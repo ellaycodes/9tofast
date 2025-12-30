@@ -1,9 +1,11 @@
 import { useState, useCallback, useEffect } from "react";
+import { AppState } from "react-native";
 import { onAuthStateChanged } from "firebase/auth";
 import * as dt from "date-fns";
 import { auth } from "../../firebase/app";
 import { getDailyStatsRange } from "../../firebase/fasting.db.js";
 import { logWarn } from "../../util/logger";
+import { subscribeWeeklyStatsRefresh } from "./weeklyStatsEvents";
 
 export default function useWeeklyStats() {
   const [weeklyStats, setWeeklyStats] = useState([]);
@@ -26,6 +28,12 @@ export default function useWeeklyStats() {
   }, []);
 
   useEffect(() => {
+    const unsubscribeFromRefresh = subscribeWeeklyStatsRefresh(
+      ({ startDate, endDate } = {}) => {
+        refreshWeeklyStats(startDate, endDate);
+      }
+    );
+
     const unsub = onAuthStateChanged(auth, (user) => {
       if (user) {
         refreshWeeklyStats();
@@ -34,8 +42,32 @@ export default function useWeeklyStats() {
       }
     });
 
-    return unsub;
+    return () => {
+      unsub();
+      unsubscribeFromRefresh();
+    };
   }, [refreshWeeklyStats]);
+
+  useEffect(() => {
+    const handleAppStateChange = (nextState) => {
+      if (nextState === "active" && weeklyStats.length === 0) {
+        refreshWeeklyStats();
+      }
+    };
+
+    const subscription = AppState.addEventListener(
+      "change",
+      handleAppStateChange
+    );
+
+    return () => {
+      if (subscription?.remove) {
+        subscription.remove();
+      } else {
+        AppState.removeEventListener("change", handleAppStateChange);
+      }
+    };
+  }, [refreshWeeklyStats, weeklyStats.length]);
 
   return { weeklyStats, refreshWeeklyStats };
 }

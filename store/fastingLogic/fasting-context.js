@@ -18,6 +18,7 @@ import useScheduleBoundaryScheduler from "./scheduler";
 import useFastingLoader from "./useFastingLoader";
 import useDailyStatsSync from "./useDailyStatsSync";
 import { buildCurrentDayStats } from "./useFastingPersistence.js";
+import { emitWeeklyStatsRefresh } from "./weeklyStatsEvents";
 
 export const FastingContext = createContext({
   loading: true,
@@ -91,6 +92,7 @@ export default function FastingContextProvider({ children }) {
       try {
         await addDailyStats(day, hours, scheduleHours, eventsList);
         lastUploadedDayRef.current = day;
+        emitWeeklyStatsRefresh();
       } finally {
         uploadLock.current = false;
       }
