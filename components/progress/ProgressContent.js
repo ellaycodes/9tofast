@@ -67,7 +67,7 @@ export default function MainProgess({
       {isPremium ? null : (
         <>
           <Ads />
-          <FlatButton
+          {/* <FlatButton
             size="xs"
             style={{ paddingTop: 0, paddingBottom: 24 }}
             onPress={() =>
@@ -77,7 +77,7 @@ export default function MainProgess({
             }
           >
             Want to get rid of ads? Subscribe to Premium
-          </FlatButton>
+          </FlatButton> */}
         </>
       )}
       <View style={memoStyle.inner}>

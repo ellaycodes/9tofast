@@ -154,7 +154,7 @@ export default function App() {
     const init = async () => {
       if (firebaseConfig?.apiKey !== undefined) setReady(true);
       await MobileAdsConfig();
-      await configureRevenueCat();
+      // await configureRevenueCat();
     };
     init();
   }, []);

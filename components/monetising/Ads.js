@@ -6,6 +6,7 @@ import {
   useForeground,
 } from "react-native-google-mobile-ads";
 import { useRef } from "react";
+import Constants from "expo-constants";
 
 function Ads() {
   const bannerRef = useRef(null);
@@ -19,8 +20,8 @@ function Ads() {
       <BannerAd
         ref={bannerRef}
         size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-        unitId={TestIds.BANNER}
-        // unitId={Constants.expoConfig.extra.bannerAdUnitId}
+        // unitId={TestIds.BANNER}
+        unitId={Constants.expoConfig.extra.bannerAdUnitId}
         onAdFailedToLoad={(error) => {
           console.log("Banner failed to load:", error);
         }}

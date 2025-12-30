@@ -107,7 +107,7 @@ function SettingsHomeScreen({ navigation }) {
       {isPremium ? null : (
         <>
           <Ads />
-          <FlatButton
+          {/* <FlatButton
             size="xs"
             style={{ paddingTop: 0, paddingBottom: 24 }}
             onPress={() =>
@@ -125,7 +125,7 @@ function SettingsHomeScreen({ navigation }) {
               icon="star-border"
               onPress={premiumHandler}
             />
-          </View>
+          </View> */}
         </>
       )}
       <View>
