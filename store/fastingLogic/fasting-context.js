@@ -7,8 +7,11 @@ import {
   useEffect,
   useRef,
 } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AppState } from "react-native";
-import useFastingPersistence from "./useFastingPersistence.js";
+import useFastingPersistence, {
+  LAST_UPLOADED_DAY_KEY,
+} from "./useFastingPersistence.js";
 import * as session from "./fasting-session";
 import * as events from "./events";
 import useScheduleBoundaryScheduler from "./scheduler";
@@ -62,12 +65,46 @@ export default function FastingContextProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, session.getInitialState());
   const stateRef = useRef(state);
   const uploadLock = useRef(false);
+  const lastUploadedDayRef = useRef(null);
   const { load, persist, addFastingEvent, addDailyStats, flushDailyEvents } =
     useFastingPersistence();
 
   useFastingLoader(load, dispatch);
 
-  useDailyStatsSync(state, addDailyStats, flushDailyEvents, persist, dispatch);
+  const uploadDailyStatsLocked = useCallback(
+    async (
+      day,
+      hours,
+      scheduleHours,
+      eventsList = [],
+      options = { skipIfUploaded: false }
+    ) => {
+      if (uploadLock.current) return;
+      if (options.skipIfUploaded && lastUploadedDayRef.current === null) {
+        lastUploadedDayRef.current = await AsyncStorage.getItem(
+          LAST_UPLOADED_DAY_KEY
+        );
+      }
+      if (options.skipIfUploaded && lastUploadedDayRef.current === day) return;
+
+      uploadLock.current = true;
+      try {
+        await addDailyStats(day, hours, scheduleHours, eventsList);
+        lastUploadedDayRef.current = day;
+      } finally {
+        uploadLock.current = false;
+      }
+    },
+    [addDailyStats]
+  );
+
+  useDailyStatsSync(
+    state,
+    uploadDailyStatsLocked,
+    flushDailyEvents,
+    persist,
+    dispatch
+  );
 
   useEffect(() => {
     stateRef.current = state;
@@ -75,22 +112,16 @@ export default function FastingContextProvider({ children }) {
 
   const uploadCurrentDaySnapshot = useCallback(
     async (overrideState) => {
-      if (uploadLock.current) return;
-      uploadLock.current = true;
-      try {
-        const baseState = overrideState || stateRef.current;
-        const snapshot = buildCurrentDayStats(baseState);
-        await addDailyStats(
-          snapshot.day,
-          snapshot.hoursFasted,
-          snapshot.scheduleHours,
-          snapshot.events
-        );
-      } finally {
-        uploadLock.current = false;
-      }
+      const baseState = overrideState || stateRef.current;
+      const snapshot = buildCurrentDayStats(baseState);
+      await uploadDailyStatsLocked(
+        snapshot.day,
+        snapshot.hoursFasted,
+        snapshot.scheduleHours,
+        snapshot.events
+      );
     },
-    [addDailyStats]
+    [uploadDailyStatsLocked]
   );
 
   useEffect(() => {
@@ -162,7 +193,7 @@ export default function FastingContextProvider({ children }) {
 
     const tempState = events.startFast(stateRef.current, trigger, ts);
     dispatch({ type: "START_FAST", trigger, payload: ts });
-    
+
     await uploadCurrentDaySnapshot(tempState);
   }
 

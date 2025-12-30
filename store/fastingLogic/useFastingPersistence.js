@@ -8,14 +8,11 @@ import {
 } from "../../firebase/fasting.db.js";
 import { auth } from "../../firebase/app";
 import * as date from "date-fns";
-import {
-  removeOldEventsAndHandleMidnight,
-  removeFutureEvents,
-} from "./stripOldEvents.js";
+import { removeFutureEvents } from "./stripOldEvents.js";
 import { logWarn } from "../../util/logger.js";
 
 const STORAGE_KEY = "fastingstate_v2";
-const LAST_UPLOADED_DAY_KEY = "fasting_last_uploaded_day";
+export const LAST_UPLOADED_DAY_KEY = "fasting_last_uploaded_day";
 const LAST_SAVED_TIMESTAMP_KEY = "fasting_last_ts";
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -39,36 +36,6 @@ async function getLastSavedTime(lastTimestamp) {
 
   const stored = await AsyncStorage.getItem(LAST_SAVED_TIMESTAMP_KEY);
   return stored ? Number(stored) : 0;
-}
-
-/**
- * If a new day has started, upload the previous day’s fasting stats to Firebase.
- * Avoids double uploads by checking what was last recorded.
- */
-async function uploadPreviousDayIfNeeded(
-  parsedState,
-  startOfToday,
-  uploadDailyStats
-) {
-  const allEvents = normalizeEventTimestamps(parsedState.events || []);
-  parsedState.events = allEvents;
-  const yesterdayEvents = allEvents.filter((event) => event.ts < startOfToday);
-  const previousDayString = date.format(startOfToday - 1, "yyyy-MM-dd");
-
-  const lastUploadedDay = await AsyncStorage.getItem(LAST_UPLOADED_DAY_KEY);
-  if (lastUploadedDay === previousDayString)
-    return { allEvents, yesterdayEvents };
-
-  const hoursFastedYesterday = hoursFastedToday(parsedState, startOfToday - 1);
-  const scheduledHours = parsedState.schedule?.fastingHours ?? undefined;
-
-  await uploadDailyStats(
-    previousDayString,
-    hoursFastedYesterday,
-    scheduledHours,
-    yesterdayEvents
-  );
-  return { allEvents, yesterdayEvents };
 }
 
 /**
@@ -102,7 +69,7 @@ export function buildCurrentDayStats(state, now = new Date()) {
 
   // You can choose if you want to pass today’s events or not
   const eventsToday = (state.events || []).filter(
-    event => event.ts >= date.startOfDay(now).getTime()
+    (event) => event.ts >= date.startOfDay(now).getTime()
   );
 
   return {
@@ -130,16 +97,10 @@ export default function useFastingPersistence() {
    */
   const saveLocalState = useCallback(async (state) => {
     try {
-      const todayEvents = removeOldEventsAndHandleMidnight(state.events || []);
-      const validEvents = removeFutureEvents(todayEvents);
-
       const stateToSave = { ...state };
       delete stateToSave.hours;
-      delete stateToSave.events;
-
-      const cleanedState = { ...stateToSave, events: validEvents };
-
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(cleanedState));
+      
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
       await AsyncStorage.setItem(
         LAST_SAVED_TIMESTAMP_KEY,
         Date.now().toString()
@@ -241,29 +202,27 @@ export default function useFastingPersistence() {
         return parsedState;
       }
 
-      const startOfToday = date.startOfDay(now).getTime();
-
-      const { allEvents, yesterdayEvents } = await uploadPreviousDayIfNeeded(
-        parsedState,
-        startOfToday,
-        uploadDailyStats
+      const normalizedEvents = normalizeEventTimestamps(
+        parsedState.events || []
       );
 
-      const todayEvents = removeOldEventsAndHandleMidnight(allEvents, now);
-      const validEvents = removeFutureEvents(todayEvents, now);
+      const validEvents = removeFutureEvents(normalizedEvents, now);
 
       await updateStoredEvents(
         parsedState,
-        allEvents,
+        normalizedEvents,
         validEvents,
         now,
-        yesterdayEvents.length,
+        normalizedEvents.length,
         saveDailyEvents
       );
 
       return parsedState;
     },
-    [uploadDailyStats, saveDailyEvents]
+    [
+      // uploadDailyStats,
+      saveDailyEvents,
+    ]
   );
 
   /**
