@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "438582901138",
+    "project_id": "tofast-b52b7",
+    "storage_bucket": "tofast-b52b7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:438582901138:android:f2c6b491700d084204e94b",
+        "android_client_info": {
+          "package_name": "com.horizon.x9tofast"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "438582901138-hur2aak42eh8vbqn6s7koa0m9h71ja7i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC2PEIu-Z9eQLRxCLVNbzJRGbAV8qIgkFc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "438582901138-hur2aak42eh8vbqn6s7koa0m9h71ja7i.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "438582901138-7lo7q4ggvn1q03mdmtv51ivphdng6sro.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.horizon.x9tofast",
+                "app_store_id": "6754204142"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

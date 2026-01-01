@@ -1,13 +1,10 @@
-import * as Google from "expo-auth-session/providers/google";
-import { makeRedirectUri } from "expo-auth-session";
-import Constants from "expo-constants";
+import { Platform } from "react-native";
+import useGoogleAuthAndroid from "./useGoogleAuth.android";
+import useGoogleAuthIOS from "./useGoogleAuth.ios";
 
 export default function useGoogleAuth() {
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    iosClientId: Constants.expoConfig.extra.iosClientId,
-    expoClientId: Constants.expoConfig.extra.expoClientId,
-    redirectUri: makeRedirectUri(),
-  });
-
-  return { request, response, promptAsync };
+  
+  return Platform.OS === "android"
+    ? useGoogleAuthAndroid()
+    : useGoogleAuthIOS();
 }

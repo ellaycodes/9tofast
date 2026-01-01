@@ -12,7 +12,7 @@ function Header({ children }) {
       <View style={memoStyle.imageContainer}>
         <Title>{children}</Title>
         <Image
-          source={require("../../assets/icon.png")}
+          source={require("../../assets/icon2.png")}
           style={memoStyle.image}
         />
       </View>

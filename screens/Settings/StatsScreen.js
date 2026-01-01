@@ -69,14 +69,13 @@ export default function Stats() {
           icon="local-fire-department"
           label="Get your streak back"
           subtitle={
-            canOverride
-              ? `Manually add a missed day to maintain your streak. ${"\n"}This feature can only be used once every 30 days`
+            canOverride ? `Manually add a missed day to maintain your streak. ${"\n"}This feature can only be used once every 30 days`
               : `You have already used Override within the last 30 days. ${"\n"}You can override again in ${
                   30 - (canOverrideStreak().diffInDays || 0)
                 } days`
           }
           iconColour={canOverride ? theme.success : theme.muted}
-          style={{ lineHeight: 0, width: "auto" }}
+          style={{ lineHeight: 15, width: "auto", includeFontPadding: false }}
           onPress={() => (canOverride ? openOverrideStreakModal("open") : null)}
         />
       </View>

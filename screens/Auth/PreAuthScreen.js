@@ -1,4 +1,4 @@
-import { StyleSheet, View, Linking, Alert } from "react-native";
+import { StyleSheet, View, Linking, Alert, Platform } from "react-native";
 import { useEffect, useState } from "react";
 
 import Title from "../../components/ui/Title";
@@ -33,9 +33,11 @@ function PreAuthScreen({ navigation }) {
     handleNewAnonymousUser,
   } = useAuthHelpers();
 
-  const { request, response, promptAsync } = useGoogleAuth();
+  const { request, response, signIn } = useGoogleAuth();
 
   useEffect(() => {
+    if (Platform.OS === "android") return;
+
     const signInWithGoogle = async () => {
       if (response?.type === "success") {
         setIsAuthing(true);
@@ -91,7 +93,35 @@ function PreAuthScreen({ navigation }) {
   }
 
   async function googleHandler() {
-    await promptAsync();
+    setIsAuthing(true);
+    try {
+      const result = await signIn();
+      if (Platform.OS === "android" && result?.uid) {
+        const user = result;
+        const existingUser = await getUser(user.uid);
+
+        if (!existingUser) {
+          await handleNewProviderUser(
+            user,
+            user.email,
+            user.displayName,
+            navigation
+          );
+          return;
+        }
+        await handleExistingUserLogin(user, existingUser);
+      }
+    } catch (err) {
+      if (err?.code === "ERR_REQUEST_CANCELED") return;
+      console.log(err);
+      
+      Alert.alert(
+        "There was an error while logging you in",
+        "Please try again."
+      );
+    } finally {
+      setIsAuthing(false);
+    }
   }
 
   async function appleHandler() {
@@ -160,14 +190,16 @@ function PreAuthScreen({ navigation }) {
           <View style={{ width: 8 }} />
           Continue with Google
         </PrimaryButton>
-        <PrimaryButton
-          onPress={appleHandler}
-          style={{ backgroundColor: "white" }}
-        >
-          <Ionicons name="logo-apple" size={24} color="black" />
-          <View style={{ width: 8 }} />
-          Continue with Apple
-        </PrimaryButton>
+        {Platform.OS === "android" ? null : (
+          <PrimaryButton
+            onPress={appleHandler}
+            style={{ backgroundColor: "white" }}
+          >
+            <Ionicons name="logo-apple" size={24} color="black" />
+            <View style={{ width: 8 }} />
+            Continue with Apple
+          </PrimaryButton>
+        )}
         <PrimaryButton onPress={emailHandler}>
           <Ionicons name="mail" size={24} color="black" />
           <View style={{ width: 12 }} />

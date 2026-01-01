@@ -125,7 +125,7 @@ function ScheduleSelect({ settings, setWizardState, token, userName, uid }) {
   };
 
   function isFastingTooLong({ fastingHours }) {
-    return fastingHours > 18;
+    return fastingHours > 20;
   }
 
   async function onSave(settings) {
@@ -217,7 +217,7 @@ function ScheduleSelect({ settings, setWizardState, token, userName, uid }) {
           {settings ? (
             <PrimaryButton
               onPress={() => onSave(settings)}
-              disabled={chosenSchedule.fastingHours > 18}
+              disabled={isFastingTooLong(chosenSchedule)}
               style={{ marginTop: 0 }}
             >
               Save

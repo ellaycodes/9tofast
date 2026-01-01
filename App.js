@@ -33,7 +33,7 @@ import { scheduleStreakNotifications } from "./notifications/streakNotifications
 import MobileAdsConfig from "./components/monetising/AdsConfig.js";
 import { usePremium } from "./hooks/usePremium.js";
 import { PremiumProvider } from "./store/premium-context.js";
-import configureRevenueCat from "./components/monetising/RevenueCat.js";
+// import configureRevenueCat from "./components/monetising/RevenueCat.js";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => {

@@ -22,7 +22,7 @@ export default function OverrideStreakModal({
           style={styles(theme).modalSheet}
           onStartShouldSetResponder={() => true}
         >
-          <Title size='26' style={{ paddingBottom: 0 }}>Override Streak?</Title>
+          <Title size={26} style={{ paddingBottom: 0 }}>Override Streak?</Title>
           <SubtitleText size='s' style={{lineHeight: 18}}>
             This action will manually keep your current streak and will update your stats. This cannot be undone. You can only override once every 30 days.{" "}
           </SubtitleText>

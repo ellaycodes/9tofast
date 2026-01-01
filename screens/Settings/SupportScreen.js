@@ -77,11 +77,7 @@ function SupportScreen() {
           </Title>
           <SettingsRow
             label="Privacy Policy"
-            onPress={() => Linking.openURL("https://9tofast.netlify.app/privacy")}
-          />
-          <SettingsRow
-            label="Terms of Service"
-            onPress={() => Linking.openURL("https://9tofast.netlify.app/terms")}
+            onPress={() => Linking.openURL("https://9tofast.netlify.app/privacy-policy")}
           />
         </View>
       </View>

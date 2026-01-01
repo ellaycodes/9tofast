@@ -174,7 +174,7 @@ function AuthedProfile({ emailAddress }) {
   if (loading) {
     return <LoadingOverlay>Please Wait...</LoadingOverlay>;
   }
-  
+
   return (
     <ScrollView contentContainerStyle={{ paddingBottom: 40, flexGrow: 1 }}>
       <View style={styles(theme).container}>
@@ -207,40 +207,42 @@ function AuthedProfile({ emailAddress }) {
               onPress={logoutHandler}
               label="Logout"
             />
-            {isPremium ? <SettingsPressable
-              icon="subscriptions"
-              label="Manage Subscriptions"
-              onPress={() => {
-                Alert.alert(
-                  "Subscriptions are managed through the App Store.",
-                  "If you wish to cancel your subscription you can do this by selecting the 'App Store' button below.",
-                  [
-                    {
-                      isPreferred: true,
-                      style: "cancel",
-                      text: "Cancel",
-                    },
-                    {
-                      isPreferred: false,
-                      style: "default",
-                      text: "App Store",
-                      onPress: () => {
-                        const url =
-                          Platform.OS === "ios"
-                            ? "https://apps.apple.com/account/subscriptions"
-                            : "https://play.google.com/store/account/subscriptions";
-
-                        Linking.openURL(url);
+            {isPremium ? (
+              <SettingsPressable
+                icon="subscriptions"
+                label="Manage Subscriptions"
+                onPress={() => {
+                  Alert.alert(
+                    "Subscriptions are managed through the App Store.",
+                    "If you wish to cancel your subscription you can do this by selecting the 'App Store' button below.",
+                    [
+                      {
+                        isPreferred: true,
+                        style: "cancel",
+                        text: "Cancel",
                       },
-                    },
-                  ]
-                );
-              }}
-            /> : null }
+                      {
+                        isPreferred: false,
+                        style: "default",
+                        text: "App Store",
+                        onPress: () => {
+                          const url =
+                            Platform.OS === "ios"
+                              ? "https://apps.apple.com/account/subscriptions"
+                              : "https://play.google.com/store/account/subscriptions";
+
+                          Linking.openURL(url);
+                        },
+                      },
+                    ]
+                  );
+                }}
+              />
+            ) : null}
           </View>
         </View>
         <View>
-          <Title size="20" style={{ paddingLeft: 0, color: theme.error }}>
+          <Title size={20} style={{ paddingLeft: 0, color: theme.error }}>
             Danger Zone
           </Title>
           <View style={styles(theme).divider} />

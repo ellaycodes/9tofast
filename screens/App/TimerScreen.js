@@ -132,7 +132,7 @@ function TimerScreen({ navigation }) {
       {isPremium ? null : (
         <>
           <Ads />
-          {/* <FlatButton
+          <FlatButton
             size="xs"
             style={{ paddingTop: 0, paddingBottom: 24 }}
             onPress={() =>
@@ -142,7 +142,7 @@ function TimerScreen({ navigation }) {
             }
           >
             Want to get rid of ads? Subscribe to Premium
-          </FlatButton> */}
+          </FlatButton>
         </>
       )}
       <View style={memoStyle.buttonsContainer}>
@@ -181,7 +181,7 @@ const styles = (theme, themeName) =>
       marginBottom: 12,
       ...(themeName === "Desk" && {
         textAlign: "left",
-        paddingLeft: 2,
+        paddingLeft: 12,
         paddingBottom: 0,
         alignItems: "left",
         fontSize: 14,

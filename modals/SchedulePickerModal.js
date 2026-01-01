@@ -1,5 +1,7 @@
 import { Modal, Pressable, View, Platform, StyleSheet } from "react-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import DateTimePicker, {
+  DateTimePickerAndroid,
+} from "@react-native-community/datetimepicker";
 import PrimaryButton from "../components/ui/PrimaryButton";
 import { useAppTheme } from "../store/app-theme-context";
 import { timeStringToDate } from "../util/formatTime";
@@ -13,6 +15,23 @@ function SchedulePickerModal({
   const { theme } = useAppTheme();
 
   const dateTimeValue = timeStringToDate(timeDate);
+
+  if (Platform.OS === "android") {
+    if (showPicker) {
+      DateTimePickerAndroid.open({
+        mode: "time",
+        value: dateTimeValue,
+        is24Hour: false,
+        onChange: (event, selectedDate) => {
+          if (event.type === "set") {
+            onChange(event, selectedDate);
+          }
+          onRequestClose();
+        },
+      });
+    }
+    return null;
+  }
 
   return (
     <Modal
@@ -28,10 +47,7 @@ function SchedulePickerModal({
           value={dateTimeValue}
           display={Platform.OS === "ios" ? "spinner" : "default"}
           textColor={Platform.OS === "ios" ? theme.text : undefined}
-          onChange={(e, d) => {
-            onChange(e, d);
-            if (Platform.OS !== "ios") onRequestClose();
-          }}
+          onChange={onChange}
           style={{ alignSelf: "center" }}
         />
         <PrimaryButton onPress={onRequestClose}>Done</PrimaryButton>

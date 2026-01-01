@@ -6,7 +6,7 @@ const IS_PREVIEW = process.env.APP_VARIANT === "preview";
 
 const getUniqueIdentifier = () => {
   if (IS_DEV) {
-    return "com.horizon.x9tofast.dev";
+    return "com.horizon.x9tofast";
   }
 
   if (IS_PREVIEW) {
@@ -33,8 +33,11 @@ export default ({ config }) => ({
   name: getAppName(),
   slug: "9tofast",
   owner: "horizon9tofast",
-  scheme:
+  scheme: [
+    "com.horizon.x9tofast",
     "com.googleusercontent.apps.438582901138-7lo7q4ggvn1q03mdmtv51ivphdng6sro",
+    "com.googleusercontent.apps.438582901138-umckshratmsduhi213q0kn7rhoahnhbn",
+  ],
   version: "1.2.1",
   orientation: "portrait",
   icon: "./assets/icon2.png",
@@ -69,23 +72,31 @@ export default ({ config }) => ({
     },
   },
   android: {
+    versionCode: 5,
     adaptiveIcon: {
-      foregroundImage: "./assets/adaptive-icon.png",
+      foregroundImage: "./assets/adaptive-icon2.png",
       backgroundColor: "#0F2524",
     },
-    package: "com.horizon.x9tofast",
+    package: getUniqueIdentifier(),
+    googleServicesFile: IS_PREVIEW
+      ? "./plists/google-services-staging.json"
+      : "./plists/google-services.json",
+    permissions: ["com.google.android.gms.permission.AD_ID"],
   },
   web: {
-    favicon: "./assets/favicon.png",
+    favicon: "./assets/favicon2.png",
   },
   extra: {
     firebaseApiKey: process.env.FIREBASE_API_KEY,
+    firebaseAndroidApiKey: process.env.FIREBASE_ANDROID_API_KEY,
     firebaseAuthDomain: process.env.FIREBASE_AUTH_DOMAIN,
     firebaseProjectId: process.env.FIREBASE_PROJECT_ID,
     firebaseStorageBucket: process.env.FIREBASE_STORAGE_BUCKET,
     firebaseMessagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
     firebaseAppId: process.env.FIREBASE_APP_ID,
+    firebaseAndroidAppId: process.env.FIREBASE_ANDROID_APP_ID,
     iosClientId: process.env.IOS_CLIENT_ID,
+    androidClientId: process.env.ANDROID_CLIENT_ID,
     expoClientId: process.env.EXPO_CLIENT_ID,
     revenueCatApiKey: process.env.REVENUECAT_API_KEY,
     adAppId: process.env.AD_APP_ID,
@@ -123,7 +134,7 @@ export default ({ config }) => ({
     [
       "expo-notifications",
       {
-        icon: "./local/assets/adaptive-icon2.png",
+        icon: "./assets/adaptive-icon2.png",
         color: "#ffffff",
         defaultChannel: "default",
         enableBackgroundRemoteNotifications: true,
