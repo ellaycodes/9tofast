@@ -9,6 +9,9 @@
       "distribution": "internal",
       "env": {
         "APP_VARIANT": "development"
+      },
+      "android": {
+        "buildType": "apk"
       }
     },
     "ios-simulator": {
@@ -27,6 +30,12 @@
         "simulator": false
       }
     },
+    "testing": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
+    },
     "production": {
       "distribution": "store",
       "autoIncrement": true,
@@ -35,6 +44,9 @@
       },
       "ios": {
         "simulator": false
+      },
+      "android": {
+        "buildType": "app-bundle"
       }
     },
     "development-simulator": {

@@ -113,11 +113,11 @@ function PreAuthScreen({ navigation }) {
       }
     } catch (err) {
       if (err?.code === "ERR_REQUEST_CANCELED") return;
-      console.log(err);
-      
+      console.log(err.code);
+
       Alert.alert(
         "There was an error while logging you in",
-        "Please try again."
+        "Please try again or contact support if this issue persists."
       );
     } finally {
       setIsAuthing(false);
@@ -162,8 +162,8 @@ function PreAuthScreen({ navigation }) {
       console.warn("APPLE ERROR HERE =>", err);
       Alert.alert(
         "There was an error signing you in with Apple.",
-        err.code
-        //  "Please try signing in a different way or contact support if the issue persists."
+        // err.code
+         "Please try signing in a different way or contact support if the issue persists."
       );
     } finally {
       setIsAuthing(false);

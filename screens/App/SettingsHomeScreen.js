@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { ScrollView, View } from "react-native";
+import { Alert, ScrollView, Text, View } from "react-native";
 import * as dt from "date-fns";
 import { AuthContext } from "../../store/auth-context";
 import { useAppTheme } from "../../store/app-theme-context";
@@ -7,8 +7,8 @@ import { useFasting } from "../../store/fastingLogic/fasting-context";
 import SectionTitle from "../../components/Settings/SectionTitle";
 import SettingsPressable from "../../components/Settings/SettingsPressable";
 import Ads from "../../components/monetising/Ads";
-import { usePremium } from "../../hooks/usePremium";
-import FlatButton from "../../components/ui/FlatButton";
+import { setOptimisticPremium, usePremium } from "../../hooks/usePremium";
+import RevenueCatUI from "react-native-purchases-ui";
 
 function SettingsHomeScreen({ navigation }) {
   const authCxt = useContext(AuthContext);
@@ -35,8 +35,35 @@ function SettingsHomeScreen({ navigation }) {
     });
   }
 
-  function premiumHandler() {
-    navigation.navigate("PremiumPaywallScreen");
+  async function premiumHandler() {
+    try {
+      const paywallResult = await RevenueCatUI.presentPaywall();
+
+      if (paywallResult === "PURCHASED" || paywallResult === "RESTORED") {
+        setOptimisticPremium(true);
+        await refresh();
+        navigation.navigate("SettingsHomeScreen");
+      }
+
+      console.log("paywall result", paywallResult);
+    } catch (err) {
+      console.warn(err);
+      Alert.alert(
+        "Error with Premium Subscription",
+        "We're very sorry but we could not subscribe you to Premium. Please try again later or contact support if this persists.",
+        [
+          {
+            text: "Contact Support",
+            onPress: () => navigation.navigate("SupportScreen"),
+            style: "default",
+          },
+          {
+            text: "Cancel",
+            style: "cancel",
+          },
+        ]
+      );
+    }
   }
 
   function aboutScreenHandler() {
@@ -106,18 +133,7 @@ function SettingsHomeScreen({ navigation }) {
       </View>
       {isPremium ? null : (
         <>
-          <Ads />
-          <FlatButton
-            size="xs"
-            style={{ paddingTop: 0, paddingBottom: 24 }}
-            onPress={() =>
-              navigation.navigate("Settings", {
-                screen: "PremiumPaywallScreen",
-              })
-            }
-          >
-            Want to get rid of ads? Subscribe to Premium
-          </FlatButton>
+          <Ads disabled={isPremium} />
           <View>
             <SectionTitle>Premium</SectionTitle>
             <SettingsPressable

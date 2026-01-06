@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { View } from "react-native";
+import { Text, View } from "react-native";
 import * as dt from "date-fns";
 import { useFasting } from "../../store/fastingLogic/fasting-context";
 import Countdown from "../../components/ui/Countdown";
@@ -129,22 +129,7 @@ function TimerScreen({ navigation }) {
             dt.format(dt.parse(schedule.end, "HH:mm", new Date()), "p")}
         </SubtitleText>
       )}
-      {isPremium ? null : (
-        <>
-          <Ads />
-          <FlatButton
-            size="xs"
-            style={{ paddingTop: 0, paddingBottom: 24 }}
-            onPress={() =>
-              navigation.navigate("Settings", {
-                screen: "PremiumPaywallScreen",
-              })
-            }
-          >
-            Want to get rid of ads? Subscribe to Premium
-          </FlatButton>
-        </>
-      )}
+      <Ads disabled={isPremium} />
       <View style={memoStyle.buttonsContainer}>
         <ButtonsContainer fast={fasting} withinFasting={inside} />
       </View>

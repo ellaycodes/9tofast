@@ -16,34 +16,34 @@ function PremiumPaywallScreen({ navigation }) {
   const { refresh } = usePremium();
 
   async function handleContinuePremium() {
-    try {
-      const paywallResult = await RevenueCatUI.presentPaywall();
+    // try {
+    //   const paywallResult = await RevenueCatUI.presentPaywall();
 
-      if (paywallResult === "PURCHASED" || paywallResult === "RESTORED") {
-        setOptimisticPremium(true);
-        await refresh();
-        navigation.navigate("TimerScreen");
-      } else if (paywallResult === "CANCELLED") {
-        throw new Error("App Error");
-      }
-    } catch (err) {
-      console.warn(err);
-      Alert.alert(
-        "Error with Premium Subscription",
-        "We're very sorry but we could not subscribe you to Premium. Please try again later or contact support if this persists.",
-        [
-          {
-            text: "Contact Support",
-            onPress: () => navigation.navigate("SupportScreen"),
-            style: "default",
-          },
-          {
-            text: "Cancel",
-            style: "cancel",
-          },
-        ]
-      );
-    }
+    //   if (paywallResult === "PURCHASED" || paywallResult === "RESTORED") {
+    //     setOptimisticPremium(true);
+    //     await refresh();
+    //     navigation.navigate("SettingsHomeScreen");
+    //   }
+
+    //   console.log("paywall result", paywallResult);
+    // } catch (err) {
+    //   console.warn(err);
+    //   Alert.alert(
+    //     "Error with Premium Subscription",
+    //     "We're very sorry but we could not subscribe you to Premium. Please try again later or contact support if this persists.",
+    //     [
+    //       {
+    //         text: "Contact Support",
+    //         onPress: () => navigation.navigate("SupportScreen"),
+    //         style: "default",
+    //       },
+    //       {
+    //         text: "Cancel",
+    //         style: "cancel",
+    //       },
+    //     ]
+    //   );
+    // }
   }
 
   async function handleRestorePurchase() {
@@ -54,7 +54,7 @@ function PremiumPaywallScreen({ navigation }) {
       navigation.navigate("TimerScreen");
       console.log(restoreResult);
     } else {
-      console.log('todo');
+      console.log("todo");
     }
   }
 

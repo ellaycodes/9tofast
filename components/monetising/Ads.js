@@ -5,27 +5,51 @@ import {
   TestIds,
   useForeground,
 } from "react-native-google-mobile-ads";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Constants from "expo-constants";
+import FlatButton from "../ui/FlatButton";
+import { useNavigation } from "@react-navigation/native";
 
-function Ads() {
+function Ads({ disabled = false }) {
   const bannerRef = useRef(null);
-
   useForeground(() => {
     Platform.OS === "ios" && bannerRef.current?.load();
   });
+  const navigation = useNavigation();
+  const [canShow, setCanShow] = useState(true);
+
+  useEffect(() => {
+    setCanShow(true);
+  }, []);
+
+  if (disabled || !canShow) return null;
 
   return (
     <View style={styles.conatiner}>
       <BannerAd
         ref={bannerRef}
         size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-        // unitId={TestIds.BANNER}
-        unitId={Constants.expoConfig.extra.bannerAdUnitId}
+        unitId={TestIds.BANNER}
+        //unitId={Constants.expoConfig.extra.bannerAdUnitId}
+        onAdLoaded={() => {
+          setCanShow(true);
+        }}
         onAdFailedToLoad={(error) => {
-          console.log("Banner failed to load:", error);
+          console.log("Ad failed to load:", error);
+          setCanShow(false);
         }}
       />
+      <FlatButton
+        size="xs"
+        style={{ paddingTop: 0, paddingBottom: 24 }}
+        onPress={() =>
+          navigation.navigate("Settings", {
+            screen: "PremiumPaywallScreen",
+          })
+        }
+      >
+        Want to get rid of ads? Subscribe to Premium
+      </FlatButton>
     </View>
   );
 }
@@ -34,6 +58,7 @@ export default Ads;
 
 const styles = StyleSheet.create({
   conatiner: {
-    paddingVertical: 15,
+    paddingTop: 15,
+    gap: 10,
   },
 });
