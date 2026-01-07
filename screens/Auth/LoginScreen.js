@@ -25,25 +25,18 @@ function LoginScreen() {
         authDetails.password
       );
 
-      const { displayName, email, uid } = user;
+      const uid = user.uid;
 
-      const args = {
-        displayName: displayName,
-        email: email,
-      };
-
-      await updateUser(uid, args);
-
-      const token = await getIdToken(user, true);
-
-      authCxt.authenticate(token, displayName, uid);
-      authCxt.setEmailAddress(email);
-      authCxt.setOnboarded(true);
-
-      const [userData, prefs] = await Promise.all([
+      const [userData, prefs, token] = await Promise.all([
         getUser(uid),
         getPreferences(uid),
+        getIdToken(user, true),
       ]);
+
+      authCxt.authenticate(token, userData.displayName, uid);
+      authCxt.setEmailAddress(userData.email);
+      authCxt.setOnboarded(true);
+
       if (userData && userData.fullName) {
         authCxt.updateFullName(userData.fullName);
       }

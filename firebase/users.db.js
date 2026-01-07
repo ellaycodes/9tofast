@@ -45,26 +45,25 @@ export async function getUser(uid) {
   }
 }
 
+function stripUndefined(partial) {
+  return Object.fromEntries(
+    Object.entries(partial).filter(([, v]) => v !== undefined && v !== "")
+  );
+}
+
 export async function updateUser(uid, partial) {
   if (!uid) throw new Error("UPDATE_USER_MISSING_UID");
   if (!partial || typeof partial !== "object") throw new Error("BAD_PARTIAL");
 
-  const patch = {};
-  for (const [k, v] of Object.entries(partial)) {
-    if (v !== undefined) patch[k] = v;
-  }
+  const patch = stripUndefined(partial);
 
-  if (Object.keys(patch).length === 0) return { status: "noop" };
+  if (Object.keys(patch).length === 0) return { status: "noop", patch: {} };
 
   patch.updatedAt = serverTimestamp();
 
-  try {
-    await updateDoc(doc(db, "users", uid), patch);
-    return { status: "user updated" };
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
+  await updateDoc(doc(db, "users", uid), patch);
+
+  return { status: "ok", patch };
 }
 
 export async function deleteCurrentUser(uid) {

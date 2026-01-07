@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { useAppTheme } from "../../store/app-theme-context";
-import { StyleSheet } from "react-native";
+import { Platform, StyleSheet } from "react-native";
 import { TextInput, View } from "react-native";
 
 function Input({
@@ -11,10 +12,17 @@ function Input({
   style,
   children,
   error,
-  autoComplete,
-  textContentType,
+  textContentType
 }) {
   const { theme } = useAppTheme();
+  const [iosSecureFix, setIosSecureFix] = useState(true);
+
+  function handleFocus() {
+    if (Platform.OS === "ios" && secure) {
+      setIosSecureFix(false);
+      requestAnimationFrame(() => setIosSecureFix(true));
+    }
+  }
 
   return (
     <View
@@ -27,7 +35,7 @@ function Input({
       <TextInput
         value={value}
         style={styles(theme).textInput}
-        secureTextEntry={secure}
+        secureTextEntry={secure && iosSecureFix}
         onChangeText={onUpdateText}
         keyboardType={keyboardType}
         placeholder={label}
@@ -35,8 +43,11 @@ function Input({
         returnKeyType="next"
         autoCapitalize="none"
         autoCorrect={false}
-        autoComplete={autoComplete}
-        textContentType={textContentType}
+        textContentType={secure ? "oneTimeCode" : textContentType}
+        autoComplete={secure ? "off" : "on"}
+        passwordRules={secure ? "" : undefined}
+        importantForAutofill={secure ? "no" : "auto"} 
+        onFocus={handleFocus}
       />
       {children}
     </View>
@@ -61,8 +72,8 @@ const styles = (theme) =>
     textInput: {
       padding: 16,
       margin: 8,
-      color: theme.darkText,
-      flex: 1
+      color: theme.text,
+      flex: 1,
     },
     inputContainerError: {
       borderColor: theme.error,

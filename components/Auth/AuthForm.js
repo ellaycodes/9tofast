@@ -56,7 +56,6 @@ function AuthForm({ isLogin, onSubmit, credentialsInvalid }) {
 
   return (
     <View>
-      {/* <KeyboardAvoidingView style={{ flex: 1 }}> */}
       <Input
         label="Email"
         value={authDetails.email}
@@ -64,7 +63,6 @@ function AuthForm({ isLogin, onSubmit, credentialsInvalid }) {
         onUpdateText={handleInputs.bind(this, "email")}
         keyboardType="email-address"
         error={!!credentialsInvalid?.email}
-        autoComplete="email"
         textContentType="emailAddress"
       />
       {!isLogin && (
@@ -75,7 +73,6 @@ function AuthForm({ isLogin, onSubmit, credentialsInvalid }) {
           onUpdateText={handleInputs.bind(this, "confirmEmail")}
           keyboardType="email-address"
           error={!!credentialsInvalid?.confirmEmail}
-          autoComplete="email"
           textContentType="emailAddress"
         />
       )}
@@ -118,7 +115,6 @@ function AuthForm({ isLogin, onSubmit, credentialsInvalid }) {
           {isLogin ? "Log In" : "Create Account"}
         </PrimaryButton>
       </View>
-      {/* </KeyboardAvoidingView> */}
     </View>
   );
 }
