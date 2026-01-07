@@ -5,7 +5,7 @@ import PrimaryButton from "../ui/PrimaryButton";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useAppTheme } from "../../store/app-theme-context";
 
-function AuthForm({ isLogin, onSubmit }) {
+function AuthForm({ isLogin, onSubmit, credentialsInvalid }) {
   const [secure, setSecure] = useState(true);
   const [secure2, setSecure2] = useState(true);
   const { theme } = useAppTheme();
@@ -56,61 +56,69 @@ function AuthForm({ isLogin, onSubmit }) {
 
   return (
     <View>
-      <KeyboardAvoidingView>
+      {/* <KeyboardAvoidingView style={{ flex: 1 }}> */}
+      <Input
+        label="Email"
+        value={authDetails.email}
+        secure={false}
+        onUpdateText={handleInputs.bind(this, "email")}
+        keyboardType="email-address"
+        error={!!credentialsInvalid?.email}
+        autoComplete="email"
+        textContentType="emailAddress"
+      />
+      {!isLogin && (
         <Input
-          label="Email"
-          value={authDetails.email}
+          label="Confirm Email"
+          value={authDetails.confirmEmail}
           secure={false}
-          onUpdateText={handleInputs.bind(this, "email")}
+          onUpdateText={handleInputs.bind(this, "confirmEmail")}
           keyboardType="email-address"
+          error={!!credentialsInvalid?.confirmEmail}
+          autoComplete="email"
+          textContentType="emailAddress"
         />
-        {!isLogin && (
-          <Input
-            label="Confirm Email"
-            value={authDetails.confirmEmail}
-            secure={false}
-            onUpdateText={handleInputs.bind(this, "confirmEmail")}
-            keyboardType="email-address"
+      )}
+      <Input
+        label="Password"
+        value={authDetails.password}
+        secure={secure}
+        onUpdateText={handleInputs.bind(this, "password")}
+        keyboardType="default"
+        error={!!credentialsInvalid?.password}
+      >
+        <Pressable onPress={() => setSecure(!secure)}>
+          <MaterialCommunityIcons
+            name={secure ? "eye-outline" : "eye-off-outline"}
+            size={24}
+            color={theme.muted}
           />
-        )}
+        </Pressable>
+      </Input>
+      {!isLogin && (
         <Input
-          label="Password"
-          value={authDetails.password}
-          secure={secure}
-          onUpdateText={handleInputs.bind(this, "password")}
+          label="Confirm Password"
+          value={authDetails.confirmPassword}
+          secure={secure2}
+          onUpdateText={handleInputs.bind(this, "confirmPassword")}
           keyboardType="default"
+          error={!!credentialsInvalid?.confirmPassword}
         >
-          <Pressable onPress={() => setSecure(!secure)}>
+          <Pressable onPress={() => setSecure2(!secure2)}>
             <MaterialCommunityIcons
-              name={secure ? "eye-outline" : "eye-off-outline"}
+              name={secure2 ? "eye-outline" : "eye-off-outline"}
               size={24}
               color={theme.muted}
             />
           </Pressable>
         </Input>
-        {!isLogin && (
-          <Input
-            label="Confirm Password"
-            value={authDetails.confirmPassword}
-            secure={secure2}
-            onUpdateText={handleInputs.bind(this, "confirmPassword")}
-            keyboardType="default"
-          >
-            <Pressable onPress={() => setSecure2(!secure2)}>
-              <MaterialCommunityIcons
-                name={secure2 ? "eye-outline" : "eye-off-outline"}
-                size={24}
-                color={theme.muted}
-              />
-            </Pressable>
-          </Input>
-        )}
-        <View>
-          <PrimaryButton onPress={onSubmitHandler}>
-            {isLogin ? "Log In" : "Create Account"}
-          </PrimaryButton>
-        </View>
-      </KeyboardAvoidingView>
+      )}
+      <View>
+        <PrimaryButton onPress={onSubmitHandler}>
+          {isLogin ? "Log In" : "Create Account"}
+        </PrimaryButton>
+      </View>
+      {/* </KeyboardAvoidingView> */}
     </View>
   );
 }

@@ -23,6 +23,7 @@ import { useFasting } from "../../store/fastingLogic/fasting-context.js";
 import { StatsContext } from "../../store/statsLogic/stats-context.js";
 import Title from "../ui/Title.js";
 import { usePremium } from "../../hooks/usePremium.js";
+import RevenueCatUI from "react-native-purchases-ui";
 
 function AuthedProfile({ emailAddress }) {
   const [showModal, setShowModal] = useState(false);
@@ -211,31 +212,34 @@ function AuthedProfile({ emailAddress }) {
               <SettingsPressable
                 icon="subscriptions"
                 label="Manage Subscriptions"
-                onPress={() => {
-                  Alert.alert(
-                    "Subscriptions are managed through the App Store.",
-                    "If you wish to cancel your subscription you can do this by selecting the 'App Store' button below.",
-                    [
-                      {
-                        isPreferred: true,
-                        style: "cancel",
-                        text: "Cancel",
-                      },
-                      {
-                        isPreferred: false,
-                        style: "default",
-                        text: "App Store",
-                        onPress: () => {
-                          const url =
-                            Platform.OS === "ios"
-                              ? "https://apps.apple.com/account/subscriptions"
-                              : "https://play.google.com/store/account/subscriptions";
+                // onPress={() => {
+                //   Alert.alert(
+                //     "Subscriptions are managed through the App Store.",
+                //     "If you wish to cancel your subscription you can do this by selecting the 'App Store' button below.",
+                //     [
+                //       {
+                //         isPreferred: true,
+                //         style: "cancel",
+                //         text: "Cancel",
+                //       },
+                //       {
+                //         isPreferred: false,
+                //         style: "default",
+                //         text: "App Store",
+                //         onPress: () => {
+                //           const url =
+                //             Platform.OS === "ios"
+                //               ? "https://apps.apple.com/account/subscriptions"
+                //               : "https://play.google.com/store/account/subscriptions";
 
-                          Linking.openURL(url);
-                        },
-                      },
-                    ]
-                  );
+                //           Linking.openURL(url);
+                //         },
+                //       },
+                //     ]
+                //   );
+                // }}
+                onPress={async () => {
+                  await RevenueCatUI.presentCustomerCenter();
                 }}
               />
             ) : null}

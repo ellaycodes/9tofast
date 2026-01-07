@@ -9,6 +9,7 @@ import { useEffect, useRef, useState } from "react";
 import Constants from "expo-constants";
 import FlatButton from "../ui/FlatButton";
 import { useNavigation } from "@react-navigation/native";
+import { premiumHandler } from "./RevenueCat";
 
 function Ads({ disabled = false }) {
   const bannerRef = useRef(null);
@@ -42,11 +43,7 @@ function Ads({ disabled = false }) {
       <FlatButton
         size="xs"
         style={{ paddingTop: 0, paddingBottom: 24 }}
-        onPress={() =>
-          navigation.navigate("Settings", {
-            screen: "PremiumPaywallScreen",
-          })
-        }
+        onPress={() => premiumHandler()}
       >
         Want to get rid of ads? Subscribe to Premium
       </FlatButton>

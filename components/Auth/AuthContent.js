@@ -2,14 +2,22 @@ import AuthForm from "./AuthForm";
 import FlatButton from "../ui/FlatButton";
 import { useNavigation } from "@react-navigation/native";
 import Header from "./Header";
-import { Text, View } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import { StyleSheet } from "react-native";
 import { useAppTheme } from "../../store/app-theme-context";
 import { Alert } from "react-native";
+import { useState } from "react";
 
 function AuthContent({ isLogin, authenticate }) {
   const navigation = useNavigation();
   const { theme } = useAppTheme();
+  const [credentialsInvalid, setCredentialsInvalid] = useState({});
 
   function switchAuthModeHandler() {
     if (isLogin) {
@@ -45,30 +53,45 @@ function AuthContent({ isLogin, authenticate }) {
       });
       return;
     }
+    setCredentialsInvalid({});
     authenticate({ email, password });
   }
 
   return (
-    <View style={styles.container}>
-      <Header>{isLogin ? "Log In" : "Sign Up"}</Header>
-      <AuthForm isLogin={isLogin} onSubmit={submitHandler} />
-      <View style={styles.flatbuttonContainer}>
-        <FlatButton onPress={switchAuthModeHandler}>
-          {isLogin ? "Create Account" : "I already have an account"}
-        </FlatButton>
-        <Text style={{ color: theme.muted }}> | </Text>
-        <FlatButton onPress={signInDifferently}>
-          Sign in a different way
-        </FlatButton>
-      </View>
-      <View>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "position" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 20 : 0}
+    >
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Header>{isLogin ? "Log In" : "Sign Up"}</Header>
+
+        <AuthForm
+          isLogin={isLogin}
+          onSubmit={submitHandler}
+          credentialsInvalid={credentialsInvalid}
+        />
+
+        <View style={styles.flatbuttonContainer}>
+          <FlatButton onPress={switchAuthModeHandler}>
+            {isLogin ? "Create Account" : "I already have an account"}
+          </FlatButton>
+          <Text style={{ color: theme.muted }}> | </Text>
+          <FlatButton onPress={signInDifferently}>
+            Sign in a different way
+          </FlatButton>
+        </View>
+
         {isLogin && (
           <FlatButton onPress={() => navigation.navigate("ForgottenPassword")}>
             Forgotten Password?
           </FlatButton>
         )}
-      </View>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -81,6 +104,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   container: {
-    margin: 16,
+    padding: 16,
+    flexGrow: 1,
   },
 });

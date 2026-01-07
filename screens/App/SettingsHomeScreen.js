@@ -9,6 +9,7 @@ import SettingsPressable from "../../components/Settings/SettingsPressable";
 import Ads from "../../components/monetising/Ads";
 import { setOptimisticPremium, usePremium } from "../../hooks/usePremium";
 import RevenueCatUI from "react-native-purchases-ui";
+import { premiumHandler } from "../../components/monetising/RevenueCat";
 
 function SettingsHomeScreen({ navigation }) {
   const authCxt = useContext(AuthContext);
@@ -33,37 +34,6 @@ function SettingsHomeScreen({ navigation }) {
       emailAddress: authCxt.emailAddress,
       username: authCxt.username,
     });
-  }
-
-  async function premiumHandler() {
-    try {
-      const paywallResult = await RevenueCatUI.presentPaywall();
-
-      if (paywallResult === "PURCHASED" || paywallResult === "RESTORED") {
-        setOptimisticPremium(true);
-        await refresh();
-        navigation.navigate("SettingsHomeScreen");
-      }
-
-      console.log("paywall result", paywallResult);
-    } catch (err) {
-      console.warn(err);
-      Alert.alert(
-        "Error with Premium Subscription",
-        "We're very sorry but we could not subscribe you to Premium. Please try again later or contact support if this persists.",
-        [
-          {
-            text: "Contact Support",
-            onPress: () => navigation.navigate("SupportScreen"),
-            style: "default",
-          },
-          {
-            text: "Cancel",
-            style: "cancel",
-          },
-        ]
-      );
-    }
   }
 
   function aboutScreenHandler() {
@@ -139,7 +109,7 @@ function SettingsHomeScreen({ navigation }) {
             <SettingsPressable
               label="Upgrade to Premium"
               icon="star-border"
-              onPress={premiumHandler}
+              onPress={() => premiumHandler()}
             />
           </View>
         </>
