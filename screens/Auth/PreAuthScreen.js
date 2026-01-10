@@ -21,12 +21,14 @@ import { useFasting } from "../../store/fastingLogic/fasting-context.js";
 import useGoogleAuth from "../../hooks/useGoogleAuth.js";
 import * as AppleAuthentication from "expo-apple-authentication";
 import useAuthHelpers from "../../hooks/useAuthHelpers.js";
+import { usePremium } from "../../store/premium-context.js";
 
 WebBrowser.maybeCompleteAuthSession();
 
 function PreAuthScreen({ navigation }) {
   const [isAuthing, setIsAuthing] = useState(false);
   const { setSchedule } = useFasting();
+  const { premiumLogIn } = usePremium();
   const {
     handleExistingUserLogin,
     handleNewProviderUser,
@@ -58,6 +60,7 @@ function PreAuthScreen({ navigation }) {
             return;
           }
           await handleExistingUserLogin(user, existingUser);
+          await premiumLogIn(user.uid);
         } catch (err) {
           Alert.alert(
             "There was an error while logging you in",
@@ -111,6 +114,7 @@ function PreAuthScreen({ navigation }) {
         }
         await handleExistingUserLogin(user, existingUser);
       }
+      await premiumLogIn(user.uid);
     } catch (err) {
       if (err?.code === "ERR_REQUEST_CANCELED") return;
       console.log(err.code);
@@ -156,6 +160,7 @@ function PreAuthScreen({ navigation }) {
         return;
       }
       await handleExistingUserLogin(user, existing);
+      await premiumLogIn(user.uid);
     } catch (err) {
       setIsAuthing(false);
       if (err.code === "ERR_REQUEST_CANCELED") return;
@@ -163,7 +168,7 @@ function PreAuthScreen({ navigation }) {
       Alert.alert(
         "There was an error signing you in with Apple.",
         // err.code
-         "Please try signing in a different way or contact support if the issue persists."
+        "Please try signing in a different way or contact support if the issue persists."
       );
     } finally {
       setIsAuthing(false);

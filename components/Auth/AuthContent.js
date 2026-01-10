@@ -31,7 +31,7 @@ function AuthContent({ isLogin, authenticate }) {
     navigation.replace("PreAuthScreen");
   }
 
-  function submitHandler(authDetails) {
+  async function submitHandler(authDetails) {
     let { email, confirmEmail, password, confirmPassword } = authDetails;
 
     const emailIsValid = email.includes("@");
@@ -54,7 +54,7 @@ function AuthContent({ isLogin, authenticate }) {
       return;
     }
     setCredentialsInvalid({});
-    authenticate({ email, password });
+    await authenticate({ email, password });
   }
 
   return (

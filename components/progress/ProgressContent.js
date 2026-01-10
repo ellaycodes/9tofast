@@ -8,7 +8,8 @@ import SubtitleText from "../ui/SubtitleText";
 import Ads from "../../components/monetising/Ads";
 import EventsChart from "./EventsChart";
 import * as dt from "date-fns";
-import { usePremium } from "../../hooks/usePremium";
+import { usePremium } from "../../store/premium-context";
+// import { usePremium } from "../../hooks/usePremium";
 
 export default function MainProgess({
   fastingHours,

@@ -6,9 +6,10 @@ import PrimaryButton from "../../components/ui/PrimaryButton";
 import FlatButton from "../../components/ui/FlatButton";
 import { useAppTheme } from "../../store/app-theme-context";
 import { useMemo } from "react";
-import { setOptimisticPremium, usePremium } from "../../hooks/usePremium";
+// import { setOptimisticPremium, usePremium } from "../../hooks/usePremium";
 import RevenueCatUI from "react-native-purchases-ui";
 import Purchases from "react-native-purchases";
+import { usePremium } from "../../store/premium-context";
 
 function PremiumPaywallScreen({ navigation }) {
   const { theme } = useAppTheme();
@@ -16,46 +17,19 @@ function PremiumPaywallScreen({ navigation }) {
   const { refresh } = usePremium();
 
   async function handleContinuePremium() {
-    // try {
-    //   const paywallResult = await RevenueCatUI.presentPaywall();
-
-    //   if (paywallResult === "PURCHASED" || paywallResult === "RESTORED") {
-    //     setOptimisticPremium(true);
-    //     await refresh();
-    //     navigation.navigate("SettingsHomeScreen");
-    //   }
-
-    //   console.log("paywall result", paywallResult);
-    // } catch (err) {
-    //   console.warn(err);
-    //   Alert.alert(
-    //     "Error with Premium Subscription",
-    //     "We're very sorry but we could not subscribe you to Premium. Please try again later or contact support if this persists.",
-    //     [
-    //       {
-    //         text: "Contact Support",
-    //         onPress: () => navigation.navigate("SupportScreen"),
-    //         style: "default",
-    //       },
-    //       {
-    //         text: "Cancel",
-    //         style: "cancel",
-    //       },
-    //     ]
-    //   );
-    // }
+    
   }
 
   async function handleRestorePurchase() {
-    const restoreResult = await Purchases.restorePurchases();
-    if (restoreResult) {
-      setOptimisticPremium(true);
-      await refresh();
-      navigation.navigate("TimerScreen");
-      console.log(restoreResult);
-    } else {
-      console.log("todo");
-    }
+    // const restoreResult = await Purchases.restorePurchases();
+    // if (restoreResult) {
+    //   setOptimisticPremium(true);
+    //   await refresh();
+    //   navigation.navigate("TimerScreen");
+    //   console.log(restoreResult);
+    // } else {
+    //   console.log("todo");
+    // }
   }
 
   return (

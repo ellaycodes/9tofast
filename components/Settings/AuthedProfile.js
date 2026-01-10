@@ -22,8 +22,8 @@ import AvatarSegment from "../ui/AvatarSegment";
 import { useFasting } from "../../store/fastingLogic/fasting-context.js";
 import { StatsContext } from "../../store/statsLogic/stats-context.js";
 import Title from "../ui/Title.js";
-import { usePremium } from "../../hooks/usePremium.js";
 import RevenueCatUI from "react-native-purchases-ui";
+import { usePremium } from "../../store/premium-context.js";
 
 function AuthedProfile({ emailAddress }) {
   const [showModal, setShowModal] = useState(false);
@@ -31,17 +31,18 @@ function AuthedProfile({ emailAddress }) {
 
   const authCxt = useContext(AuthContext);
   const { statsLogout } = useContext(StatsContext);
+  const { premiumLogOut, isPremium } = usePremium();
   const navigation = useNavigation();
   const { theme, setThemeName } = useAppTheme();
   const { setSchedule } = useFasting();
-  const { isPremium } = usePremium();
 
   async function logoutHandler() {
-    await statsLogout();
     try {
+      await statsLogout();
       authCxt.logout();
       setThemeName("Original", true);
       setSchedule(null);
+      await premiumLogOut();
     } catch (error) {
       const message =
         error &&

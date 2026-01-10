@@ -6,10 +6,10 @@ import {
   useForeground,
 } from "react-native-google-mobile-ads";
 import { useEffect, useRef, useState } from "react";
-import Constants from "expo-constants";
 import FlatButton from "../ui/FlatButton";
 import { useNavigation } from "@react-navigation/native";
 import { premiumHandler } from "./RevenueCat";
+import { usePremium } from "../../store/premium-context";
 
 function Ads({ disabled = false }) {
   const bannerRef = useRef(null);
@@ -18,6 +18,7 @@ function Ads({ disabled = false }) {
   });
   const navigation = useNavigation();
   const [canShow, setCanShow] = useState(true);
+  const { refresh } = usePremium();
 
   useEffect(() => {
     setCanShow(true);
@@ -43,7 +44,7 @@ function Ads({ disabled = false }) {
       <FlatButton
         size="xs"
         style={{ paddingTop: 0, paddingBottom: 24 }}
-        onPress={() => premiumHandler()}
+        onPress={() => premiumHandler({ navigation, refresh })}
       >
         Want to get rid of ads? Subscribe to Premium
       </FlatButton>

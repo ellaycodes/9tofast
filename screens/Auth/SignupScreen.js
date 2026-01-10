@@ -8,11 +8,13 @@ import randomUsername from "../../util/randomUsername";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../firebase/app";
 import { addUser } from "../../firebase/users.db.js";
+import { usePremium } from "../../store/premium-context.js";
 
 function SignupScreen({ navigation }) {
   const [isAuthing, setIsAuthing] = useState(false);
 
   const authCxt = useContext(AuthContext);
+  const { premiumLogIn } = usePremium()
 
   async function signUpHandler(authDetails) {
     setIsAuthing(true);
@@ -31,6 +33,8 @@ function SignupScreen({ navigation }) {
         displayName: userName,
         isAnonymous: false
       });
+
+      await premiumLogIn(user.uid);
 
       navigation.navigate("OnboardingCarousel", {
         token: user.stsTokenManager.accessToken,

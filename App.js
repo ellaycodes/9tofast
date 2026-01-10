@@ -31,9 +31,7 @@ import { getUser } from "./firebase/users.db.js";
 
 import { scheduleStreakNotifications } from "./notifications/streakNotifications.js";
 import MobileAdsConfig from "./components/monetising/AdsConfig.js";
-import { usePremium } from "./hooks/usePremium.js";
 import { PremiumProvider } from "./store/premium-context.js";
-import configureRevenueCat from "./components/monetising/RevenueCat.js";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => {
@@ -152,9 +150,10 @@ export default function App() {
 
   useEffect(() => {
     const init = async () => {
-      if (firebaseConfig?.apiKey !== undefined) setReady(true);
-      await MobileAdsConfig();
-      await configureRevenueCat();
+      if (firebaseConfig?.apiKey !== undefined) {
+        await MobileAdsConfig();
+        setReady(true);
+      }
     };
     init();
   }, []);
@@ -163,13 +162,13 @@ export default function App() {
 
   return (
     <>
-      <AuthContextProvider>
-        <AppThemeContextProvider>
-          <PremiumProvider>
+      <PremiumProvider>
+        <AuthContextProvider>
+          <AppThemeContextProvider>
             <InnerApp />
-          </PremiumProvider>
-        </AppThemeContextProvider>
-      </AuthContextProvider>
+          </AppThemeContextProvider>
+        </AuthContextProvider>
+      </PremiumProvider>
     </>
   );
 }

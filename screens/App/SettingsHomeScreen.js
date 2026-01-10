@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { Alert, ScrollView, Text, View } from "react-native";
+import { ScrollView, View } from "react-native";
 import * as dt from "date-fns";
 import { AuthContext } from "../../store/auth-context";
 import { useAppTheme } from "../../store/app-theme-context";
@@ -7,15 +7,14 @@ import { useFasting } from "../../store/fastingLogic/fasting-context";
 import SectionTitle from "../../components/Settings/SectionTitle";
 import SettingsPressable from "../../components/Settings/SettingsPressable";
 import Ads from "../../components/monetising/Ads";
-import { setOptimisticPremium, usePremium } from "../../hooks/usePremium";
-import RevenueCatUI from "react-native-purchases-ui";
 import { premiumHandler } from "../../components/monetising/RevenueCat";
+import { usePremium } from "../../store/premium-context";
 
 function SettingsHomeScreen({ navigation }) {
   const authCxt = useContext(AuthContext);
   const { schedule } = useFasting();
   const { themeName } = useAppTheme();
-  const { isPremium } = usePremium();
+  const { isPremium, refresh } = usePremium();
 
   function editScheduleHandler() {
     navigation.navigate("EditScheduleScreen");
@@ -109,7 +108,7 @@ function SettingsHomeScreen({ navigation }) {
             <SettingsPressable
               label="Upgrade to Premium"
               icon="star-border"
-              onPress={() => premiumHandler()}
+              onPress={() => premiumHandler({ navigation, refresh })}
             />
           </View>
         </>

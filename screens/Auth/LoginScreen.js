@@ -4,16 +4,18 @@ import { AuthContext } from "../../store/auth-context";
 import { Alert, KeyboardAvoidingView, ScrollView } from "react-native";
 import LoadingOverlay from "../../components/ui/LoadingOverlay";
 import { Platform } from "react-native";
-import { updateUser, getUser } from "../../firebase/users.db.js";
+import { getUser } from "../../firebase/users.db.js";
 import { getPreferences } from "../../firebase/fasting.db.js";
 import { useFasting } from "../../store/fastingLogic/fasting-context";
 import { auth } from "../../firebase/app";
 import { getIdToken, signInWithEmailAndPassword } from "firebase/auth";
+import { usePremium } from "../../store/premium-context.js";
 
 function LoginScreen() {
   const [isAuthing, setIsAuthing] = useState(false);
 
   const authCxt = useContext(AuthContext);
+  const { premiumLogIn } = usePremium()
   const { setSchedule } = useFasting();
 
   async function loginHandler(authDetails) {
@@ -33,9 +35,13 @@ function LoginScreen() {
         getIdToken(user, true),
       ]);
 
-      authCxt.authenticate(token, userData.displayName, uid);
+      const displayName = userData?.displayName ?? ""
+
+      authCxt.authenticate(token, displayName, uid);
       authCxt.setEmailAddress(userData.email);
       authCxt.setOnboarded(true);
+
+      await premiumLogIn(user.uid);
 
       if (userData && userData.fullName) {
         authCxt.updateFullName(userData.fullName);

@@ -1,36 +1,19 @@
-import { Alert, Platform } from "react-native";
-import Purchases, { LOG_LEVEL } from "react-native-purchases";
-import Constants from "expo-constants";
+import { Alert } from "react-native";
 import RevenueCatUI from "react-native-purchases-ui";
-import { setOptimisticPremium } from "../../hooks/usePremium";
 
-export default async function configureRevenueCat() {
-  Purchases.setLogLevel(LOG_LEVEL.VERBOSE);
-
-  const iosApiKey = Constants.expoConfig.extra.revenueCatApiKey;
-  const androidApiKey = Constants.expoConfig?.extra?.revenueCatAndroidApiKey;
-
-  const apiKey = Platform.OS === "ios" ? iosApiKey : androidApiKey;
-
-  if (!apiKey) {
-    console.warn("RevenueCat API key missing");
-    return;
-  }
-
-  return Purchases.configure({ apiKey });
-}
-
-export async function premiumHandler() {
+export async function premiumHandler({ navigation, refresh }) {
   try {
     const paywallResult = await RevenueCatUI.presentPaywall();
 
     if (paywallResult === "PURCHASED" || paywallResult === "RESTORED") {
-      setOptimisticPremium(true);
       await refresh();
-      navigation.navigate("SettingsHomeScreen");
+      navigation.navigate("Settings", {
+        screen: "SettingsHomeScreen",
+      });
     }
 
     console.log("paywall result", paywallResult);
+    return paywallResult;
   } catch (err) {
     console.warn(err);
     Alert.alert(

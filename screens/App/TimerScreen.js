@@ -16,8 +16,9 @@ import { prefetchAvatars } from "../../assets/avatars";
 import { stateAt } from "../../store/fastingLogic/scheduler";
 import Streaks from "../../components/Home/Streaks.js";
 import * as Notifications from "expo-notifications";
-import { usePremium } from "../../hooks/usePremium.js";
+// import { usePremium } from "../../hooks/usePremium.js";
 import FlatButton from "../../components/ui/FlatButton.js";
+import { usePremium } from "../../store/premium-context.js";
 
 export async function allowNotificationsAsync() {
   const settings = await Notifications.getPermissionsAsync();
