@@ -5,6 +5,7 @@ import {
   query,
   setDoc,
   getDoc,
+  serverTimestamp,
   orderBy,
   startAt,
   getDocs,
@@ -127,7 +128,10 @@ export async function getDailyStatsRange(uid, startDay, endDay) {
 
 export async function setFastingStateDb(uid, state) {
   try {
-    await setDoc(doc(db, "users", uid, "fasting_state", "current"), state);
+    await setDoc(doc(db, "users", uid, "fasting_state", "current"), {
+      ...state,
+      lastUpdatedAt: serverTimestamp(),
+    });
   } catch (error) {
     logWarn("setFastingStateDb", error);
   }

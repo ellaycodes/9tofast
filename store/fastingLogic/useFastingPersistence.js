@@ -5,6 +5,7 @@ import {
   addDailyStatsDb,
   getFastingSchedule,
   getFastingStateDb,
+  setFastingStateDb,
 } from "../../firebase/fasting.db.js";
 import { auth } from "../../firebase/app";
 import * as date from "date-fns";
@@ -15,6 +16,22 @@ const STORAGE_KEY = "fastingstate_v2";
 export const LAST_UPLOADED_DAY_KEY = "fasting_last_uploaded_day";
 const LAST_SAVED_TIMESTAMP_KEY = "fasting_last_ts";
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
+function getRemoteUpdatedAtMs(remoteState) {
+  if (!remoteState) return 0;
+  const lastUpdatedAt = remoteState.lastUpdatedAt;
+  if (!lastUpdatedAt) return 0;
+  if (typeof lastUpdatedAt.toMillis === "function") {
+    return lastUpdatedAt.toMillis();
+  }
+  if (typeof lastUpdatedAt === "number") {
+    return lastUpdatedAt;
+  }
+  if (typeof lastUpdatedAt.seconds === "number") {
+    return lastUpdatedAt.seconds * 1000;
+  }
+  return 0;
+}
 
 function normalizeEventTimestamps(events = []) {
   return events.map((event) => {
@@ -99,7 +116,7 @@ export default function useFastingPersistence() {
     try {
       const stateToSave = { ...state };
       delete stateToSave.hours;
-      
+
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
       await AsyncStorage.setItem(
         LAST_SAVED_TIMESTAMP_KEY,
@@ -197,9 +214,9 @@ export default function useFastingPersistence() {
 
       // Reset everything if data is stale (more than a day old)
       if (lastSavedTime && nowTs - lastSavedTime > ONE_DAY_MS) {
-        parsedState.events = [];
-        parsedState.baselineAnchorTs = null;
-        return parsedState;
+        logWarn(
+          "[fasting-persistence] Stale local data detected; preserving events."
+        );
       }
 
       const normalizedEvents = normalizeEventTimestamps(
@@ -227,36 +244,54 @@ export default function useFastingPersistence() {
 
   /**
    * Load the fasting state when the app starts or user logs in.
-   * - Prefers local AsyncStorage data.
-   * - Falls back to Firebase if needed.
+   * - Reconciles local AsyncStorage data with Firebase using lastUpdatedAt.
+   * - Falls back when either side is missing.
    * - Always returns a clean, ready-to-use state.
    */
   const loadFastingState = useCallback(async () => {
     try {
       const localData = await AsyncStorage.getItem(STORAGE_KEY);
-      if (localData) {
-        const parsed = JSON.parse(localData);
-        return await processLoadedState(parsed);
-      }
+      const localState = localData ? JSON.parse(localData) : null;
+      const localLastSavedTime = await getLastSavedTime();
 
-      // Try remote state if local storage is empty
       if (auth.currentUser) {
         const remoteState = await getFastingStateDb(auth.currentUser.uid);
         if (remoteState) {
-          const { lastTs, ...cleanState } = remoteState;
+          const remoteUpdatedAtMs = getRemoteUpdatedAtMs(remoteState);
+          const { lastUpdatedAt, lastTs, ...cleanState } = remoteState;
+          const remoteTimestamp = remoteUpdatedAtMs || lastTs || 0;
+          const localIsNewer =
+            localState && localLastSavedTime >= remoteTimestamp;
 
-          await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(cleanState));
-          if (lastTs) {
+          if (!localState || !localIsNewer) {
+            const normalizedState = {
+              ...cleanState,
+              lastUpdatedAt: remoteUpdatedAtMs || undefined,
+            };
             await AsyncStorage.setItem(
-              LAST_SAVED_TIMESTAMP_KEY,
-              String(lastTs)
+              STORAGE_KEY,
+              JSON.stringify(normalizedState)
             );
+            if (remoteTimestamp) {
+              await AsyncStorage.setItem(
+                LAST_SAVED_TIMESTAMP_KEY,
+                String(remoteTimestamp)
+              );
+            }
+
+            return await processLoadedState(normalizedState, remoteTimestamp);
           }
 
-          return await processLoadedState(cleanState, lastTs);
+          await setFastingStateDb(auth.currentUser.uid, localState);
+          return await processLoadedState(localState, localLastSavedTime);
         }
 
-        // If no saved state, try to at least load their fasting schedule
+        if (localState) {
+          return await processLoadedState(localState, localLastSavedTime);
+        }
+      }
+
+      if (auth.currentUser) {
         const userSchedule = await getFastingSchedule(auth.currentUser.uid);
         if (userSchedule) {
           return { ...getInitialState(), schedule: userSchedule };
