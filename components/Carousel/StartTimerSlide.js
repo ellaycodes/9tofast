@@ -9,7 +9,6 @@ import { AuthContext } from "../../store/auth-context";
 import { useFasting } from "../../store/fastingLogic/fasting-context";
 import { auth } from "../../firebase/app";
 import { calcReadout, msToHms } from "../../util/formatTime";
-import { setFastingStateDb } from "../../firebase/fasting.db.js";
 import {
   getScheduleTimeZone,
   startOfDayTs,
@@ -30,8 +29,7 @@ export default function StartTimerSlide({
     startFast,
     schedule,
     endFast,
-    setBaselineAnchor,
-    state,
+    setBaselineAnchor
   } = useFasting();
 
   const [started, setStarted] = useState(false);
@@ -94,15 +92,13 @@ export default function StartTimerSlide({
       }
 
       if (inEatingWindow) {
-        endFast("manual");
+        await endFast("manual");
       } else {
-        startFast("manual");
+        await startFast("manual");
       }
 
       await setSchedule(schedule, { anchor: false });
       setStarted(true);
-
-      await setFastingStateDb(authCxt.uid, state);
     };
 
     if (authReady) {

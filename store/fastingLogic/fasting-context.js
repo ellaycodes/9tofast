@@ -21,6 +21,7 @@ import { buildCurrentDayStats } from "./useFastingPersistence.js";
 import { emitWeeklyStatsRefresh } from "./weeklyStatsEvents";
 import { getResolvedTimeZone } from "../../util/timezone";
 import { auth } from "../../firebase/app";
+import { setFastingStateDb } from "../../firebase/fasting.db.js";
 
 export const FastingContext = createContext({
   loading: true,
@@ -30,8 +31,8 @@ export const FastingContext = createContext({
   hoursFastedToday: null,
   setSchedule: async () => {},
   setBaselineAnchor: () => {},
-  startFast: () => {},
-  endFast: () => {},
+  startFast: async () => {},
+  endFast: async () => {},
   clearFast: () => {},
   isFasting: false,
 });
@@ -202,8 +203,13 @@ export default function FastingContextProvider({ children }) {
       });
 
       await uploadCurrentDaySnapshot(tempState);
+      const uid = auth.currentUser?.uid;
+      if (uid) {
+        await setFastingStateDb(uid, tempState);
+      }
+      return tempState;
     },
-    [addFastingEvent, uploadCurrentDaySnapshot]
+    [addFastingEvent, uploadCurrentDaySnapshot, setFastingStateDb]
   );
 
   useScheduleBoundaryScheduler(
@@ -254,12 +260,12 @@ export default function FastingContextProvider({ children }) {
 
   async function startFast(trigger) {
     const ts = Date.now();
-    await addEventAndPersist(ts, events.EVENT.START, trigger);
+    return await addEventAndPersist(ts, events.EVENT.START, trigger);
   }
 
   async function endFast(trigger) {
     const ts = Date.now();
-    await addEventAndPersist(ts, events.EVENT.END, trigger);
+    return await addEventAndPersist(ts, events.EVENT.END, trigger);
   }
 
   function setBaselineAnchor(timestamp) {
