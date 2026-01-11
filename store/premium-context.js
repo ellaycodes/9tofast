@@ -18,8 +18,8 @@ const PremiumContext = createContext({
   customerInfo: (info) => {},
   error: false,
   refresh: () => {},
-  premiumLogIn: (uid) => {},
-  premiumLogOut: () => {},
+  premiumLogIn: async (uid) => {},
+  premiumLogOut: async () => {},
 });
 
 function getApiKey() {
@@ -131,7 +131,7 @@ export function PremiumProvider({ children }) {
       } catch (e) {
         setError(e);
         console.error("PREMIUM LOG IN ERROR =>>>", e);
-        throw e;
+        // throw e;
       }
     },
     [configure, syncCustomerInfo]
@@ -140,12 +140,20 @@ export function PremiumProvider({ children }) {
   const premiumLogOut = useCallback(async () => {
     try {
       await configure();
-      await Purchases.logOut();
-      await refresh();
+      setLoading(true);
+      const info = await Purchases.getCustomerInfo();
+      const isAnonymous =
+        info?.originalAppUserId?.startsWith("$RCAnonymousID:");
+
+      if (!isAnonymous) {
+        const { customerInfo: loggedOutInfo } = await Purchases.logOut();
+        await syncCustomerInfo(loggedOutInfo);
+      } else {
+        await syncCustomerInfo(info);
+      }
     } catch (err) {
       setError(err);
       console.error("PREMIUM LOG OUT ERROR =>>>", err);
-      throw err;
     }
   }, [configure, refresh]);
 

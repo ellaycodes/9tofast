@@ -6,6 +6,7 @@ import {
   useForeground,
 } from "react-native-google-mobile-ads";
 import { useEffect, useRef, useState } from "react";
+import Constants from 'expo-constants'
 import FlatButton from "../ui/FlatButton";
 import { useNavigation } from "@react-navigation/native";
 import { premiumHandler } from "./RevenueCat";
@@ -31,8 +32,8 @@ function Ads({ disabled = false }) {
       <BannerAd
         ref={bannerRef}
         size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-        unitId={TestIds.BANNER}
-        //unitId={Constants.expoConfig.extra.bannerAdUnitId}
+        //unitId={TestIds.BANNER}
+        unitId={Constants.expoConfig.extra.bannerAdUnitId}
         onAdLoaded={() => {
           setCanShow(true);
         }}

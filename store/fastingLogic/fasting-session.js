@@ -10,9 +10,9 @@ export function getInitialState() {
   };
 }
 
-// export function setSchedule(state, schedule) {
-//   return { ...state, schedule };
-// }
+export function setSchedule(state, schedule) {
+  return { ...state, schedule };
+}
 
 export function clearAll() {
   return getInitialState();

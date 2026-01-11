@@ -38,7 +38,7 @@ export default ({ config }) => ({
     "com.googleusercontent.apps.438582901138-7lo7q4ggvn1q03mdmtv51ivphdng6sro",
     "com.googleusercontent.apps.438582901138-umckshratmsduhi213q0kn7rhoahnhbn",
   ],
-  version: "1.2.1",
+  version: "1.3.0",
   orientation: "portrait",
   icon: "./assets/icon2.png",
   backgroundColor: "#0F2524",
@@ -56,7 +56,7 @@ export default ({ config }) => ({
   },
   assetBundlePatterns: ["**/*"],
   ios: {
-    buildNumber: "1.2.1",
+    buildNumber: "1.3.0",
     supportsTablet: true,
     bundleIdentifier: getUniqueIdentifier(),
     usesAppleSignIn: true,
