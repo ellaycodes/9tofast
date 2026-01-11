@@ -1,5 +1,5 @@
 import { StyleSheet, View, Linking, Alert, Platform } from "react-native";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 import Title from "../../components/ui/Title";
 import PrimaryButton from "../../components/ui/PrimaryButton";
@@ -73,7 +73,13 @@ function PreAuthScreen({ navigation }) {
       }
     };
     signInWithGoogle();
-  }, [response, navigation, setSchedule]);
+  }, [
+    response,
+    navigation,
+    premiumLogIn,
+    handleExistingUserLogin,
+    handleNewProviderUser,
+  ]);
 
   function emailHandler() {
     navigation.navigate("LoginScreen");
@@ -113,8 +119,8 @@ function PreAuthScreen({ navigation }) {
           return;
         }
         await handleExistingUserLogin(user, existingUser);
+        await premiumLogIn(user.uid);
       }
-      await premiumLogIn(user.uid);
     } catch (err) {
       if (err?.code === "ERR_REQUEST_CANCELED") return;
       console.log(err.code);

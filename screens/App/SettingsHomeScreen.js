@@ -14,7 +14,7 @@ function SettingsHomeScreen({ navigation }) {
   const authCxt = useContext(AuthContext);
   const { schedule } = useFasting();
   const { themeName } = useAppTheme();
-  const { isPremium, refresh } = usePremium();
+  const { loading, isPremium, refresh, isConfigured } = usePremium();
 
   function editScheduleHandler() {
     navigation.navigate("EditScheduleScreen");
@@ -100,7 +100,7 @@ function SettingsHomeScreen({ navigation }) {
           }
         />
       </View>
-      {isPremium ? null : (
+      {loading || isPremium ? null : (
         <>
           <Ads disabled={isPremium} />
           <View>
@@ -108,7 +108,7 @@ function SettingsHomeScreen({ navigation }) {
             <SettingsPressable
               label="Upgrade to Premium"
               icon="star-border"
-              onPress={() => premiumHandler({ navigation, refresh })}
+              onPress={() => premiumHandler({ navigation, refresh, isConfigured })}
             />
           </View>
         </>

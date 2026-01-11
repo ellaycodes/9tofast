@@ -18,7 +18,7 @@ export default function MainProgess({
 }) {
   const { theme, themeName } = useContext(AppThemeContext);
   const memoStyle = useMemo(() => styles(theme), [theme]);
-  const { isPremium } = usePremium();
+  const { isPremium, loading } = usePremium();
 
   const day = selectedDay || defaultToday;
 
@@ -62,7 +62,7 @@ export default function MainProgess({
           </Text>
         )}
       </AnimatedCircularProgress>
-      <Ads disabled={isPremium} />
+      <Ads disabled={isPremium || loading} />
       <View style={memoStyle.inner}>
         <SubtitleText style={memoStyle.text} size="xl">
           {themeName === "Desk" ? "Total:" : "Fasted Today:"}

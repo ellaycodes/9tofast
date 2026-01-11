@@ -1,7 +1,7 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import SettingsHomeScreen from "../screens/App/SettingsHomeScreen";
 import ManageAccountScreen from "../screens/Settings/ManageAccountScreen";
-import PremiumPaywallScreen from "../screens/Settings/PremiumPaywallScreen";
+// import PremiumPaywallScreen from "../screens/Settings/PremiumPaywallScreen";
 import AboutScreen from "../screens/Settings/AboutScreen";
 import { useAppTheme } from "../store/app-theme-context";
 import EditScheduleScreen from "../screens/Settings/EditScheduleScreen";
@@ -42,13 +42,13 @@ function SettingsStack() {
           title: "Manage Account",
         }}
       />
-      <Stack.Screen
+      {/* <Stack.Screen
         name="PremiumPaywallScreen"
         component={PremiumPaywallScreen}
         options={{
           title: "Premium",
         }}
-      />
+      /> */}
       <Stack.Screen
         name="AboutScreen"
         component={AboutScreen}

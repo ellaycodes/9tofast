@@ -42,7 +42,7 @@ function TimerScreen({ navigation }) {
   const memoStyle = useMemo(() => styles(theme, themeName), [theme, themeName]);
   const [readout, setReadout] = useState(null);
   const [offScheduleTitle, setOffScheduleTitle] = useState("");
-  const { isPremium } = usePremium();
+  const { isPremium, loading } = usePremium();
 
   const fasting = isFasting();
 
@@ -130,7 +130,7 @@ function TimerScreen({ navigation }) {
             dt.format(dt.parse(schedule.end, "HH:mm", new Date()), "p")}
         </SubtitleText>
       )}
-      <Ads disabled={isPremium} />
+      <Ads disabled={isPremium || loading} />
       <View style={memoStyle.buttonsContainer}>
         <ButtonsContainer fast={fasting} withinFasting={inside} />
       </View>

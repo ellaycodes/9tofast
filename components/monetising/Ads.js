@@ -18,7 +18,7 @@ function Ads({ disabled = false }) {
   });
   const navigation = useNavigation();
   const [canShow, setCanShow] = useState(true);
-  const { refresh } = usePremium();
+  const { refresh, isConfigured } = usePremium();
 
   useEffect(() => {
     setCanShow(true);
@@ -44,7 +44,7 @@ function Ads({ disabled = false }) {
       <FlatButton
         size="xs"
         style={{ paddingTop: 0, paddingBottom: 24 }}
-        onPress={() => premiumHandler({ navigation, refresh })}
+        onPress={() => premiumHandler({ navigation, refresh, isConfigured })}
       >
         Want to get rid of ads? Subscribe to Premium
       </FlatButton>

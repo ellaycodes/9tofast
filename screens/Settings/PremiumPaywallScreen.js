@@ -1,4 +1,4 @@
-import { Alert, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import Title from "../../components/ui/Title";
 import SubtitleText from "../../components/ui/SubtitleText";
 import SettingsPressable from "../../components/Settings/SettingsPressable";
@@ -7,8 +7,8 @@ import FlatButton from "../../components/ui/FlatButton";
 import { useAppTheme } from "../../store/app-theme-context";
 import { useMemo } from "react";
 // import { setOptimisticPremium, usePremium } from "../../hooks/usePremium";
-import RevenueCatUI from "react-native-purchases-ui";
-import Purchases from "react-native-purchases";
+// import RevenueCatUI from "react-native-purchases-ui";
+// import Purchases from "react-native-purchases";
 import { usePremium } from "../../store/premium-context";
 
 function PremiumPaywallScreen({ navigation }) {
@@ -16,21 +16,9 @@ function PremiumPaywallScreen({ navigation }) {
   const memoStyle = useMemo(() => styles(theme), [theme]);
   const { refresh } = usePremium();
 
-  async function handleContinuePremium() {
-    
-  }
+  async function handleContinuePremium() {}
 
-  async function handleRestorePurchase() {
-    // const restoreResult = await Purchases.restorePurchases();
-    // if (restoreResult) {
-    //   setOptimisticPremium(true);
-    //   await refresh();
-    //   navigation.navigate("TimerScreen");
-    //   console.log(restoreResult);
-    // } else {
-    //   console.log("todo");
-    // }
-  }
+  async function handleRestorePurchase() {}
 
   return (
     <View style={memoStyle.container}>

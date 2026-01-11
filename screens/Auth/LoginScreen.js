@@ -15,7 +15,7 @@ function LoginScreen() {
   const [isAuthing, setIsAuthing] = useState(false);
 
   const authCxt = useContext(AuthContext);
-  const { premiumLogIn } = usePremium()
+  const { premiumLogIn } = usePremium();
   const { setSchedule } = useFasting();
 
   async function loginHandler(authDetails) {
@@ -35,7 +35,7 @@ function LoginScreen() {
         getIdToken(user, true),
       ]);
 
-      const displayName = userData?.displayName ?? ""
+      const displayName = userData?.displayName ?? "";
 
       authCxt.authenticate(token, displayName, uid);
       authCxt.setEmailAddress(userData.email);
@@ -53,7 +53,10 @@ function LoginScreen() {
         setSchedule(prefs.fastingSchedule);
       }
     } catch (error) {
-      Alert.alert("Authentication Failed", error.message);
+      Alert.alert(
+        "Oh no! Could not log you in.",
+        "Please ensure you have the correct username & password. If you have forgotten your password, please use the 'Forgotten Password' link."
+      );
       setIsAuthing(false);
       throw error;
     }

@@ -11,7 +11,16 @@ import Constants from "expo-constants";
 import Purchases, { LOG_LEVEL } from "react-native-purchases";
 import { Platform } from "react-native";
 
-const PremiumContext = createContext(null);
+const PremiumContext = createContext({
+  isConfigured: false,
+  loading: false,
+  isPremium: null,
+  customerInfo: (info) => {},
+  error: false,
+  refresh: () => {},
+  premiumLogIn: (uid) => {},
+  premiumLogOut: () => {},
+});
 
 function getApiKey() {
   const iosApiKey = Constants.expoConfig.extra.revenueCatApiKey;
@@ -58,7 +67,6 @@ export function PremiumProvider({ children }) {
 
   const syncCustomerInfo = useCallback(
     async (info) => {
-
       if (!info) {
         info = await Purchases.getCustomerInfo();
       }

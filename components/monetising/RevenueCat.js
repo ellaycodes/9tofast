@@ -1,7 +1,9 @@
 import { Alert } from "react-native";
 import RevenueCatUI from "react-native-purchases-ui";
 
-export async function premiumHandler({ navigation, refresh }) {
+export async function premiumHandler({ navigation, refresh, isConfigured }) {
+  if (!isConfigured) await refresh();
+  
   try {
     const paywallResult = await RevenueCatUI.presentPaywall();
 
