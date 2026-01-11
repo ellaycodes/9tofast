@@ -21,6 +21,12 @@ export default function useDailyStatsSync(
 ) {
   // Keeps track of the last day that was processed
   const lastProcessedDay = useRef();
+  const lastSavedHash = useRef(null);
+  const latestStateRef = useRef(fastingState);
+
+  useEffect(() => {
+    latestStateRef.current = fastingState;
+  }, [fastingState]);
 
   const deriveLastEventDay = (eventsList, fallbackDay) => {
     if (!eventsList?.length) return fallbackDay;
@@ -103,15 +109,16 @@ export default function useDailyStatsSync(
         const stateToSave = { ...fastingState, events: todaysEvents };
         delete stateToSave.hours;
         await saveLocalState(stateToSave);
+        lastSavedHash.current = JSON.stringify(stateToSave);
 
         lastProcessedDay.current = currentDayString;
         return;
       }
 
       // --- 5️⃣ During the same day, persist fasting state periodically
-      const stateToSave = { ...fastingState };
-      delete stateToSave.hours; // 'hours' can always be recalculated
-      await saveLocalState(stateToSave);
+      // const stateToSave = { ...fastingState };
+      // delete stateToSave.hours; // 'hours' can always be recalculated
+      // await saveLocalState(stateToSave);
     })();
   }, [
     fastingState,
@@ -120,4 +127,27 @@ export default function useDailyStatsSync(
     saveDailyEvents,
     dispatch,
   ]);
+
+  useEffect(() => {
+    if (fastingState.loading) return;
+
+    let isMounted = true;
+    const persist = async () => {
+      if (!isMounted) return;
+      const stateToSave = { ...latestStateRef.current };
+      delete stateToSave.hours; // 'hours' can always be recalculated
+      const serialized = JSON.stringify(stateToSave);
+      if (lastSavedHash.current === serialized) return;
+      await saveLocalState(stateToSave);
+      lastSavedHash.current = serialized;
+    };
+
+    persist();
+    const intervalId = setInterval(persist, 30_000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
+  }, [fastingState.loading, saveLocalState]);
 }
