@@ -31,7 +31,7 @@ import { getUser } from "./firebase/users.db.js";
 
 import { scheduleStreakNotifications } from "./notifications/streakNotifications.js";
 import MobileAdsConfig from "./components/monetising/AdsConfig.js";
-import { PremiumProvider } from "./store/premium-context.js";
+import { PremiumProvider, usePremium } from "./store/premium-context.js";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => {
@@ -45,6 +45,7 @@ Notifications.setNotificationHandler({
 
 function Navigator() {
   const authCxt = useContext(AuthContext);
+  const { premiumLogIn, premiumLogOut } = usePremium();
   const [loading, setLoading] = useState(true);
   const { loadStreak } = useContext(StatsContext);
 
@@ -56,6 +57,7 @@ function Navigator() {
     const unsubAuth = onAuthStateChanged(auth, async (user) => {
       if (user) {
         try {
+          await premiumLogIn(user.uid);
           const token = await getIdToken(user);
           const { email, uid } = user;
 
@@ -93,6 +95,7 @@ function Navigator() {
           setLoading(false);
         }
       } else {
+        await premiumLogOut();
         authCxt.logout();
         setLoading(false);
       }
@@ -109,7 +112,7 @@ function Navigator() {
       unsubToken();
       clearTimeout(timeout);
     };
-  }, [authCxt]);
+  }, [authCxt, premiumLogIn, premiumLogOut]);
 
   useEffect(() => {
     async function setupNotifications() {
