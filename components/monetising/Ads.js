@@ -37,7 +37,7 @@ function Ads({ disabled = false }) {
           setCanShow(true);
         }}
         onAdFailedToLoad={(error) => {
-          console.log("Ad failed to load:", error);
+          console.warn("Ad failed to load:", error);
           setCanShow(false);
         }}
       />

@@ -123,7 +123,7 @@ function PreAuthScreen({ navigation }) {
       }
     } catch (err) {
       if (err?.code === "ERR_REQUEST_CANCELED") return;
-      console.log(err.code);
+      console.error(err.code);
 
       Alert.alert(
         "There was an error while logging you in",

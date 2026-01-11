@@ -11,6 +11,7 @@ import { auth } from "../../firebase/app";
 import * as date from "date-fns";
 import { removeFutureEvents } from "./stripOldEvents.js";
 import { logWarn } from "../../util/logger.js";
+import { onAuthStateChanged } from "firebase/auth";
 
 const STORAGE_KEY = "fastingstate_v2";
 export const LAST_UPLOADED_DAY_KEY = "fasting_last_uploaded_day";
@@ -76,6 +77,33 @@ async function updateStoredEvents(
   }
 
   parsedState.events = validEvents;
+}
+
+async function ensureScheduleFromPreferences(state, lastSavedTimestamp) {
+  if (!auth.currentUser || state?.schedule) return state;
+
+  const userSchedule = await getFastingSchedule(auth.currentUser.uid);
+  if (!userSchedule) return state;
+
+  const nextState = { ...state, schedule: userSchedule };
+  await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
+  if (lastSavedTimestamp) {
+    await AsyncStorage.setItem(
+      LAST_SAVED_TIMESTAMP_KEY,
+      String(lastSavedTimestamp)
+    );
+  }
+
+  return nextState;
+}
+
+function waitForAuthUser() {
+  return new Promise((resolve) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      unsubscribe();
+      resolve(user || null);
+    });
+  });
 }
 
 // helper that computes the current day stats from the current state
@@ -254,8 +282,13 @@ export default function useFastingPersistence() {
       const localState = localData ? JSON.parse(localData) : null;
       const localLastSavedTime = await getLastSavedTime();
 
-      if (auth.currentUser) {
-        const remoteState = await getFastingStateDb(auth.currentUser.uid);
+      let currentUser = auth.currentUser;
+      if (!currentUser && !localState) {
+        currentUser = await waitForAuthUser();
+      }
+
+      if (currentUser) {
+        const remoteState = await getFastingStateDb(currentUser.uid);
         if (remoteState) {
           const remoteUpdatedAtMs = getRemoteUpdatedAtMs(remoteState);
           const { lastUpdatedAt, lastTs, ...cleanState } = remoteState;
@@ -264,10 +297,15 @@ export default function useFastingPersistence() {
             localState && localLastSavedTime >= remoteTimestamp;
 
           if (!localState || !localIsNewer) {
-            const normalizedState = {
+            let normalizedState = {
               ...cleanState,
               lastUpdatedAt: remoteUpdatedAtMs || undefined,
             };
+
+            normalizedState = await ensureScheduleFromPreferences(
+              normalizedState,
+              remoteTimestamp
+            );
             await AsyncStorage.setItem(
               STORAGE_KEY,
               JSON.stringify(normalizedState)
@@ -282,17 +320,32 @@ export default function useFastingPersistence() {
             return await processLoadedState(normalizedState, remoteTimestamp);
           }
 
-          await setFastingStateDb(auth.currentUser.uid, localState);
-          return await processLoadedState(localState, localLastSavedTime);
-        }
-
-        if (localState) {
-          return await processLoadedState(localState, localLastSavedTime);
+          const hydratedLocalState = await ensureScheduleFromPreferences(
+            localState,
+            localLastSavedTime,
+            currentUser
+          );
+          await setFastingStateDb(auth.currentUser.uid, hydratedLocalState);
+          return await processLoadedState(
+            hydratedLocalState,
+            localLastSavedTime
+          );
         }
       }
 
-      if (auth.currentUser) {
-        const userSchedule = await getFastingSchedule(auth.currentUser.uid);
+      if (localState) {
+        const hydratedLocalState = currentUser
+          ? await ensureScheduleFromPreferences(
+              localState,
+              localLastSavedTime,
+              currentUser
+            )
+          : localState;
+        return await processLoadedState(hydratedLocalState, localLastSavedTime);
+      }
+      if (currentUser) {
+        const userSchedule = await getFastingSchedule(currentUser.uid);
+
         if (userSchedule) {
           return { ...getInitialState(), schedule: userSchedule };
         }

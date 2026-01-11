@@ -9,6 +9,7 @@ import SettingsPressable from "../../components/Settings/SettingsPressable";
 import Ads from "../../components/monetising/Ads";
 import { premiumHandler } from "../../components/monetising/RevenueCat";
 import { usePremium } from "../../store/premium-context";
+import { auth } from "../../firebase/app";
 
 function SettingsHomeScreen({ navigation }) {
   const authCxt = useContext(AuthContext);
@@ -108,7 +109,9 @@ function SettingsHomeScreen({ navigation }) {
             <SettingsPressable
               label="Upgrade to Premium"
               icon="star-border"
-              onPress={() => premiumHandler({ navigation, refresh, isConfigured })}
+              onPress={() =>
+                premiumHandler({ navigation, refresh, isConfigured })
+              }
             />
           </View>
         </>
