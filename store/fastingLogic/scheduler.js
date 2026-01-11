@@ -94,7 +94,7 @@ export default function useScheduleBoundaryScheduler(
           lastEmitRef.current.type !== type
         ) {
           if (onAutoEvent) {
-            onAutoEvent(type, ts, "auto");
+            onAutoEvent(ts, type, "auto");
           } else {
             dispatch({
               type: type === EVENT.START ? "START_FAST" : "END_FAST",

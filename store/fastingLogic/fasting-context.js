@@ -173,7 +173,7 @@ export default function FastingContextProvider({ children }) {
   );
 
   const addEventAndPersist = useCallback(
-    async (type, ts, trigger) => {
+    async (ts, type, trigger) => {
       const previousEvents = stateRef.current.events.length
         ? stateRef.current.events[stateRef.current.events.length - 1]
         : null;
@@ -212,12 +212,12 @@ export default function FastingContextProvider({ children }) {
 
   async function startFast(trigger) {
     const ts = Date.now();
-    await addEventAndPersist(events.EVENT.START, ts, trigger);
+    await addEventAndPersist(ts, events.EVENT.START, trigger);
   }
 
   async function endFast(trigger) {
     const ts = Date.now();
-    await addEventAndPersist(events.EVENT.START, ts, trigger);
+    await addEventAndPersist(ts, events.EVENT.END, trigger);
   }
 
   function setBaselineAnchor(timestamp) {
