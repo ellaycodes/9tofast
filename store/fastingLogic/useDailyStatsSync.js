@@ -99,7 +99,13 @@ export default function useDailyStatsSync(
 
         // If the user was still fasting at midnight, insert a “START” event at midnight
         const wasFastingOvernight = session.isFasting(yesterdayEvents);
-        if (wasFastingOvernight) {
+        const hasMidnightStart = todaysEvents.some(
+          (event) =>
+            (event?.ts ?? 0) === startOfToday &&
+            event?.type === events.EVENT.START
+        );
+
+        if (wasFastingOvernight && !hasMidnightStart) {
           const midnightStartEvent = {
             type: events.EVENT.START,
             ts: startOfToday,
