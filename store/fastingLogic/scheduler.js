@@ -52,14 +52,14 @@ export default function useScheduleBoundaryScheduler(
   schedule,
   events,
   dispatch,
-  anchorTs
+  anchorTs,
+  onAutoEvent
 ) {
   const timeoutRef = useRef(null);
   const appStateRef = useRef(AppState.currentState);
   const lastEmitRef = useRef({ ts: 0, type: null });
   const effectiveAnchor =
     anchorTs !== undefined && anchorTs !== null ? anchorTs : 0;
-
 
   // Cancel any pending timeout
   function clearTimer() {
@@ -93,11 +93,15 @@ export default function useScheduleBoundaryScheduler(
           lastEmitRef.current.ts !== ts ||
           lastEmitRef.current.type !== type
         ) {
-          dispatch({
-            type: type === EVENT.START ? "START_FAST" : "END_FAST",
-            payload: ts,
-            trigger: "auto",
-          });
+          if (onAutoEvent) {
+            onAutoEvent(type, ts, "auto");
+          } else {
+            dispatch({
+              type: type === EVENT.START ? "START_FAST" : "END_FAST",
+              payload: ts,
+              trigger: "auto",
+            });
+          }
           lastEmitRef.current = { ts, type };
         }
       }
@@ -120,19 +124,22 @@ export default function useScheduleBoundaryScheduler(
     const hasEvents = Array.isArray(events) && events.length > 0;
     const last = hasEvents ? events[events.length - 1] : undefined;
     const lastType = last && last.type ? last.type : undefined;
-    const isFastingInStore =
-      lastType === EVENT.START || lastType === "start";
+    const isFastingInStore = lastType === EVENT.START || lastType === "start";
 
     const shouldBeFasting = state === "fasting";
 
     if (shouldBeFasting !== isFastingInStore) {
       // Flip to the correct state right now
       const type = shouldBeFasting ? EVENT.START : EVENT.END;
-      dispatch({
-        type: type === EVENT.START ? "START_FAST" : "END_FAST",
-        payload: now,
-        trigger: "auto",
-      });
+      if (onAutoEvent) {
+        onAutoEvent(type, now, "auto");
+      } else {
+        dispatch({
+          type: type === EVENT.START ? "START_FAST" : "END_FAST",
+          payload: now,
+          trigger: "auto",
+        });
+      }
       lastEmitRef.current = { ts: now, type };
     }
   }
@@ -142,8 +149,12 @@ export default function useScheduleBoundaryScheduler(
     armTimer();
 
     return () => clearTimer();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [schedule ? schedule.start : undefined, schedule ? schedule.end : undefined, effectiveAnchor]);
+  }, [
+    schedule ? schedule.start : undefined,
+    schedule ? schedule.end : undefined,
+    effectiveAnchor,
+    onAutoEvent,
+  ]);
 
   // Re-arm when returning to foreground to avoid missing boundaries
   useEffect(() => {

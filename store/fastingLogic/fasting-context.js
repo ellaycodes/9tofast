@@ -172,11 +172,38 @@ export default function FastingContextProvider({ children }) {
     [state.events]
   );
 
+  const addEventAndPersist = useCallback(
+    async (type, ts, trigger) => {
+      const previousEvents = stateRef.current.events.length
+        ? stateRef.current.events[stateRef.current.events.length - 1]
+        : null;
+      const last = previousEvents ? previousEvents.type : undefined;
+      if (last === type) return;
+
+      await addFastingEvent(ts, type, trigger);
+
+      const tempState =
+        type === events.EVENT.START
+          ? events.startFast(stateRef.current, trigger, ts)
+          : events.endFast(stateRef.current, trigger, ts);
+
+      dispatch({
+        type: type === events.EVENT.START ? "START_FAST" : "END_FAST",
+        trigger,
+        payload: ts,
+      });
+
+      await uploadCurrentDaySnapshot(tempState);
+    },
+    [addFastingEvent, uploadCurrentDaySnapshot]
+  );
+
   useScheduleBoundaryScheduler(
     state.schedule,
     state.events,
     dispatch,
-    state.baselineAnchorTs || 0
+    state.baselineAnchorTs || 0,
+    addEventAndPersist
   );
 
   function setSchedule(data) {
@@ -184,35 +211,13 @@ export default function FastingContextProvider({ children }) {
   }
 
   async function startFast(trigger) {
-    const previousEvents = state.events.length
-      ? state.events[state.events.length - 1]
-      : null;
-    const last = previousEvents ? previousEvents.type : undefined;
-    if (last === events.EVENT.START) return;
     const ts = Date.now();
-
-    await addFastingEvent(ts, events.EVENT.START, trigger);
-
-    const tempState = events.startFast(stateRef.current, trigger, ts);
-    dispatch({ type: "START_FAST", trigger, payload: ts });
-
-    await uploadCurrentDaySnapshot(tempState);
+    await addEventAndPersist(events.EVENT.START, ts, trigger);
   }
 
   async function endFast(trigger) {
-    const previousEvents = state.events.length
-      ? state.events[state.events.length - 1]
-      : null;
-    const last = previousEvents ? previousEvents.type : undefined;
-    if (last === events.EVENT.END) return;
     const ts = Date.now();
-
-    await addFastingEvent(ts, events.EVENT.END, trigger);
-
-    const tempState = events.endFast(stateRef.current, trigger, ts);
-    dispatch({ type: "END_FAST", trigger, payload: ts });
-
-    await uploadCurrentDaySnapshot(tempState);
+    await addEventAndPersist(events.EVENT.START, ts, trigger);
   }
 
   function setBaselineAnchor(timestamp) {
