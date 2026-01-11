@@ -1,6 +1,10 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCallback } from "react";
-import { getInitialState, hoursFastedToday } from "./fasting-session";
+import {
+  getInitialState,
+  hoursFastedToday,
+  isFasting,
+} from "./fasting-session";
 import {
   addDailyStatsDb,
   getFastingSchedule,
@@ -12,11 +16,13 @@ import * as date from "date-fns";
 import { removeFutureEvents } from "./stripOldEvents.js";
 import { logWarn } from "../../util/logger.js";
 import { onAuthStateChanged } from "firebase/auth";
+import { EVENT } from "./events";
 
 const STORAGE_KEY = "fastingstate_v2";
 export const LAST_UPLOADED_DAY_KEY = "fasting_last_uploaded_day";
 const LAST_SAVED_TIMESTAMP_KEY = "fasting_last_ts";
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+const EVENT_HORIZON_DAYS = 7;
 
 function getRemoteUpdatedAtMs(remoteState) {
   if (!remoteState) return 0;
@@ -43,6 +49,38 @@ function normalizeEventTimestamps(events = []) {
     }
     return event;
   });
+}
+
+function trimEventsToHorizon(events = [], now = new Date()) {
+  const horizonStart = date
+    .startOfDay(date.subDays(now, EVENT_HORIZON_DAYS))
+    .getTime();
+
+  const eventsBeforeHorizon = events.filter((event) => event.ts < horizonStart);
+  const eventsWithinHorizon = events.filter(
+    (event) => event.ts >= horizonStart
+  );
+
+  if (!eventsBeforeHorizon.length) {
+    return eventsWithinHorizon;
+  }
+
+  if (!isFasting(eventsBeforeHorizon)) {
+    return eventsWithinHorizon;
+  }
+
+  const hasHorizonStart = eventsWithinHorizon.some(
+    (event) => event.ts === horizonStart && event.type === EVENT.START
+  );
+
+  if (hasHorizonStart) {
+    return eventsWithinHorizon;
+  }
+
+  return [
+    { type: EVENT.START, ts: horizonStart, trigger: EVENT.TRIGGER },
+    ...eventsWithinHorizon,
+  ];
 }
 
 /**
@@ -228,35 +266,33 @@ export default function useFastingPersistence() {
 
   /**
    * Clean up and process the current fasting state.
-   * - Removes stale data if it’s older than 24 hours.
+   * - Trims historical events to a rolling horizon.
    * - Uploads yesterday’s data if needed.
    * - Cleans up events for today.
    */
   const processLoadedState = useCallback(
-    async (parsedState, lastSavedTimestamp) => {
+    async (parsedState) => {
       delete parsedState.hours;
 
-      const lastSavedTime = await getLastSavedTime(lastSavedTimestamp);
       const now = new Date();
-      const nowTs = now.getTime();
-
-      // Reset everything if data is stale (more than a day old)
-      if (lastSavedTime && nowTs - lastSavedTime > ONE_DAY_MS) {
-        logWarn(
-          "[fasting-persistence] Stale local data detected; preserving events."
-        );
-      }
 
       const normalizedEvents = normalizeEventTimestamps(
         parsedState.events || []
       );
 
       const validEvents = removeFutureEvents(normalizedEvents, now);
+      const trimmedEvents = trimEventsToHorizon(validEvents, now);
+
+      if (trimmedEvents.length !== validEvents.length) {
+        logWarn(
+          "[fasting-persistence] Trimmed fasting events outside the horizon."
+        );
+      }
 
       await updateStoredEvents(
         parsedState,
         normalizedEvents,
-        validEvents,
+        trimmedEvents,
         now,
         normalizedEvents.length,
         saveDailyEvents
