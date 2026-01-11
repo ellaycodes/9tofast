@@ -12,9 +12,22 @@ import {
   collection,
   documentId,
   waitForPendingWrites,
+  runTransaction,
 } from "firebase/firestore";
 import { logWarn } from "../util/logger";
-import { hoursFastedToday } from "../store/fastingLogic/fasting-session";
+
+function mergeDailyEvents(existingEvents = [], incomingEvents = []) {
+  const merged = new Map();
+  [...existingEvents, ...incomingEvents].forEach((event) => {
+    const key = `${event?.ts ?? ""}|${event?.type ?? ""}|${
+      event?.trigger ?? ""
+    }`;
+    merged.set(key, event);
+  });
+  return Array.from(merged.values()).sort(
+    (a, b) => (a?.ts ?? 0) - (b?.ts ?? 0)
+  );
+}
 
 export async function getFastingSchedule(uid) {
   try {
@@ -76,13 +89,38 @@ export async function addDailyStatsDb(
   events = []
 ) {
   try {
-    await setDoc(doc(db, "users", uid, "daily_stats", day), {
-      hoursFastedToday: hoursFastedToday,
-      percent:
+    const docRef = doc(db, "users", uid, "daily_stats", day);
+    const incomingHours =
+      typeof hoursFastedToday === "number" ? hoursFastedToday : 0;
+    await runTransaction(db, async (transaction) => {
+      const docSnap = await transaction.get(docRef);
+      const existing = docSnap.exists() ? docSnap.data() : {};
+      const existingHours =
+        typeof existing.hoursFastedToday === "number"
+          ? existing.hoursFastedToday
+          : 0;
+      const mergedHours = Math.max(existingHours, incomingHours);
+      const mergedEvents = mergeDailyEvents(
+        existing.events || [],
+        events || []
+      );
+      const percent =
         typeof fastingHours === "number" && fastingHours > 0
-          ? Math.round((hoursFastedToday / fastingHours) * 100)
-          : 0,
-      events,
+          ? Math.round((mergedHours / fastingHours) * 100)
+          : typeof existing.percent === "number"
+          ? existing.percent
+          : 0;
+
+      transaction.set(
+        docRef,
+        {
+          hoursFastedToday: mergedHours,
+          percent,
+          events: mergedEvents,
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
     });
   } catch (error) {
     logWarn("addDailyStatsDb", error);
