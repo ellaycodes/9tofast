@@ -10,7 +10,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AppState } from "react-native";
 import useFastingPersistence, {
-  LAST_UPLOADED_DAY_KEY,
+  getLastUploadedDayKey,
 } from "./useFastingPersistence.js";
 import * as session from "./fasting-session";
 import * as events from "./events";
@@ -20,6 +20,7 @@ import useDailyStatsSync from "./useDailyStatsSync";
 import { buildCurrentDayStats } from "./useFastingPersistence.js";
 import { emitWeeklyStatsRefresh } from "./weeklyStatsEvents";
 import { getResolvedTimeZone } from "../../util/timezone";
+import { auth } from "../../firebase/app";
 
 export const FastingContext = createContext({
   loading: true,
@@ -84,8 +85,9 @@ export default function FastingContextProvider({ children }) {
     ) => {
       if (uploadLock.current) return;
       if (options.skipIfUploaded && lastUploadedDayRef.current === null) {
+        const uid = auth.currentUser?.uid;
         lastUploadedDayRef.current = await AsyncStorage.getItem(
-          LAST_UPLOADED_DAY_KEY
+          getLastUploadedDayKey(uid)
         );
       }
       if (options.skipIfUploaded && lastUploadedDayRef.current === day) return;

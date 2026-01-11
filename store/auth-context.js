@@ -4,6 +4,11 @@ import { signOut } from "firebase/auth";
 import { auth } from "../firebase/app";
 import { setFastingStateDb } from "../firebase/fasting.db.js";
 import { logWarn } from "../util/logger";
+import {
+  getLastSavedTimestampKey,
+  getLastUploadedDayKey,
+  getStateStorageKey,
+} from "./fastingLogic/useFastingPersistence.js";
 
 export const AuthContext = createContext({
   token: "",
@@ -52,11 +57,12 @@ function AuthContextProvider({ children }) {
   async function logout() {
     try {
       if (uid) {
-        const rawState = await AsyncStorage.getItem("fastingstate_v2");
+        const rawState = await AsyncStorage.getItem(getStateStorageKey(uid));
         if (rawState) {
           const parsed = JSON.parse(rawState);
           if (auth && auth.currentUser && auth.currentUser.uid) {
-            await setFastingStateDb(uid, parsed);
+            const { ownerUid, ...rest } = parsed;
+            await setFastingStateDb(uid, rest);
           }
         }
       }
@@ -78,8 +84,14 @@ function AuthContextProvider({ children }) {
     AsyncStorage.removeItem("fullname");
     AsyncStorage.removeItem("avatarId");
     AsyncStorage.removeItem("onboarded");
+    if (uid) {
+      AsyncStorage.removeItem(getStateStorageKey(uid));
+      AsyncStorage.removeItem(getLastSavedTimestampKey(uid));
+      AsyncStorage.removeItem(getLastUploadedDayKey(uid));
+    }
     AsyncStorage.removeItem("fastingstate_v2");
     AsyncStorage.removeItem("fasting_last_ts");
+    AsyncStorage.removeItem("fasting_last_uploaded_day");
   }
 
   function refreshToken(idToken) {

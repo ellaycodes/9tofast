@@ -26,7 +26,7 @@ import {
 } from "../../util/timezone";
 
 const STORAGE_KEY = "fastingstate_v2";
-export const LAST_UPLOADED_DAY_KEY = "fasting_last_uploaded_day";
+const LAST_UPLOADED_DAY_KEY = "fasting_last_uploaded_day";
 const LAST_SAVED_TIMESTAMP_KEY = "fasting_last_ts";
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 const EVENT_HORIZON_DAYS = 7;
@@ -95,10 +95,43 @@ function trimEventsToHorizon(events = [], now = new Date(), timeZone) {
  * Get the last time the fasting data was saved.
  * Returns a timestamp or 0 if not available.
  */
-async function getLastSavedTime(lastTimestamp) {
+function getScopedStorageKey(baseKey, uid) {
+  const scope = uid || "anonymous";
+  return `${baseKey}:${scope}`;
+}
+
+export function getStateStorageKey(uid) {
+  return getScopedStorageKey(STORAGE_KEY, uid);
+}
+
+export function getLastUploadedDayKey(uid) {
+  return getScopedStorageKey(LAST_UPLOADED_DAY_KEY, uid);
+}
+
+export function getLastSavedTimestampKey(uid) {
+  return getScopedStorageKey(LAST_SAVED_TIMESTAMP_KEY, uid);
+}
+
+function withOwnerUid(state, uid) {
+  if (!state) return state;
+  return { ...state, ownerUid: uid || null };
+}
+
+function stripLocalMeta(state) {
+  if (!state) return state;
+  const { ownerUid, ...rest } = state;
+  return rest;
+}
+
+async function getLegacyLastSavedTime() {
+  const stored = await AsyncStorage.getItem(LAST_SAVED_TIMESTAMP_KEY);
+  return stored ? Number(stored) : 0;
+}
+
+async function getLastSavedTime(uid, lastTimestamp) {
   if (lastTimestamp !== undefined) return lastTimestamp;
 
-  const stored = await AsyncStorage.getItem(LAST_SAVED_TIMESTAMP_KEY);
+  const stored = await AsyncStorage.getItem(getLastSavedTimestampKey(uid));
   return stored ? Number(stored) : 0;
 }
 
@@ -125,7 +158,7 @@ async function updateStoredEvents(
   parsedState.events = validEvents;
 }
 
-async function ensureScheduleFromPreferences(state, lastSavedTimestamp) {
+async function ensureScheduleFromPreferences(state, lastSavedTimestamp, uid) {
   if (!auth.currentUser || state?.schedule) return state;
 
   const userSchedule = await getFastingSchedule(auth.currentUser.uid);
@@ -139,10 +172,13 @@ async function ensureScheduleFromPreferences(state, lastSavedTimestamp) {
   }
 
   const nextState = { ...state, schedule: nextSchedule };
-  await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
+  await AsyncStorage.setItem(
+    getStateStorageKey(uid),
+    JSON.stringify(withOwnerUid(nextState, uid))
+  );
   if (lastSavedTimestamp) {
     await AsyncStorage.setItem(
-      LAST_SAVED_TIMESTAMP_KEY,
+      getLastSavedTimestampKey(uid),
       String(lastSavedTimestamp)
     );
   }
@@ -210,12 +246,16 @@ export default function useFastingPersistence() {
    */
   const saveLocalState = useCallback(async (state) => {
     try {
-      const stateToSave = { ...state };
+      const uid = auth.currentUser?.uid || null;
+      const stateToSave = withOwnerUid({ ...state }, uid);
       delete stateToSave.hours;
 
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
       await AsyncStorage.setItem(
-        LAST_SAVED_TIMESTAMP_KEY,
+        getStateStorageKey(uid),
+        JSON.stringify(stateToSave)
+      );
+      await AsyncStorage.setItem(
+        getLastSavedTimestampKey(uid),
         Date.now().toString()
       );
     } catch (error) {
@@ -229,8 +269,11 @@ export default function useFastingPersistence() {
    */
   const addFastingEvent = useCallback(async (timestamp, type, trigger) => {
     try {
-      const rawState = await AsyncStorage.getItem(STORAGE_KEY);
-      const parsedState = rawState ? JSON.parse(rawState) : getInitialState();
+      const uid = auth.currentUser?.uid || null;
+      const rawState = await AsyncStorage.getItem(getStateStorageKey(uid));
+      const parsedState = rawState
+        ? JSON.parse(rawState)
+        : withOwnerUid(getInitialState(), uid);
 
       const updatedEvents = [
         ...(parsedState.events || []),
@@ -238,9 +281,12 @@ export default function useFastingPersistence() {
       ];
       parsedState.events = updatedEvents;
 
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(parsedState));
       await AsyncStorage.setItem(
-        LAST_SAVED_TIMESTAMP_KEY,
+        getStateStorageKey(uid),
+        JSON.stringify(withOwnerUid(parsedState, uid))
+      );
+      await AsyncStorage.setItem(
+        getLastSavedTimestampKey(uid),
         Date.now().toString()
       );
     } catch (error) {
@@ -257,15 +303,9 @@ export default function useFastingPersistence() {
     async (day, hours, scheduleHours, events = [], metadata = {}) => {
       if (!auth.currentUser) return;
       try {
-        await addDailyStatsDb(
-          auth.currentUser.uid,
-          day,
-          hours,
-          scheduleHours,
-          events,
-          metadata
-        );
-        await AsyncStorage.setItem(LAST_UPLOADED_DAY_KEY, day);
+        const uid = auth.currentUser.uid;
+        await addDailyStatsDb(uid, day, hours, scheduleHours, events, metadata);
+        await AsyncStorage.setItem(getLastUploadedDayKey(uid), day);
       } catch (error) {
         logWarn("[fasting-persistence] uploadDailyStats() failed:", error);
         throw error;
@@ -279,15 +319,19 @@ export default function useFastingPersistence() {
    */
   const saveDailyEvents = useCallback(async (events) => {
     try {
-      const raw = await AsyncStorage.getItem(STORAGE_KEY);
+      const uid = auth.currentUser?.uid || null;
+      const raw = await AsyncStorage.getItem(getStateStorageKey(uid));
       if (!raw) return;
 
       const parsed = JSON.parse(raw);
       parsed.events = events;
 
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
       await AsyncStorage.setItem(
-        LAST_SAVED_TIMESTAMP_KEY,
+        getStateStorageKey(uid),
+        JSON.stringify(withOwnerUid(parsed, uid))
+      );
+      await AsyncStorage.setItem(
+        getLastSavedTimestampKey(uid),
         Date.now().toString()
       );
     } catch (error) {
@@ -346,13 +390,38 @@ export default function useFastingPersistence() {
    */
   const loadFastingState = useCallback(async () => {
     try {
-      const localData = await AsyncStorage.getItem(STORAGE_KEY);
-      const localState = localData ? JSON.parse(localData) : null;
-      const localLastSavedTime = await getLastSavedTime();
-
       let currentUser = auth.currentUser;
-      if (!currentUser && !localState) {
+      if (!currentUser) {
         currentUser = await waitForAuthUser();
+      }
+
+      const uid = currentUser?.uid || null;
+      const localData = await AsyncStorage.getItem(getStateStorageKey(uid));
+      let localState = localData ? JSON.parse(localData) : null;
+      let localLastSavedTime = await getLastSavedTime(uid);
+
+      if (!localState && uid) {
+        const legacyData = await AsyncStorage.getItem(STORAGE_KEY);
+        const legacyState = legacyData ? JSON.parse(legacyData) : null;
+        if (legacyState?.ownerUid === uid) {
+          localState = legacyState;
+          localLastSavedTime = await getLegacyLastSavedTime();
+          await AsyncStorage.setItem(
+            getStateStorageKey(uid),
+            JSON.stringify(withOwnerUid(legacyState, uid))
+          );
+          if (localLastSavedTime) {
+            await AsyncStorage.setItem(
+              getLastSavedTimestampKey(uid),
+              String(localLastSavedTime)
+            );
+          }
+        }
+      }
+
+      if (localState?.ownerUid && uid && localState.ownerUid !== uid) {
+        localState = null;
+        localLastSavedTime = 0;
       }
 
       if (currentUser) {
@@ -372,15 +441,16 @@ export default function useFastingPersistence() {
 
             normalizedState = await ensureScheduleFromPreferences(
               normalizedState,
-              remoteTimestamp
+              remoteTimestamp,
+              uid
             );
             await AsyncStorage.setItem(
-              STORAGE_KEY,
-              JSON.stringify(normalizedState)
+              getStateStorageKey(uid),
+              JSON.stringify(withOwnerUid(normalizedState, uid))
             );
             if (remoteTimestamp) {
               await AsyncStorage.setItem(
-                LAST_SAVED_TIMESTAMP_KEY,
+                getLastSavedTimestampKey(uid),
                 String(remoteTimestamp)
               );
             }
@@ -391,9 +461,12 @@ export default function useFastingPersistence() {
           const hydratedLocalState = await ensureScheduleFromPreferences(
             localState,
             localLastSavedTime,
-            currentUser
+            uid
           );
-          await setFastingStateDb(auth.currentUser.uid, hydratedLocalState);
+          await setFastingStateDb(
+            auth.currentUser.uid,
+            stripLocalMeta(hydratedLocalState)
+          );
           return await processLoadedState(
             hydratedLocalState,
             localLastSavedTime
@@ -406,7 +479,7 @@ export default function useFastingPersistence() {
           ? await ensureScheduleFromPreferences(
               localState,
               localLastSavedTime,
-              currentUser
+              uid
             )
           : localState;
         return await processLoadedState(hydratedLocalState, localLastSavedTime);
