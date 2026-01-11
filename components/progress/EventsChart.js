@@ -1,20 +1,20 @@
 import { View, StyleSheet, Text } from "react-native";
 import { memo, useMemo } from "react";
 import { useAppTheme } from "../../store/app-theme-context";
-import * as dt from "date-fns";
 import SubtitleText from "../ui/SubtitleText";
+import { addDaysInTimeZone, startOfDayTs } from "../../util/timezone";
 
 // Chart shows fasting/eating segments for current day based on events array
-function EventsChart({ events = [], date }) {
+function EventsChart({ events = [], date, timeZone }) {
   const { theme } = useAppTheme();
-  const start = dt.startOfDay(date).getTime();
-  const end = dt.endOfDay(date).getTime();
+  const start = startOfDayTs(date, timeZone);
+  const end = startOfDayTs(addDaysInTimeZone(date, 1, timeZone), timeZone);
   const total = end - start;
 
   // Filter events within the day and pre-compute segments
   const segments = useMemo(() => {
     const dayEvents = events
-      .filter((e) => e.ts >= start && e.ts <= end)
+      .filter((e) => e.ts >= start && e.ts < end)
       .sort((a, b) => a.ts - b.ts);
 
     // Build segments between events
@@ -77,7 +77,6 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     width: "100%",
     marginBottom: 12,
-    
   },
   wrapper: {
     width: "100%",

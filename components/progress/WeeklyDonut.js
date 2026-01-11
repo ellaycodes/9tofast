@@ -13,16 +13,18 @@ import { AnimatedCircularProgress } from "react-native-circular-progress";
 import { useAppTheme } from "../../store/app-theme-context";
 import { buildWeekPages } from "../../util/progress/dateRanges";
 import { buildDayLookupValue, buildStatsMap } from "../../util/progress/stats";
+import { useFasting } from "../../store/fastingLogic/fasting-context";
+import { formatDayString, getScheduleTimeZone } from "../../util/timezone";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const CIRCLE_SIZE = Math.floor(SCREEN_WIDTH / 9);
 const CIRCLE_WIDTH = Math.max(4, Math.round(CIRCLE_SIZE * 0.25));
 
 // helper to build 7-day array for a given week start
-function buildWeekDays(weekStart, statsMap) {
+function buildWeekDays(weekStart, statsMap, timeZone) {
   return Array.from({ length: 7 }).map((_, i) => {
     const date = dt.addDays(weekStart, i);
-    const key = dt.format(date, "yyyy-MM-dd");
+    const key = formatDayString(date, timeZone);
     const data = buildDayLookupValue(statsMap.get(key));
     return { date, ...data };
   });
@@ -36,6 +38,8 @@ export default function WeeklyDonut({
   selectedDay,
 }) {
   const { theme } = useAppTheme();
+  const { schedule } = useFasting();
+  const timeZone = getScheduleTimeZone(schedule);
   const listRef = useRef(null);
 
   // page index 0 is current week, 1 is previous week, etc
@@ -91,7 +95,7 @@ export default function WeeklyDonut({
 
   const renderWeek = useCallback(
     ({ item }) => {
-      const days = buildWeekDays(item.start, statsMap);
+      const days = buildWeekDays(item.start, statsMap, timeZone);
 
       return (
         <View style={[styles.page, { width: SCREEN_WIDTH * 0.91 }]}>
@@ -147,7 +151,7 @@ export default function WeeklyDonut({
         </View>
       );
     },
-    [statsMap, theme, selectedDay]
+    [statsMap, theme, selectedDay, timeZone]
   );
 
   return (

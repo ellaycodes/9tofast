@@ -13,6 +13,8 @@ import { useMemo, useRef, useState } from "react";
 import useWeeklyStats from "../store/fastingLogic/useWeeklyStats";
 import MonthGrid from "../components/progress/MonthGrid";
 import { buildStatsMap } from "../util/progress/stats";
+import { useFasting } from "../store/fastingLogic/fasting-context";
+import { getScheduleTimeZone } from "../util/timezone";
 
 export default function ProgressCalendarModal({
   showModal,
@@ -21,6 +23,8 @@ export default function ProgressCalendarModal({
 }) {
   const { theme } = useAppTheme();
   const { weeklyStats, refreshWeeklyStats } = useWeeklyStats();
+  const { schedule } = useFasting();
+  const timeZone = getScheduleTimeZone(schedule);
   const currentMonthStart = useMemo(() => dt.startOfMonth(new Date()), []);
   const [visibleMonth, setVisibleMonth] = useState(
     dt.format(new Date(), "MMMM yyyy")
@@ -84,6 +88,7 @@ export default function ProgressCalendarModal({
         statsMap={statsMap}
         limitDays={item.limit}
         onDayPress={handleDayPress}
+        timeZone={timeZone}
       />
     </View>
   );

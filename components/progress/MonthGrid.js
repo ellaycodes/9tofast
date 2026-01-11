@@ -4,6 +4,7 @@ import * as dt from "date-fns";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
 
 import { buildDayLookupValue } from "../../util/progress/stats";
+import { formatDayString } from "../../util/timezone";
 
 export default function MonthGrid({
   monthDate,
@@ -11,6 +12,7 @@ export default function MonthGrid({
   statsMap,
   limitDays,
   onDayPress,
+  timeZone
 }) {
   const startOfMonth = dt.startOfMonth(monthDate);
 
@@ -26,7 +28,7 @@ export default function MonthGrid({
       }
 
       const d = dt.addDays(startOfMonth, i - offset);
-      const key = dt.format(d, "yyyy-MM-dd");
+      const key = formatDayString(d, timeZone);
       const lookup = buildDayLookupValue(statsMap.get(key));
 
       return {
@@ -35,7 +37,7 @@ export default function MonthGrid({
         ...lookup
       };
     });
-  }, [monthDate, statsMap, limitDays, startOfMonth]);
+  }, [monthDate, statsMap, limitDays, startOfMonth, timeZone]);
 
   return (
     <View>

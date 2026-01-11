@@ -19,6 +19,7 @@ import useFastingLoader from "./useFastingLoader";
 import useDailyStatsSync from "./useDailyStatsSync";
 import { buildCurrentDayStats } from "./useFastingPersistence.js";
 import { emitWeeklyStatsRefresh } from "./weeklyStatsEvents";
+import { getResolvedTimeZone } from "../../util/timezone";
 
 export const FastingContext = createContext({
   loading: true,
@@ -26,7 +27,7 @@ export const FastingContext = createContext({
   events: [],
   state: null,
   hoursFastedToday: null,
-  setSchedule: () => {},
+  setSchedule: async () => {},
   setBaselineAnchor: () => {},
   startFast: () => {},
   endFast: () => {},
@@ -78,6 +79,7 @@ export default function FastingContextProvider({ children }) {
       hours,
       scheduleHours,
       eventsList = [],
+      metadata = {},
       options = { skipIfUploaded: false }
     ) => {
       if (uploadLock.current) return;
@@ -90,7 +92,7 @@ export default function FastingContextProvider({ children }) {
 
       uploadLock.current = true;
       try {
-        await addDailyStats(day, hours, scheduleHours, eventsList);
+        await addDailyStats(day, hours, scheduleHours, eventsList, metadata);
         lastUploadedDayRef.current = day;
         emitWeeklyStatsRefresh();
       } finally {
@@ -120,7 +122,11 @@ export default function FastingContextProvider({ children }) {
         snapshot.day,
         snapshot.hoursFasted,
         snapshot.scheduleHours,
-        snapshot.events
+        snapshot.events,
+        {
+          timeZone: snapshot.timeZone,
+          dayStartUtc: snapshot.dayStartUtc,
+        }
       );
     },
     [uploadDailyStatsLocked]
@@ -173,12 +179,12 @@ export default function FastingContextProvider({ children }) {
   );
 
   const addEventAndPersist = useCallback(
-    async (ts, type, trigger) => {
+    async (ts, type, trigger, options = {}) => {
       const previousEvents = stateRef.current.events.length
         ? stateRef.current.events[stateRef.current.events.length - 1]
         : null;
       const last = previousEvents ? previousEvents.type : undefined;
-      if (last === type) return;
+      if (!options.allowDuplicateType && last === type) return;
 
       await addFastingEvent(ts, type, trigger);
 
@@ -206,8 +212,42 @@ export default function FastingContextProvider({ children }) {
     addEventAndPersist
   );
 
-  function setSchedule(data) {
-    dispatch({ type: "SET_SCHEDULE", payload: data });
+  async function setSchedule(data, options = {}) {
+    if (!data) {
+      dispatch({ type: "SET_SCHEDULE", payload: data });
+      return;
+    }
+    const normalized = data.timeZone
+      ? data
+      : { ...data, timeZone: getResolvedTimeZone() };
+    const previous = stateRef.current.schedule;
+    const scheduleChanged =
+      !previous ||
+      previous.start !== normalized.start ||
+      previous.end !== normalized.end ||
+      previous.fastingHours !== normalized.fastingHours ||
+      previous.timeZone !== normalized.timeZone;
+
+    if (
+      scheduleChanged &&
+      options.anchor !== false &&
+      stateRef.current.events.length
+    ) {
+      const now = Date.now();
+      const lastEvent = stateRef.current.events.length
+        ? stateRef.current.events[stateRef.current.events.length - 1]
+        : null;
+      const lastType = lastEvent?.type;
+      const isFasting = lastType === events.EVENT.START || lastType === "start";
+      const anchorType = isFasting ? events.EVENT.START : events.EVENT.END;
+
+      dispatch({ type: "SET_BASELINE_ANCHOR", payload: now });
+      await addEventAndPersist(now, anchorType, "schedule", {
+        allowDuplicateType: true,
+      });
+    }
+
+    dispatch({ type: "SET_SCHEDULE", payload: normalized });
   }
 
   async function startFast(trigger) {

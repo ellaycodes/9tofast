@@ -1,7 +1,12 @@
 import { useEffect, useRef } from "react";
-import * as date from "date-fns";
 import * as session from "./fasting-session";
 import * as events from "./events";
+import {
+  addDaysInTimeZone,
+  formatDayString,
+  getScheduleTimeZone,
+  startOfDayTs,
+} from "../../util/timezone";
 
 /**
  * Synchronizes daily fasting data.
@@ -28,23 +33,25 @@ export default function useDailyStatsSync(
     latestStateRef.current = fastingState;
   }, [fastingState]);
 
-  const deriveLastEventDay = (eventsList, fallbackDay) => {
+  const deriveLastEventDay = (eventsList, fallbackDay, timeZone) => {
     if (!eventsList?.length) return fallbackDay;
     const latestEvent = eventsList[eventsList.length - 1];
-    return date.format(date.startOfDay(latestEvent.ts), "yyyy-MM-dd");
+    return formatDayString(latestEvent.ts, timeZone);
   };
 
   useEffect(() => {
     if (fastingState.loading) return; // Skip until data is loaded
 
     const now = new Date();
-    const startOfToday = date.startOfDay(now).getTime();
-    const currentDayString = date.format(now, "yyyy-MM-dd");
+    const timeZone = getScheduleTimeZone(fastingState.schedule);
+    const startOfToday = startOfDayTs(now, timeZone);
+    const currentDayString = formatDayString(now, timeZone);
 
     if (!lastProcessedDay.current) {
       lastProcessedDay.current = deriveLastEventDay(
         fastingState.events,
-        currentDayString
+        currentDayString,
+        timeZone
       );
     }
 
@@ -58,10 +65,9 @@ export default function useDailyStatsSync(
 
     (async () => {
       if (newDayStarted) {
-        const previousDayString = date.format(
-          date.subDays(new Date(startOfToday), 1),
-          "yyyy-MM-dd"
-        );
+        const previousDayDate = addDaysInTimeZone(startOfToday, -1, timeZone);
+        const previousDayString = formatDayString(previousDayDate, timeZone);
+        const previousDayStart = startOfDayTs(previousDayDate, timeZone);
         const yesterdayEvents = (fastingState.events || []).filter(
           (event) => (event?.ts ?? 0) < startOfToday
         );
@@ -81,6 +87,7 @@ export default function useDailyStatsSync(
           hoursFastedYesterday,
           scheduledHours,
           yesterdayEvents,
+          { timeZone, dayStartUtc: previousDayStart },
           { skipIfUploaded: true }
         );
 

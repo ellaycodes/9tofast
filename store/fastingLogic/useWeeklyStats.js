@@ -6,9 +6,13 @@ import { auth } from "../../firebase/app";
 import { getDailyStatsRange } from "../../firebase/fasting.db.js";
 import { logWarn } from "../../util/logger";
 import { subscribeWeeklyStatsRefresh } from "./weeklyStatsEvents";
+import { useFasting } from "./fasting-context";
+import { formatDayString, getScheduleTimeZone } from "../../util/timezone";
 
 export default function useWeeklyStats() {
   const [weeklyStats, setWeeklyStats] = useState([]);
+  const { schedule } = useFasting();
+  const timeZone = getScheduleTimeZone(schedule);
 
   const refreshWeeklyStats = useCallback(async (startDate, endDate) => {
     if (!auth.currentUser) {
@@ -18,14 +22,14 @@ export default function useWeeklyStats() {
     try {
       const resolvedEnd = endDate || new Date();
       const resolvedStart = startDate || dt.subDays(resolvedEnd, 6);
-      const end = dt.format(resolvedEnd, "yyyy-MM-dd");
-      const start = dt.format(resolvedStart, "yyyy-MM-dd");
+      const end = formatDayString(resolvedEnd, timeZone);
+      const start = formatDayString(resolvedStart, timeZone);
       const stats = await getDailyStatsRange(auth.currentUser.uid, start, end);
       setWeeklyStats(stats);
     } catch (error) {
       logWarn("[weekly-stats] refreshWeeklyStats", error);
     }
-  }, []);
+  }, [timeZone]);
 
   useEffect(() => {
     const unsubscribeFromRefresh = subscribeWeeklyStatsRefresh(

@@ -1,11 +1,15 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { format } from "date-fns";
 import { createContext, useState, useEffect } from "react";
 import { getStreak, setStreak } from "../../firebase/stats.db.js";
 import { auth } from "../../firebase/app.js";
-import { dayQualifier, fastingQualifier } from "./qualifier.js";
+import { dayQualifier } from "./qualifier.js";
 import { useFasting } from "../fastingLogic/fasting-context.js";
 import { yesterdayHoursFasted } from "./yesterdayHours.js";
+import {
+  addDaysInTimeZone,
+  formatDayString,
+  getScheduleTimeZone,
+} from "../../util/timezone";
 
 export const StatsContext = createContext({
   currentStreak: 0,
@@ -31,8 +35,12 @@ function StatsContextProvider({ children }) {
   const [hoursFastedYesterday, setHoursFastedYesterday] = useState(null);
 
   const oneDay = 24 * 60 * 60 * 1000;
-  const today = format(new Date(), "yyyy-MM-dd");
-  const yesterday = format(new Date(Date.now() - oneDay), "yyyy-MM-dd");
+  const timeZone = getScheduleTimeZone(schedule);
+  const today = formatDayString(new Date(), timeZone);
+  const yesterday = formatDayString(
+    addDaysInTimeZone(Date.now(), -1, timeZone),
+    timeZone
+  );
   const fastingGoalHours = schedule?.fastingHours;
 
   const STREAK_DATA = "streak_data";
@@ -60,14 +68,14 @@ function StatsContextProvider({ children }) {
   //Load Data on app open
   useEffect(() => {
     async function yesterdayHoursFromDb() {
-      const yesterdayData = await yesterdayHoursFasted();
+      const yesterdayData = await yesterdayHoursFasted(timeZone);
       setHoursFastedYesterday(yesterdayData);
     }
 
     yesterdayHoursFromDb();
 
     loadStreak();
-  }, [auth.currentUser]);
+  }, [auth.currentUser, timeZone]);
 
   async function save(streakData) {
     await AsyncStorage.setItem(STREAK_DATA, JSON.stringify(streakData));
@@ -172,7 +180,7 @@ function StatsContextProvider({ children }) {
     if (hoursFastedYesterday === null) return;
     if (!fastingGoalHours) return;
 
-    const dayStatus = dayQualifier(today, lastStreakDate);
+    const dayStatus = dayQualifier(today, lastStreakDate, timeZone);
     if (dayStatus === "same") return;
 
     if (dayStatus === "yesterday") {
@@ -193,7 +201,13 @@ function StatsContextProvider({ children }) {
       breakStreak();
       return;
     }
-  }, [today, lastStreakDate, fastingGoalHours, hoursFastedYesterday]);
+  }, [
+    today,
+    lastStreakDate,
+    fastingGoalHours,
+    hoursFastedYesterday,
+    timeZone,
+  ]);
 
   const value = {
     currentStreak: currentStreak,

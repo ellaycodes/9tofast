@@ -1,6 +1,5 @@
 import { useContext, useEffect, useState, useRef, useMemo } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
-import { parse, startOfDay } from "date-fns";
 import { onAuthStateChanged } from "firebase/auth";
 
 import Title from "../ui/Title";
@@ -11,6 +10,11 @@ import { useFasting } from "../../store/fastingLogic/fasting-context";
 import { auth } from "../../firebase/app";
 import { calcReadout, msToHms } from "../../util/formatTime";
 import { setFastingStateDb } from "../../firebase/fasting.db.js";
+import {
+  getScheduleTimeZone,
+  startOfDayTs,
+  timeStringToZonedTs,
+} from "../../util/timezone";
 
 export default function StartTimerSlide({
   setWizardState,
@@ -21,8 +25,14 @@ export default function StartTimerSlide({
   const { theme } = useAppTheme();
   const memoStyle = useMemo(() => styles(theme), [theme]);
   const authCxt = useContext(AuthContext);
-  const { setSchedule, startFast, schedule, endFast, setBaselineAnchor, state } =
-    useFasting();
+  const {
+    setSchedule,
+    startFast,
+    schedule,
+    endFast,
+    setBaselineAnchor,
+    state,
+  } = useFasting();
 
   const [started, setStarted] = useState(false);
   const [readout, setReadout] = useState("\u00A0"); // non‑breaking space as placeholder
@@ -67,9 +77,14 @@ export default function StartTimerSlide({
       setBaselineAnchor(now);
 
       // decide current window and flip once
-      const todayMidnight = startOfDay(new Date());
-      const startTs = parse(schedule.start, "HH:mm", todayMidnight).getTime();
-      const endTs = parse(schedule.end, "HH:mm", todayMidnight).getTime();
+      const timeZone = getScheduleTimeZone(schedule);
+      const todayMidnight = new Date(startOfDayTs(now, timeZone));
+      const startTs = timeStringToZonedTs(
+        schedule.start,
+        todayMidnight,
+        timeZone
+      );
+      const endTs = timeStringToZonedTs(schedule.end, todayMidnight, timeZone);
 
       let inEatingWindow;
       if (startTs < endTs) {
@@ -84,10 +99,10 @@ export default function StartTimerSlide({
         startFast("manual");
       }
 
-      setSchedule(schedule);
+      await setSchedule(schedule, { anchor: false });
       setStarted(true);
 
-      await setFastingStateDb(authCxt.uid, state)
+      await setFastingStateDb(authCxt.uid, state);
     };
 
     if (authReady) {

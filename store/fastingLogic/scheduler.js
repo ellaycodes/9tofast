@@ -1,21 +1,25 @@
 import { useEffect, useRef, useReducer } from "react";
 import { EVENT } from "./events";
-import * as dt from "date-fns";
 import { AppState } from "react-native";
-
-//helper
-function parseHHmmToTs(hhmm, baseDate) {
-  return dt.parse(hhmm, "HH:mm", baseDate).getTime();
-}
+import {
+  addDaysInTimeZone,
+  getScheduleTimeZone,
+  startOfDayTs,
+  timeStringToZonedTs,
+} from "../../util/timezone";
 
 //helper
 function normalizeWindow(schedule, nowTs = Date.now()) {
-  const base = dt.startOfDay(new Date(nowTs));
-  let startTs = parseHHmmToTs(schedule.start, base);
-  let endTs = parseHHmmToTs(schedule.end, base);
+  const timeZone = getScheduleTimeZone(schedule);
+  const base = new Date(startOfDayTs(nowTs, timeZone));
+  let startTs = timeStringToZonedTs(schedule.start, base, timeZone);
+  let endTs = timeStringToZonedTs(schedule.end, base, timeZone);
 
   // If end is not after start, treat end as next-day
-  if (endTs <= startTs) endTs = dt.addDays(new Date(endTs), 1).getTime();
+  if (endTs <= startTs) {
+    const nextDayBase = addDaysInTimeZone(base, 1, timeZone);
+    endTs = timeStringToZonedTs(schedule.end, nextDayBase, timeZone);
+  }
 
   return { startTs, endTs };
 }
@@ -23,6 +27,7 @@ function normalizeWindow(schedule, nowTs = Date.now()) {
 //helper
 function stateAndNextBoundary(schedule, nowTs = Date.now()) {
   const { startTs, endTs } = normalizeWindow(schedule, nowTs);
+  const timeZone = getScheduleTimeZone(schedule);
 
   const inEating = nowTs >= startTs && nowTs < endTs;
   const state = inEating ? "eating" : "fasting";
@@ -37,7 +42,7 @@ function stateAndNextBoundary(schedule, nowTs = Date.now()) {
     nextBoundaryTs =
       nowTs < startTodayOrYesterday
         ? startTodayOrYesterday
-        : dt.addDays(new Date(startTodayOrYesterday), 1).getTime();
+        : addDaysInTimeZone(startTodayOrYesterday, 1, timeZone).getTime();
   }
 
   return { state, nextBoundaryTs };
@@ -172,7 +177,8 @@ export default function useScheduleBoundaryScheduler(
 
 export function baselineForDay(schedule, nowTs = Date.now()) {
   if (!schedule) return [];
-  const dayStart = dt.startOfDay(new Date(nowTs)).getTime();
+  const timeZone = getScheduleTimeZone(schedule);
+  const dayStart = startOfDayTs(nowTs, timeZone);
   const { startTs, endTs } = normalizeWindow(schedule, nowTs);
   const events = [];
   // fasting from midnight until eating start
@@ -198,10 +204,14 @@ export function useUiTicker(periodMs = 250) {
 
 // returns "eating" or "fasting" at a given time
 export function stateAt(schedule, atTs) {
-  const base = dt.startOfDay(new Date(atTs));
-  let startTs = dt.parse(schedule.start, "HH:mm", base).getTime();
-  let endTs = dt.parse(schedule.end, "HH:mm", base).getTime();
-  if (endTs <= startTs) endTs = dt.addDays(new Date(endTs), 1).getTime();
+  const timeZone = getScheduleTimeZone(schedule);
+  const base = new Date(startOfDayTs(atTs, timeZone));
+  let startTs = timeStringToZonedTs(schedule.start, base, timeZone);
+  let endTs = timeStringToZonedTs(schedule.end, base, timeZone);
+  if (endTs <= startTs) {
+    const nextDayBase = addDaysInTimeZone(base, 1, timeZone);
+    endTs = timeStringToZonedTs(schedule.end, nextDayBase, timeZone);
+  }
 
   const inEating = atTs >= startTs && atTs < endTs;
   return inEating ? "eating" : "fasting";
@@ -217,15 +227,18 @@ export function baselineSinceAnchor(
   if (nowTs < anchorTs) return [];
 
   const events = [];
-  const initial = stateAt(schedule, anchorTs);
+  const anchorEvent = userEvents.find((event) => event.ts === anchorTs);
+  const initial = anchorEvent
+    ? anchorEvent.type === EVENT.START
+      ? "fasting"
+      : "eating"
+    : stateAt(schedule, anchorTs);
 
   // seed a synthetic flip at the anchor to set state
   const syntheticType = initial === "fasting" ? EVENT.START : EVENT.END;
 
   // seed a synthetic flip at the anchor unless user already logged one
-  const hasUserEventAtAnchor = userEvents.some(
-    (e) => e.ts === anchorTs && e.type === syntheticType
-  );
+  const hasUserEventAtAnchor = userEvents.some((e) => e.ts === anchorTs);
   if (!hasUserEventAtAnchor) {
     events.push({ type: syntheticType, ts: anchorTs, trigger: "auto" });
   }
@@ -256,12 +269,23 @@ export function baselineSinceAnchor(
 
 // helper to get the next boundary strictly after a timestamp
 export function nextBoundaryAfter(schedule, afterTs) {
-  const base = dt.startOfDay(new Date(afterTs));
-  let startTs = dt.parse(schedule.start, "HH:mm", base).getTime();
-  let endTs = dt.parse(schedule.end, "HH:mm", base).getTime();
-  if (endTs <= startTs) endTs = dt.addDays(new Date(endTs), 1).getTime();
+  const timeZone = getScheduleTimeZone(schedule);
+  const base = new Date(startOfDayTs(afterTs, timeZone));
+  let startTs = timeStringToZonedTs(schedule.start, base, timeZone);
+  let endTs = timeStringToZonedTs(schedule.end, base, timeZone);
+  if (endTs <= startTs) {
+    const nextDayBase = addDaysInTimeZone(base, 1, timeZone);
+    endTs = timeStringToZonedTs(schedule.end, nextDayBase, timeZone);
+  }
 
-  const candidates = [startTs, endTs, startTs + 86400000, endTs + 86400000];
+  const nextDayBase = addDaysInTimeZone(base, 1, timeZone);
+  const nextStartTs = timeStringToZonedTs(
+    schedule.start,
+    nextDayBase,
+    timeZone
+  );
+  const nextEndTs = timeStringToZonedTs(schedule.end, nextDayBase, timeZone);
+  const candidates = [startTs, endTs, nextStartTs, nextEndTs];
   const next = candidates.filter((ts) => ts > afterTs).sort((a, b) => a - b)[0];
   return next !== undefined ? next : null;
 }

@@ -86,7 +86,8 @@ export async function addDailyStatsDb(
   day,
   hoursFastedToday,
   fastingHours,
-  events = []
+  events = [],
+  metadata = {}
 ) {
   try {
     const docRef = doc(db, "users", uid, "daily_stats", day);
@@ -118,6 +119,8 @@ export async function addDailyStatsDb(
           percent,
           events: mergedEvents,
           updatedAt: serverTimestamp(),
+          timeZone: metadata.timeZone,
+          dayStartUtc: metadata.dayStartUtc,
         },
         { merge: true }
       );

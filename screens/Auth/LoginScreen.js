@@ -50,7 +50,7 @@ function LoginScreen() {
         authCxt.updateAvatarId(userData.avatarId);
       }
       if (prefs && prefs.fastingSchedule) {
-        setSchedule(prefs.fastingSchedule);
+        await setSchedule(prefs.fastingSchedule, { anchor: false });
       }
     } catch (error) {
       Alert.alert(

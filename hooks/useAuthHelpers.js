@@ -28,7 +28,7 @@ export default function useAuthHelpers() {
     }
 
     if (prefs && prefs.fastingSchedule) {
-      setSchedule(prefs.fastingSchedule);
+      await setSchedule(prefs.fastingSchedule, { anchor: false });
     }
   }
 

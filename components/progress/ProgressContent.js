@@ -9,7 +9,8 @@ import Ads from "../../components/monetising/Ads";
 import EventsChart from "./EventsChart";
 import * as dt from "date-fns";
 import { usePremium } from "../../store/premium-context";
-// import { usePremium } from "../../hooks/usePremium";
+import { useFasting } from "../../store/fastingLogic/fasting-context";
+import { getScheduleTimeZone } from "../../util/timezone";
 
 export default function MainProgess({
   fastingHours,
@@ -19,6 +20,8 @@ export default function MainProgess({
   const { theme, themeName } = useContext(AppThemeContext);
   const memoStyle = useMemo(() => styles(theme), [theme]);
   const { isPremium, loading } = usePremium();
+  const { schedule } = useFasting();
+  const timeZone = getScheduleTimeZone(schedule);
 
   const day = selectedDay || defaultToday;
 
@@ -73,7 +76,7 @@ export default function MainProgess({
           <Text style={memoStyle.unit}> HOURS</Text>
         </Text>
       </View>
-      <EventsChart events={day.events} date={day.date} />
+      <EventsChart events={day.events} date={day.date} timeZone={timeZone}/>
     </>
   );
 }

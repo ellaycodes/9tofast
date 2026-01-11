@@ -4,12 +4,16 @@ import { useEffect, useState, useMemo } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import * as dt from "date-fns";
 import useWeeklyStats from "../../store/fastingLogic/useWeeklyStats";
+import { useFasting } from "../../store/fastingLogic/fasting-context";
+import { formatDayString, getScheduleTimeZone } from "../../util/timezone";
 
 const CELL_SIZE = `${100 / 7}%`;
 
 function FastingCalendar() {
   const { theme } = useAppTheme();
   const { weeklyStats, refreshWeeklyStats } = useWeeklyStats();
+  const { schedule } = useFasting();
+  const timeZone = getScheduleTimeZone(schedule);
   const [currentMonth, setCurrentMonth] = useState(dt.startOfMonth(new Date()));
 
   useEffect(() => {
@@ -25,13 +29,13 @@ function FastingCalendar() {
     const list = [];
     for (let i = 0; i < 42; i++) {
       const day = dt.addDays(startDate, i);
-      const formatted = dt.format(day, "yyyy-MM-dd");
+      const formatted = formatDayString(day, timeZone);
       const stat = weeklyStats.find((s) => s.day === formatted);
       const value = stat && stat.percent != null ? stat.percent : 0;
       list.push({ date: day, percent: value });
     }
     return list;
-  }, [currentMonth, weeklyStats]);
+  }, [currentMonth, weeklyStats, timeZone]);
 
   const handlePrev = () => setCurrentMonth(dt.subMonths(currentMonth, 1));
   const handleNext = () => setCurrentMonth(dt.addMonths(currentMonth, 1));

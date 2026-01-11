@@ -9,6 +9,7 @@ import {
   addDailyStatsDb,
   getFastingSchedule,
   getFastingStateDb,
+  setFastingScheduleDb,
   setFastingStateDb,
 } from "../../firebase/fasting.db.js";
 import { auth } from "../../firebase/app";
@@ -17,6 +18,12 @@ import { removeFutureEvents } from "./stripOldEvents.js";
 import { logWarn } from "../../util/logger.js";
 import { onAuthStateChanged } from "firebase/auth";
 import { EVENT } from "./events";
+import {
+  formatDayString,
+  getResolvedTimeZone,
+  getScheduleTimeZone,
+  startOfDayTs,
+} from "../../util/timezone";
 
 const STORAGE_KEY = "fastingstate_v2";
 export const LAST_UPLOADED_DAY_KEY = "fasting_last_uploaded_day";
@@ -51,10 +58,11 @@ function normalizeEventTimestamps(events = []) {
   });
 }
 
-function trimEventsToHorizon(events = [], now = new Date()) {
-  const horizonStart = date
-    .startOfDay(date.subDays(now, EVENT_HORIZON_DAYS))
-    .getTime();
+function trimEventsToHorizon(events = [], now = new Date(), timeZone) {
+  const horizonStart = startOfDayTs(
+    date.subDays(now, EVENT_HORIZON_DAYS),
+    timeZone
+  );
 
   const eventsBeforeHorizon = events.filter((event) => event.ts < horizonStart);
   const eventsWithinHorizon = events.filter(
@@ -123,7 +131,14 @@ async function ensureScheduleFromPreferences(state, lastSavedTimestamp) {
   const userSchedule = await getFastingSchedule(auth.currentUser.uid);
   if (!userSchedule) return state;
 
-  const nextState = { ...state, schedule: userSchedule };
+  const nextSchedule = userSchedule.timeZone
+    ? userSchedule
+    : { ...userSchedule, timeZone: getResolvedTimeZone() };
+  if (!userSchedule.timeZone) {
+    await setFastingScheduleDb(auth.currentUser.uid, nextSchedule);
+  }
+
+  const nextState = { ...state, schedule: nextSchedule };
   await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
   if (lastSavedTimestamp) {
     await AsyncStorage.setItem(
@@ -133,6 +148,18 @@ async function ensureScheduleFromPreferences(state, lastSavedTimestamp) {
   }
 
   return nextState;
+}
+
+function ensureScheduleTimeZone(state) {
+  if (!state?.schedule) return state;
+  const timeZone = state.schedule.timeZone || getResolvedTimeZone();
+  return {
+    ...state,
+    schedule: {
+      ...state.schedule,
+      timeZone,
+    },
+  };
 }
 
 function waitForAuthUser() {
@@ -146,13 +173,14 @@ function waitForAuthUser() {
 
 // helper that computes the current day stats from the current state
 export function buildCurrentDayStats(state, now = new Date()) {
-  const dayString = date.format(now, "yyyy-MM-dd");
+  const timeZone = getScheduleTimeZone(state.schedule);
+  const dayString = formatDayString(now, timeZone);
   const hoursToday = hoursFastedToday(state, now.getTime());
   const scheduleHours = state.schedule?.fastingHours ?? undefined;
 
   // You can choose if you want to pass today’s events or not
   const eventsToday = (state.events || []).filter(
-    (event) => event.ts >= date.startOfDay(now).getTime()
+    (event) => event.ts >= startOfDayTs(now, timeZone)
   );
 
   return {
@@ -160,6 +188,8 @@ export function buildCurrentDayStats(state, now = new Date()) {
     hoursFasted: hoursToday,
     scheduleHours,
     events: eventsToday,
+    timeZone,
+    dayStartUtc: startOfDayTs(now, timeZone),
   };
 }
 
@@ -224,7 +254,7 @@ export default function useFastingPersistence() {
    * Stores that day locally to avoid double-uploading.
    */
   const uploadDailyStats = useCallback(
-    async (day, hours, scheduleHours, events = []) => {
+    async (day, hours, scheduleHours, events = [], metadata = {}) => {
       if (!auth.currentUser) return;
       try {
         await addDailyStatsDb(
@@ -232,7 +262,8 @@ export default function useFastingPersistence() {
           day,
           hours,
           scheduleHours,
-          events
+          events,
+          metadata
         );
         await AsyncStorage.setItem(LAST_UPLOADED_DAY_KEY, day);
       } catch (error) {
@@ -281,7 +312,8 @@ export default function useFastingPersistence() {
       );
 
       const validEvents = removeFutureEvents(normalizedEvents, now);
-      const trimmedEvents = trimEventsToHorizon(validEvents, now);
+      const timeZone = getScheduleTimeZone(parsedState.schedule);
+      const trimmedEvents = trimEventsToHorizon(validEvents, now, timeZone);
 
       if (trimmedEvents.length !== validEvents.length) {
         logWarn(
@@ -298,7 +330,7 @@ export default function useFastingPersistence() {
         saveDailyEvents
       );
 
-      return parsedState;
+      return ensureScheduleTimeZone(parsedState);
     },
     [
       // uploadDailyStats,

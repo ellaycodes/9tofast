@@ -1,5 +1,6 @@
 import * as ev from "./events";
 import { baselineSinceAnchor } from "./scheduler";
+import { getScheduleTimeZone, startOfDayTs } from "../../util/timezone";
 
 export function getInitialState() {
   return {
@@ -9,9 +10,9 @@ export function getInitialState() {
   };
 }
 
-export function setSchedule(state, schedule) {
-  return { ...state, schedule };
-}
+// export function setSchedule(state, schedule) {
+//   return { ...state, schedule };
+// }
 
 export function clearAll() {
   return getInitialState();
@@ -28,6 +29,7 @@ export function isFasting(events) {
 export function hoursFastedToday(state, now = Date.now()) {
   const { schedule, events: userEvents = [], baselineAnchorTs } = state;
   if (!schedule && !userEvents.length) return 0;
+  const timeZone = getScheduleTimeZone(schedule);
 
   // build baseline once
   const baseline = schedule
@@ -50,9 +52,7 @@ export function hoursFastedToday(state, now = Date.now()) {
   };
 
   // midnight anchor for "today"
-  const midnight = new Date(now);
-  midnight.setHours(0, 0, 0, 0);
-  const dayStart = midnight.getTime();
+  const dayStart = startOfDayTs(now, timeZone);
 
   // only today’s events, sorted, and collapse exact dupes
   const all = [...baseline, ...userEvents]

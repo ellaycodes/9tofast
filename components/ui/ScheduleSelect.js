@@ -14,6 +14,7 @@ import ErrorText from "./ErrorText";
 import { AuthContext } from "../../store/auth-context";
 import { setFastingScheduleDb } from "../../firebase/fasting.db.js";
 import { logWarn } from "../../util/logger";
+import { getResolvedTimeZone } from "../../util/timezone";
 
 function ScheduleSelect({ settings, setWizardState, token, userName, uid }) {
   const { schedule, setSchedule } = useFasting();
@@ -34,6 +35,8 @@ function ScheduleSelect({ settings, setWizardState, token, userName, uid }) {
   const initialEnd = schedule && schedule.end ? schedule.end : defaultEnd;
   const initialFastingHours =
     schedule && schedule.fastingHours != null ? schedule.fastingHours : 8;
+  const initialTimeZone =
+    schedule && schedule.timeZone ? schedule.timeZone : getResolvedTimeZone();
 
   const [showCustom, setShowCustom] = useState(initialIsCustom);
   const [showStartPicker, setShowStartPicker] = useState(false);
@@ -43,6 +46,7 @@ function ScheduleSelect({ settings, setWizardState, token, userName, uid }) {
     end: initialEnd,
     fastingHours: initialFastingHours,
     label: schedule && schedule.label ? schedule.label : undefined,
+    timeZone: initialTimeZone,
   });
   const [highlightedLabel, setHighlightedLabel] = useState(null);
 
@@ -53,6 +57,7 @@ function ScheduleSelect({ settings, setWizardState, token, userName, uid }) {
       end: schedule.end,
       fastingHours: calcDuration({ start: schedule.start, end: schedule.end })
         .fastingHours,
+      timeZone: initialTimeZone,
     };
 
     setChosenSchedule(chosenPreset);
@@ -129,7 +134,7 @@ function ScheduleSelect({ settings, setWizardState, token, userName, uid }) {
   }
 
   async function onSave(settings) {
-    setSchedule(chosenSchedule);
+    await setSchedule(chosenSchedule);
 
     const userId = uid || authCxt.uid;
     if (userId) {

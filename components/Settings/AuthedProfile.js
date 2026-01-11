@@ -41,7 +41,7 @@ function AuthedProfile({ emailAddress }) {
       await statsLogout();
       authCxt.logout();
       setThemeName("Original", true);
-      setSchedule(null);
+      await setSchedule(null, { anchor: false });
       await premiumLogOut();
     } catch (error) {
       const message =

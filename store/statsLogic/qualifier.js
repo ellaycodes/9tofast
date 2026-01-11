@@ -1,26 +1,21 @@
-import { differenceInCalendarDays, parseISO } from "date-fns";
+import { addDaysInTimeZone, formatDayString } from "../../util/timezone";
 
-export function dayQualifier(today, lastStreakDate) {
+export function dayQualifier(today, lastStreakDate, timeZone) {
   if (!lastStreakDate) return "missed";
 
-  const todayISO = parseISO(today);
-  const lastStreakDateISO = parseISO(lastStreakDate);
-
-  const diff = differenceInCalendarDays(todayISO, lastStreakDateISO);
-
-  if (diff === 0) {
+  if (today === lastStreakDate) {
     return "same";
   }
 
-  if (diff === 1) {
+  const yesterday = formatDayString(
+    addDaysInTimeZone(Date.now(), -1, timeZone),
+    timeZone
+  );
+  if (lastStreakDate === yesterday) {
     return "yesterday";
   }
 
-  if (diff > 1) {
-    return "missed";
-  }
-
-  return "same";
+  return "missed";
 }
 
 export function fastingQualifier(fastedHours, fastingGoalHours) {
