@@ -165,13 +165,13 @@ export default function App() {
 
   return (
     <>
-      <PremiumProvider>
-        <AuthContextProvider>
+      <AuthContextProvider>
+        <PremiumProvider>
           <AppThemeContextProvider>
             <InnerApp />
           </AppThemeContextProvider>
-        </AuthContextProvider>
-      </PremiumProvider>
+        </PremiumProvider>
+      </AuthContextProvider>
     </>
   );
 }

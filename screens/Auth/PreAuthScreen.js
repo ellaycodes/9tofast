@@ -216,9 +216,9 @@ function PreAuthScreen({ navigation }) {
           <View style={{ width: 12 }} />
           Continue with Email
         </PrimaryButton>
-        <PrimaryButton lowlight onPress={signInAnonymouslyHandler}>
+        {/* <PrimaryButton lowlight onPress={signInAnonymouslyHandler}>
           Continue without signing up
-        </PrimaryButton>
+        </PrimaryButton> */}
       </View>
       <SubtitleText size={"m"} muted>
         By continuing, you agree to our{" "}
