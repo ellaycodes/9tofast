@@ -29,7 +29,7 @@ export default function MainProgess({
     <>
       <Title>{dt.format(day.date, "d MMM")}</Title>
       <AnimatedCircularProgress
-        key={`${day.date}-${day.percent}`}
+        key={dt.format(day.date, "yyyy-MM-dd")}
         size={250}
         width={50}
         fill={day.percent}

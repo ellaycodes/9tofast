@@ -8,20 +8,8 @@ import Section from "../../components/ui/Section";
 import StatsCard from "../../components/ui/StatsCard";
 import { StatsContext } from "../../store/statsLogic/stats-context";
 import OverrideStreakModal from "../../modals/OverrideStreakModal";
-import * as Notifications from "expo-notifications";
 import SectionTitle from "../../components/Settings/SectionTitle";
 import { useNavigation } from "@react-navigation/native";
-
-Notifications.setNotificationHandler({
-  handleNotification: async () => {
-    return {
-      shouldPlaySound: true,
-      shouldSetBadge: true,
-      shouldShowBanner: true,
-      shouldShowList: true,
-    };
-  },
-});
 
 export default function Stats() {
   const { theme } = useContext(AppThemeContext);

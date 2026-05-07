@@ -16,12 +16,15 @@ function SchedulePickerModal({
 
   const dateTimeValue = timeStringToDate(timeDate);
 
+  const is24Hour =
+    Intl.DateTimeFormat(undefined, { hour: "numeric" }).resolvedOptions().hour12 === false;
+
   if (Platform.OS === "android") {
     if (showPicker) {
       DateTimePickerAndroid.open({
         mode: "time",
         value: dateTimeValue,
-        is24Hour: false,
+        is24Hour,
         onChange: (event, selectedDate) => {
           if (event.type === "set") {
             onChange(event, selectedDate);

@@ -15,29 +15,12 @@ import PrimaryButton from "../../components/ui/PrimaryButton";
 import { prefetchAvatars } from "../../assets/avatars";
 import { stateAt } from "../../store/fastingLogic/scheduler";
 import Streaks from "../../components/Home/Streaks.js";
-import * as Notifications from "expo-notifications";
 // import { usePremium } from "../../hooks/usePremium.js";
 import FlatButton from "../../components/ui/FlatButton.js";
 import { usePremium } from "../../store/premium-context.js";
 
-export async function allowNotificationsAsync() {
-  const settings = await Notifications.getPermissionsAsync();
-
-  if (
-    !settings.granted &&
-    settings.ios?.status !== Notifications.IosAuthorizationStatus.PROVISIONAL
-  ) {
-    settings = await Notifications.requestPermissionsAsync();
-  }
-
-  return (
-    settings.granted ||
-    settings.ios?.status === Notifications.IosAuthorizationStatus.PROVISIONAL
-  );
-}
-
 function TimerScreen({ navigation }) {
-  const { schedule, isFasting, events, hoursFastedToday } = useFasting();
+  const { schedule, isFasting, hoursFastedToday } = useFasting();
   const { theme, themeName } = useAppTheme();
   const memoStyle = useMemo(() => styles(theme, themeName), [theme, themeName]);
   const [readout, setReadout] = useState(null);
@@ -71,7 +54,7 @@ function TimerScreen({ navigation }) {
         getRandomOffScheduleTitle(!fasting && inside ? "eating" : "fasting")
       );
     }
-  }, [offSchedule, fasting, inside, events, hoursFastedToday]);
+  }, [offSchedule, fasting, inside, hoursFastedToday]);
 
   const timeUnits = readout ? Object.keys(readout.units).slice(0, -1) : [];
 

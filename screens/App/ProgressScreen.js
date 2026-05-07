@@ -12,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 import { useAppTheme } from "../../store/app-theme-context";
 import { useFasting } from "../../store/fastingLogic/fasting-context";
+import * as session from "../../store/fastingLogic/fasting-session";
 
 import WeeklyDonut from "../../components/progress/WeeklyDonut";
 
@@ -27,8 +28,8 @@ import {
 function ProgressScreen() {
   const { theme } = useAppTheme();
   const { weeklyStats, refreshWeeklyStats } = useWeeklyStats();
-  const { schedule, hoursFastedToday, events } = useFasting();
-  const [, setNow] = useState(Date.now());
+  const { schedule, state: fastingState } = useFasting();
+  const [now, setNow] = useState(() => Date.now());
   const [openModal, setOpenModal] = useState(false);
   const [selectedDay, setSelectedDay] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -37,6 +38,10 @@ function ProgressScreen() {
   const navigation = useNavigation();
 
   const memoStyle = useMemo(() => styles(theme), [theme]);
+  const hoursFastedToday = useMemo(
+    () => session.hoursFastedToday(fastingState || {}, now),
+    [fastingState, now]
+  );
 
   const handleWeekChange = useCallback(
     (start) => {
@@ -122,7 +127,7 @@ function ProgressScreen() {
             percent,
             hoursFastedToday,
             fastingHours,
-            events,
+            events: fastingState?.events ?? [],
             date: new Date(),
           }}
           fastingHours={fastingHours}

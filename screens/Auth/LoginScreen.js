@@ -38,7 +38,7 @@ function LoginScreen() {
       const displayName = userData?.displayName ?? "";
 
       authCxt.authenticate(token, displayName, uid);
-      authCxt.setEmailAddress(userData.email);
+      authCxt.setEmailAddress(userData?.email ?? "");
       authCxt.setOnboarded(true);
 
       await premiumLogIn(user.uid);

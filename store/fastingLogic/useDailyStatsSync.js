@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import * as session from "./fasting-session";
-import * as events from "./events";
+import { EVENT } from "./events";
 import {
   addDaysInTimeZone,
   formatDayString,
@@ -9,158 +9,98 @@ import {
 } from "../../util/timezone";
 
 /**
- * Synchronizes daily fasting data.
- * Handles:
- *  - Detecting new days (midnight rollover)
- *  - Uploading previous day’s fasting stats
- *  - Carrying over ongoing fasts into the new day
- *  - Regularly persisting the current fasting state
+ * Detects midnight rollovers, uploads the previous day's fasting stats,
+ * and carries overnight fasts into the new day.
+ *
+ * Parameters
+ *   fastingState       – live state from the reducer
+ *   uploadDailyStats   – (day, hours, scheduledHours, events, meta) → Promise
+ *   dispatch           – reducer dispatch
  */
-
 export default function useDailyStatsSync(
-  fastingState, // Current fasting state from your app
-  uploadDailyStats, // Function to send yesterday’s stats to Firebase (locked)
-  saveDailyEvents, // Function to overwrite local AsyncStorage events
-  saveLocalState, // Function to persist the full fasting state locally
-  dispatch // Redux-style dispatcher for in-memory updates
+  fastingState,
+  uploadDailyStats,
+  dispatch
 ) {
-  // Keeps track of the last day that was processed
   const lastProcessedDay = useRef();
-  const lastSavedHash = useRef(null);
-  const latestStateRef = useRef(fastingState);
 
   useEffect(() => {
-    latestStateRef.current = fastingState;
-  }, [fastingState]);
-
-  const deriveLastEventDay = (eventsList, fallbackDay, timeZone) => {
-    if (!eventsList?.length) return fallbackDay;
-    const latestEvent = eventsList[eventsList.length - 1];
-    return formatDayString(latestEvent.ts, timeZone);
-  };
-
-  useEffect(() => {
-    if (fastingState.loading) return; // Skip until data is loaded
+    if (fastingState.loading) return;
 
     const now = new Date();
     const timeZone = getScheduleTimeZone(fastingState.schedule);
     const startOfToday = startOfDayTs(now, timeZone);
     const currentDayString = formatDayString(now, timeZone);
 
+    // --- Seed lastProcessedDay on first run ---
     if (!lastProcessedDay.current) {
-      lastProcessedDay.current = deriveLastEventDay(
-        fastingState.events,
-        currentDayString,
-        timeZone
+      const hasOldEvents = (fastingState.events || []).some(
+        (e) => (e?.ts ?? 0) < startOfToday
       );
+      if (hasOldEvents) {
+        // Events from a previous day exist → trigger rollover once
+        lastProcessedDay.current = formatDayString(
+          addDaysInTimeZone(new Date(startOfToday), -1, timeZone),
+          timeZone
+        );
+      } else {
+        lastProcessedDay.current = currentDayString;
+      }
     }
 
-    // // --- 2️⃣ Handle midnight rollover (when a new day starts)
-    const hasEventsBeforeToday = (fastingState.events || []).some((event) => {
-      const ts = event?.ts ?? 0;
-      return ts < startOfToday;
-    });
-    const newDayStarted =
-      hasEventsBeforeToday || lastProcessedDay.current !== currentDayString;
+    // Rollover fires exactly once when the calendar day changes
+    if (lastProcessedDay.current === currentDayString) return;
 
     (async () => {
-      if (newDayStarted) {
-        const previousDayDate = addDaysInTimeZone(startOfToday, -1, timeZone);
-        const previousDayString = formatDayString(previousDayDate, timeZone);
-        const previousDayStart = startOfDayTs(previousDayDate, timeZone);
-        const yesterdayEvents = (fastingState.events || []).filter(
-          (event) => (event?.ts ?? 0) < startOfToday
-        );
+      const previousDayDate = addDaysInTimeZone(
+        new Date(startOfToday),
+        -1,
+        timeZone
+      );
+      const previousDayString = formatDayString(previousDayDate, timeZone);
+      const previousDayStart = startOfDayTs(previousDayDate, timeZone);
 
-        // Calculate how long the user fasted yesterday
-        const hoursFastedYesterday = session.hoursFastedToday(
-          fastingState,
-          startOfToday - 1
-        );
+      // Calculate hours fasted yesterday (last ms of yesterday as "now")
+      const hoursFastedYesterday = session.hoursFastedToday(
+        fastingState,
+        startOfToday - 1
+      );
 
-        // Get scheduled fasting goal for that day
-        const scheduledHours = fastingState.schedule?.fastingHours ?? undefined;
+      const scheduledHours = fastingState.schedule?.fastingHours ?? undefined;
 
-        // Upload previous day’s fasting stats to Firebase
-        await uploadDailyStats(
-          previousDayString,
-          hoursFastedYesterday,
-          scheduledHours,
-          yesterdayEvents,
-          { timeZone, dayStartUtc: previousDayStart },
-          { skipIfUploaded: true }
-        );
+      const yesterdayEvents = (fastingState.events || []).filter(
+        (e) => (e?.ts ?? 0) < startOfToday
+      );
 
-        // --- 3️⃣ Build new day’s event list
-        // Keep only today’s events (starting from midnight)
-        let todaysEvents = (fastingState.events || []).filter(
-          (event) => (event?.ts ?? 0) >= startOfToday
-        );
+      // Upload the previous day's summary
+      await uploadDailyStats(
+        previousDayString,
+        hoursFastedYesterday,
+        scheduledHours,
+        yesterdayEvents,
+        { timeZone, dayStartUtc: previousDayStart }
+      ).catch((e) => console.warn("[daily-sync] upload failed", e));
 
-        // If the user was still fasting at midnight, insert a “START” event at midnight
-        const wasFastingOvernight = session.isFasting(yesterdayEvents);
-        const hasMidnightStart = todaysEvents.some(
-          (event) =>
-            (event?.ts ?? 0) === startOfToday &&
-            event?.type === events.EVENT.START
-        );
+      // Build today's starting events
+      let todaysEvents = (fastingState.events || []).filter(
+        (e) => (e?.ts ?? 0) >= startOfToday
+      );
 
-        if (wasFastingOvernight && !hasMidnightStart) {
-          const midnightStartEvent = {
-            type: events.EVENT.START,
-            ts: startOfToday,
-            trigger: events.EVENT.TRIGGER,
-          };
-          todaysEvents = [midnightStartEvent, ...todaysEvents];
-        }
+      // If the user was fasting at midnight, insert an explicit START at midnight
+      const wasFastingOvernight = session.isFasting(yesterdayEvents);
+      const hasMidnightStart = todaysEvents.some(
+        (e) => e?.ts === startOfToday && e?.type === EVENT.START
+      );
 
-        // --- 4️⃣ Save the cleaned event list
-        await saveDailyEvents(todaysEvents);
-        dispatch({ type: "SET_EVENTS", payload: todaysEvents });
-
-        // Update tracker to prevent re-processing the same day
-        const stateToSave = { ...fastingState, events: todaysEvents };
-        delete stateToSave.hours;
-        await saveLocalState(stateToSave);
-        lastSavedHash.current = JSON.stringify(stateToSave);
-
-        lastProcessedDay.current = currentDayString;
-        return;
+      if (wasFastingOvernight && !hasMidnightStart) {
+        todaysEvents = [
+          { type: EVENT.START, ts: startOfToday, trigger: "auto" },
+          ...todaysEvents,
+        ];
       }
 
-      // --- 5️⃣ During the same day, persist fasting state periodically
-      // const stateToSave = { ...fastingState };
-      // delete stateToSave.hours; // 'hours' can always be recalculated
-      // await saveLocalState(stateToSave);
+      dispatch({ type: "SET_EVENTS", payload: todaysEvents });
+      lastProcessedDay.current = currentDayString;
     })();
-  }, [
-    fastingState,
-    saveLocalState,
-    uploadDailyStats,
-    saveDailyEvents,
-    dispatch,
-  ]);
-
-  useEffect(() => {
-    if (fastingState.loading) return;
-
-    let isMounted = true;
-    const persist = async () => {
-      if (!isMounted) return;
-      const stateToSave = { ...latestStateRef.current };
-      delete stateToSave.hours; // 'hours' can always be recalculated
-      const serialized = JSON.stringify(stateToSave);
-      if (lastSavedHash.current === serialized) return;
-      await saveLocalState(stateToSave);
-      lastSavedHash.current = serialized;
-    };
-
-    persist();
-    const intervalId = setInterval(persist, 30_000);
-
-    return () => {
-      isMounted = false;
-      clearInterval(intervalId);
-    };
-  }, [fastingState.loading, saveLocalState]);
+  }, [fastingState, uploadDailyStats, dispatch]);
 }

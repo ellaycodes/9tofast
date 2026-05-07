@@ -8,14 +8,12 @@ import {
   timeStringToZonedTs,
 } from "../../util/timezone";
 
-//helper
 function normalizeWindow(schedule, nowTs = Date.now()) {
   const timeZone = getScheduleTimeZone(schedule);
   const base = new Date(startOfDayTs(nowTs, timeZone));
   let startTs = timeStringToZonedTs(schedule.start, base, timeZone);
   let endTs = timeStringToZonedTs(schedule.end, base, timeZone);
 
-  // If end is not after start, treat end as next-day
   if (endTs <= startTs) {
     const nextDayBase = addDaysInTimeZone(base, 1, timeZone);
     endTs = timeStringToZonedTs(schedule.end, nextDayBase, timeZone);
@@ -24,49 +22,48 @@ function normalizeWindow(schedule, nowTs = Date.now()) {
   return { startTs, endTs };
 }
 
-//helper
 function stateAndNextBoundary(schedule, nowTs = Date.now()) {
   const { startTs, endTs } = normalizeWindow(schedule, nowTs);
   const timeZone = getScheduleTimeZone(schedule);
-
   const inEating = nowTs >= startTs && nowTs < endTs;
   const state = inEating ? "eating" : "fasting";
 
-  // Compute the next boundary timestamp
   let nextBoundaryTs;
   if (inEating) {
-    nextBoundaryTs = endTs; // eating -> fasting at end
+    nextBoundaryTs = endTs;
   } else {
-    // fasting until next start; if we are after endTs, next start is tomorrow
-    const startTodayOrYesterday = startTs; // start for this base day
     nextBoundaryTs =
-      nowTs < startTodayOrYesterday
-        ? startTodayOrYesterday
-        : addDaysInTimeZone(startTodayOrYesterday, 1, timeZone).getTime();
+      nowTs < startTs
+        ? startTs
+        : addDaysInTimeZone(startTs, 1, timeZone).getTime();
   }
 
   return { state, nextBoundaryTs };
 }
 
-//helper
 function eventAtBoundary(prevState) {
   return prevState === "eating" ? EVENT.START : EVENT.END;
 }
 
+/**
+ * Watches the fasting schedule and fires START/END events at each boundary.
+ * Also reconciles on mount and on every foreground-return so the app
+ * never drifts out of sync with the schedule.
+ *
+ * onAutoEvent(ts, type, trigger) – called instead of dispatch when provided.
+ */
 export default function useScheduleBoundaryScheduler(
   schedule,
   events,
   dispatch,
-  anchorTs,
   onAutoEvent
 ) {
   const timeoutRef = useRef(null);
   const appStateRef = useRef(AppState.currentState);
   const lastEmitRef = useRef({ ts: 0, type: null });
-  const effectiveAnchor =
-    anchorTs !== undefined && anchorTs !== null ? anchorTs : 0;
+  const reconcileNowRef = useRef(null);
+  const armTimerRef = useRef(null);
 
-  // Cancel any pending timeout
   function clearTimer() {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
@@ -76,24 +73,19 @@ export default function useScheduleBoundaryScheduler(
 
   function armTimer() {
     if (!schedule) return;
-    // if (!anchorTs) return;
 
     const now = Date.now();
     const { state, nextBoundaryTs } = stateAndNextBoundary(schedule, now);
-    // const target = Math.max(nextBoundaryTs, anchorTs);
-    const target = Math.max(nextBoundaryTs, effectiveAnchor);
-    const delay = Math.max(0, target - now);
+    const delay = Math.max(0, nextBoundaryTs - now);
 
     clearTimer();
     timeoutRef.current = setTimeout(() => {
-      // Recalculate at fire time for accuracy
-      const before = state; // what we computed when arming
+      const before = state;
       const after = stateAndNextBoundary(schedule, Date.now()).state;
       if (before !== after) {
         const type = eventAtBoundary(before);
         const ts = nextBoundaryTs;
 
-        // Deduplicate by ts+type in case of quick re-arms
         if (
           lastEmitRef.current.ts !== ts ||
           lastEmitRef.current.type !== type
@@ -111,33 +103,26 @@ export default function useScheduleBoundaryScheduler(
         }
       }
 
-      // Always re-arm for the next boundary
       armTimer();
     }, delay);
   }
 
-  // On mount or when schedule changes, ensure state matches current time.
-  // If out of sync, emit a corrective event immediately.
   function reconcileNow() {
-    // if (!anchorTs || Date.now() < anchorTs) return;
-    if (Date.now() < effectiveAnchor) return;
     if (!schedule) return;
     const now = Date.now();
     const { state } = stateAndNextBoundary(schedule, now);
 
-    // Infer current app state from your store using last event in `events`
-    const hasEvents = Array.isArray(events) && events.length > 0;
-    const last = hasEvents ? events[events.length - 1] : undefined;
-    const lastType = last && last.type ? last.type : undefined;
-    const isFastingInStore = lastType === EVENT.START || lastType === "start";
-
+    const last = Array.isArray(events) && events.length > 0
+      ? events[events.length - 1]
+      : undefined;
+    const isFastingInStore =
+      last?.type === EVENT.START || last?.type === "start";
     const shouldBeFasting = state === "fasting";
 
     if (shouldBeFasting !== isFastingInStore) {
-      // Flip to the correct state right now
       const type = shouldBeFasting ? EVENT.START : EVENT.END;
       if (onAutoEvent) {
-        onAutoEvent(type, now, "auto");
+        onAutoEvent(now, type, "auto");
       } else {
         dispatch({
           type: type === EVENT.START ? "START_FAST" : "END_FAST",
@@ -149,44 +134,41 @@ export default function useScheduleBoundaryScheduler(
     }
   }
 
+  // Always keep refs current so the once-registered AppState listener
+  // calls the latest closure (fresh schedule + events) on foreground-return.
+  reconcileNowRef.current = reconcileNow;
+  armTimerRef.current = armTimer;
+
+  // Derived key so the effect re-runs when the last event changes
+  // (e.g. after midnight rollover or a manual start/stop).
+  const lastEventKey =
+    Array.isArray(events) && events.length > 0
+      ? `${events[events.length - 1].ts}:${events[events.length - 1].type}`
+      : "";
+
   useEffect(() => {
     reconcileNow();
     armTimer();
-
     return () => clearTimer();
   }, [
     schedule ? schedule.start : undefined,
     schedule ? schedule.end : undefined,
-    effectiveAnchor,
     onAutoEvent,
+    lastEventKey,
   ]);
 
-  // Re-arm when returning to foreground to avoid missing boundaries
+  // Re-arm on foreground return so missed boundaries are corrected immediately.
   useEffect(() => {
     const sub = AppState.addEventListener("change", (next) => {
       const prev = appStateRef.current;
       appStateRef.current = next;
       if (prev.match(/inactive|background/) && next === "active") {
-        reconcileNow();
-        armTimer();
+        reconcileNowRef.current?.();
+        armTimerRef.current?.();
       }
     });
     return () => sub.remove();
   }, []);
-}
-
-export function baselineForDay(schedule, nowTs = Date.now()) {
-  if (!schedule) return [];
-  const timeZone = getScheduleTimeZone(schedule);
-  const dayStart = startOfDayTs(nowTs, timeZone);
-  const { startTs, endTs } = normalizeWindow(schedule, nowTs);
-  const events = [];
-  // fasting from midnight until eating start
-  events.push({ type: "start", ts: dayStart, trigger: "auto" });
-  events.push({ type: "end", ts: startTs, trigger: "auto" });
-  // if eating already ended by now, fasting resumes at endTs (which may be today)
-  if (endTs < nowTs) events.push({ type: "start", ts: endTs, trigger: "auto" });
-  return events;
 }
 
 export function useUiTicker(periodMs = 250) {
@@ -202,7 +184,7 @@ export function useUiTicker(periodMs = 250) {
   return tickRef.current;
 }
 
-// returns "eating" or "fasting" at a given time
+// Returns "eating" or "fasting" at a given timestamp for a given schedule.
 export function stateAt(schedule, atTs) {
   const timeZone = getScheduleTimeZone(schedule);
   const base = new Date(startOfDayTs(atTs, timeZone));
@@ -212,80 +194,5 @@ export function stateAt(schedule, atTs) {
     const nextDayBase = addDaysInTimeZone(base, 1, timeZone);
     endTs = timeStringToZonedTs(schedule.end, nextDayBase, timeZone);
   }
-
-  const inEating = atTs >= startTs && atTs < endTs;
-  return inEating ? "eating" : "fasting";
-}
-
-export function baselineSinceAnchor(
-  schedule,
-  anchorTs,
-  nowTs = Date.now(),
-  userEvents = []
-) {
-  if (!schedule || !anchorTs) return [];
-  if (nowTs < anchorTs) return [];
-
-  const events = [];
-  const anchorEvent = userEvents.find((event) => event.ts === anchorTs);
-  const initial = anchorEvent
-    ? anchorEvent.type === EVENT.START
-      ? "fasting"
-      : "eating"
-    : stateAt(schedule, anchorTs);
-
-  // seed a synthetic flip at the anchor to set state
-  const syntheticType = initial === "fasting" ? EVENT.START : EVENT.END;
-
-  // seed a synthetic flip at the anchor unless user already logged one
-  const hasUserEventAtAnchor = userEvents.some((e) => e.ts === anchorTs);
-  if (!hasUserEventAtAnchor) {
-    events.push({ type: syntheticType, ts: anchorTs, trigger: "auto" });
-  }
-
-  // add the first boundary after anchor, if it is before now
-  // compute next boundary after anchor
-  const next = nextBoundaryAfter(schedule, anchorTs);
-  if (next && next > anchorTs && next <= nowTs) {
-    events.push({
-      type: initial === "eating" ? EVENT.START : EVENT.END,
-      ts: next,
-      trigger: "auto",
-    });
-  }
-
-  // optional: if two boundaries have passed since anchor, add the second one
-  const maybeSecond = next ? nextBoundaryAfter(schedule, next + 1) : null;
-  if (maybeSecond && maybeSecond <= nowTs) {
-    events.push({
-      type: initial === "eating" ? EVENT.END : EVENT.START,
-      ts: maybeSecond,
-      trigger: "auto",
-    });
-  }
-
-  return events.sort((a, b) => a.ts - b.ts);
-}
-
-// helper to get the next boundary strictly after a timestamp
-export function nextBoundaryAfter(schedule, afterTs) {
-  const timeZone = getScheduleTimeZone(schedule);
-  const base = new Date(startOfDayTs(afterTs, timeZone));
-  let startTs = timeStringToZonedTs(schedule.start, base, timeZone);
-  let endTs = timeStringToZonedTs(schedule.end, base, timeZone);
-  if (endTs <= startTs) {
-    const nextDayBase = addDaysInTimeZone(base, 1, timeZone);
-    endTs = timeStringToZonedTs(schedule.end, nextDayBase, timeZone);
-  }
-
-  const nextDayBase = addDaysInTimeZone(base, 1, timeZone);
-  const nextStartTs = timeStringToZonedTs(
-    schedule.start,
-    nextDayBase,
-    timeZone
-  );
-  const nextEndTs = timeStringToZonedTs(schedule.end, nextDayBase, timeZone);
-  const candidates = [startTs, endTs, nextStartTs, nextEndTs];
-  const next = candidates.filter((ts) => ts > afterTs).sort((a, b) => a - b)[0];
-  return next !== undefined ? next : null;
+  return atTs >= startTs && atTs < endTs ? "eating" : "fasting";
 }

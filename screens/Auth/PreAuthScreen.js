@@ -233,7 +233,7 @@ function PreAuthScreen({ navigation }) {
         <FlatButton
           inline
           size={"m"}
-          onPress={() => Linking.openURL("https://9tofast.netlify.app/privacy")}
+          onPress={() => Linking.openURL("https://9tofast.netlify.app/privacy-policy")}
         >
           Privacy Policy
         </FlatButton>

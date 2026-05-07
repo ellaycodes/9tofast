@@ -24,13 +24,7 @@ export default function StartTimerSlide({
   const { theme } = useAppTheme();
   const memoStyle = useMemo(() => styles(theme), [theme]);
   const authCxt = useContext(AuthContext);
-  const {
-    setSchedule,
-    startFast,
-    schedule,
-    endFast,
-    setBaselineAnchor
-  } = useFasting();
+  const { setSchedule, startFast, schedule, endFast } = useFasting();
 
   const [started, setStarted] = useState(false);
   const [readout, setReadout] = useState("\u00A0"); // non‑breaking space as placeholder
@@ -72,7 +66,6 @@ export default function StartTimerSlide({
 
     const run = async () => {
       const now = Date.now();
-      setBaselineAnchor(now);
 
       // decide current window and flip once
       const timeZone = getScheduleTimeZone(schedule);

@@ -28,8 +28,16 @@ import LoadingOverlay from "./components/ui/LoadingOverlay";
 
 import { auth, firebaseConfig } from "./firebase/app";
 import { getUser } from "./firebase/users.db.js";
+import { useFasting } from "./store/fastingLogic/fasting-context";
 
-import { scheduleStreakNotifications } from "./notifications/streakNotifications.js";
+import {
+  scheduleStreakNotifications,
+  scheduleStreakRiskNotification,
+  cancelStreakRiskNotification,
+  scheduleEatingWindowNotification,
+  cancelEatingWindowNotification,
+  allowNotificationsAsync,
+} from "./notifications/index.js";
 import MobileAdsConfig from "./components/monetising/AdsConfig.js";
 import { PremiumProvider, usePremium } from "./store/premium-context.js";
 
@@ -47,7 +55,8 @@ function Navigator() {
   const authCxt = useContext(AuthContext);
   const { premiumLogIn, premiumLogOut } = usePremium();
   const [loading, setLoading] = useState(true);
-  const { loadStreak } = useContext(StatsContext);
+  const { loadStreak, currentStreak } = useContext(StatsContext);
+  const { schedule, isFasting } = useFasting();
 
   useEffect(() => {
     const timeout = setTimeout(() => setLoading(false), 8000);
@@ -116,22 +125,39 @@ function Navigator() {
 
   useEffect(() => {
     async function setupNotifications() {
-      const { status } = await Notifications.requestPermissionsAsync();
-      if (status !== "granted") return;
-
-      const alreadyScheduled = await AsyncStorage.getItem(
-        "streakNotifsScheduled"
-      );
-      if (alreadyScheduled) return;
-
+      const granted = await allowNotificationsAsync();
+      if (!granted) return;
       await scheduleStreakNotifications(["08:00", "20:00"]);
-      await AsyncStorage.setItem("streakNotifsScheduled", "true");
     }
 
     if (authCxt.isAuthed && authCxt.onboarded) {
       setupNotifications();
     }
   }, [authCxt.isAuthed, authCxt.onboarded]);
+
+  useEffect(() => {
+    if (!authCxt.isAuthed || !authCxt.onboarded || !schedule) {
+      cancelStreakRiskNotification();
+      return;
+    }
+    if (currentStreak >= 3) {
+      scheduleStreakRiskNotification(schedule);
+    } else {
+      cancelStreakRiskNotification();
+    }
+  }, [currentStreak, schedule, authCxt.isAuthed, authCxt.onboarded]);
+
+  useEffect(() => {
+    if (!authCxt.isAuthed || !authCxt.onboarded || !schedule) {
+      cancelEatingWindowNotification();
+      return;
+    }
+    if (isFasting()) {
+      scheduleEatingWindowNotification(schedule);
+    } else {
+      cancelEatingWindowNotification();
+    }
+  }, [schedule, isFasting, authCxt.isAuthed, authCxt.onboarded]);
 
   if (loading) {
     return (

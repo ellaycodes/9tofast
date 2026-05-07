@@ -10,18 +10,20 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AppState } from "react-native";
 import useFastingPersistence, {
-  getLastUploadedDayKey,
+  getStateStorageKey,
 } from "./useFastingPersistence.js";
 import * as session from "./fasting-session";
 import * as events from "./events";
 import useScheduleBoundaryScheduler from "./scheduler";
 import useFastingLoader from "./useFastingLoader";
 import useDailyStatsSync from "./useDailyStatsSync";
-import { buildCurrentDayStats } from "./useFastingPersistence.js";
 import { emitWeeklyStatsRefresh } from "./weeklyStatsEvents";
 import { getResolvedTimeZone } from "../../util/timezone";
 import { auth } from "../../firebase/app";
-import { setFastingStateDb } from "../../firebase/fasting.db.js";
+import {
+  setFastingStateDb,
+  setFastingScheduleDb,
+} from "../../firebase/fasting.db.js";
 
 export const FastingContext = createContext({
   loading: true,
@@ -30,7 +32,6 @@ export const FastingContext = createContext({
   state: null,
   hoursFastedToday: null,
   setSchedule: async () => {},
-  setBaselineAnchor: () => {},
   startFast: async () => {},
   endFast: async () => {},
   clearFast: () => {},
@@ -51,9 +52,6 @@ function reducer(state, action) {
     case "END_FAST":
       return events.endFast(state, action.trigger, action.payload);
 
-    case "SET_BASELINE_ANCHOR":
-      return { ...state, baselineAnchorTs: action.payload };
-
     case "CLEAR_ALL":
       return session.clearAll();
 
@@ -68,112 +66,78 @@ function reducer(state, action) {
 export default function FastingContextProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, session.getInitialState());
   const stateRef = useRef(state);
-  const uploadLock = useRef(false);
-  const lastUploadedDayRef = useRef(null);
-  const { load, persist, addFastingEvent, addDailyStats, flushDailyEvents } =
-    useFastingPersistence();
+
+  const { load, uploadDailyStats } = useFastingPersistence();
 
   useFastingLoader(load, dispatch);
 
-  const uploadDailyStatsLocked = useCallback(
-    async (
-      day,
-      hours,
-      scheduleHours,
-      eventsList = [],
-      metadata = {},
-      options = { skipIfUploaded: false }
-    ) => {
-      if (uploadLock.current) return;
-      if (options.skipIfUploaded && lastUploadedDayRef.current === null) {
-        const uid = auth.currentUser?.uid;
-        lastUploadedDayRef.current = await AsyncStorage.getItem(
-          getLastUploadedDayKey(uid)
-        );
-      }
-      if (options.skipIfUploaded && lastUploadedDayRef.current === day) return;
-
-      uploadLock.current = true;
-      try {
-        await addDailyStats(day, hours, scheduleHours, eventsList, metadata);
-        lastUploadedDayRef.current = day;
-        emitWeeklyStatsRefresh();
-      } finally {
-        uploadLock.current = false;
-      }
-    },
-    [addDailyStats]
-  );
-
-  useDailyStatsSync(
-    state,
-    uploadDailyStatsLocked,
-    flushDailyEvents,
-    persist,
-    dispatch
-  );
-
+  // Keep stateRef current for use in callbacks without creating stale closures
   useEffect(() => {
     stateRef.current = state;
   }, [state]);
 
+  // --- Auto-save: write to Firestore + AsyncStorage on every meaningful change ---
+  useEffect(() => {
+    if (state.loading) return;
+    const uid = auth.currentUser?.uid || null;
+    const toSave = { schedule: state.schedule, events: state.events };
+
+    if (uid) {
+      setFastingStateDb(uid, toSave).catch((e) =>
+        console.warn("[fasting] save state failed", e)
+      );
+    }
+    AsyncStorage.setItem(
+      getStateStorageKey(uid),
+      JSON.stringify(toSave)
+    ).catch(console.warn);
+  }, [state.events, state.schedule]);
+
+  // --- Daily stats snapshot helpers ---
   const uploadCurrentDaySnapshot = useCallback(
     async (overrideState) => {
-      const baseState = overrideState || stateRef.current;
-      const snapshot = buildCurrentDayStats(baseState);
-      await uploadDailyStatsLocked(
-        snapshot.day,
-        snapshot.hoursFasted,
-        snapshot.scheduleHours,
-        snapshot.events,
-        {
-          timeZone: snapshot.timeZone,
-          dayStartUtc: snapshot.dayStartUtc,
-        }
-      );
+      if (!auth.currentUser) return;
+      const s = overrideState || stateRef.current;
+      const snapshot = session.buildCurrentDayStats(s);
+      try {
+        await uploadDailyStats(
+          snapshot.day,
+          snapshot.hoursFasted,
+          snapshot.scheduleHours,
+          snapshot.events,
+          { timeZone: snapshot.timeZone, dayStartUtc: snapshot.dayStartUtc }
+        );
+        emitWeeklyStatsRefresh();
+      } catch (e) {
+        console.warn("[fasting] snapshot upload failed", e);
+      }
     },
-    [uploadDailyStatsLocked]
+    [uploadDailyStats]
   );
 
+  // Upload snapshot on app background and on foreground return
   useEffect(() => {
-    const THREE_HOURS_MS = 3 * 60 * 60 * 1000;
-
-    const handleAppStateChange = async (nextState) => {
-      if (nextState === "background" || nextState === "inactive") {
-        await uploadCurrentDaySnapshot();
+    const sub = AppState.addEventListener("change", (next) => {
+      if (next === "background" || next === "inactive" || next === "active") {
+        uploadCurrentDaySnapshot();
       }
-      if (nextState === "active") {
-        // Optional: also sync on returning to foreground
-        await uploadCurrentDaySnapshot();
-      }
-    };
-
-    const sub = AppState.addEventListener("change", handleAppStateChange);
-
-    const intervalId = setInterval(() => {
-      uploadCurrentDaySnapshot().catch((err) => {
-        // optional: log silently
-        console.warn("[fasting-sync] 3hr snapshot failed", err);
-      });
-    }, THREE_HOURS_MS);
-
-    return () => {
-      clearInterval(intervalId);
-      sub.remove();
-    };
+    });
+    return () => sub.remove();
   }, [uploadCurrentDaySnapshot]);
 
-  // One time snapshot once loading completes
-  const initialSnapshotTakenRef = useRef(false);
+  // One-time snapshot once loading completes
+  const initialSnapshotDoneRef = useRef(false);
   useEffect(() => {
-    if (!state.loading && !initialSnapshotTakenRef.current) {
-      initialSnapshotTakenRef.current = true;
-      uploadCurrentDaySnapshot().catch((err) => {
-        console.warn("[fasting-sync] initial snapshot failed", err);
-      });
+    if (!state.loading && !initialSnapshotDoneRef.current) {
+      initialSnapshotDoneRef.current = true;
+      uploadCurrentDaySnapshot();
     }
   }, [state.loading, uploadCurrentDaySnapshot]);
 
+  // --- Midnight rollover ---
+  useDailyStatsSync(state, uploadDailyStats, dispatch);
+
+  // --- Computed values ---
   const hours = useMemo(() => session.hoursFastedToday(state), [state]);
 
   const isFasting = useCallback(
@@ -181,95 +145,59 @@ export default function FastingContextProvider({ children }) {
     [state.events]
   );
 
-  const addEventAndPersist = useCallback(
+  // --- Event dispatchers ---
+  // Used by scheduler auto-events and by startFast/endFast below
+  const dispatchEvent = useCallback(
     async (ts, type, trigger, options = {}) => {
-      const previousEvents = stateRef.current.events.length
-        ? stateRef.current.events[stateRef.current.events.length - 1]
-        : null;
-      const last = previousEvents ? previousEvents.type : undefined;
-      if (!options.allowDuplicateType && last === type) return;
-
-      await addFastingEvent(ts, type, trigger);
-
-      const tempState =
-        type === events.EVENT.START
-          ? events.startFast(stateRef.current, trigger, ts)
-          : events.endFast(stateRef.current, trigger, ts);
+      const last = stateRef.current.events.slice(-1)[0];
+      if (!options.allowDuplicateType && last?.type === type) return;
 
       dispatch({
         type: type === events.EVENT.START ? "START_FAST" : "END_FAST",
         trigger,
         payload: ts,
       });
-
-      await uploadCurrentDaySnapshot(tempState);
-      const uid = auth.currentUser?.uid;
-      if (uid) {
-        await setFastingStateDb(uid, tempState);
-      }
-      return tempState;
     },
-    [addFastingEvent, uploadCurrentDaySnapshot, setFastingStateDb]
+    []
   );
 
   useScheduleBoundaryScheduler(
     state.schedule,
     state.events,
     dispatch,
-    state.baselineAnchorTs || 0,
-    addEventAndPersist
+    dispatchEvent
   );
 
-  async function setSchedule(data, options = {}) {
+  // --- Public API ---
+  async function setSchedule(data) {
     if (!data) {
-      dispatch({ type: "SET_SCHEDULE", payload: data });
+      dispatch({ type: "SET_SCHEDULE", payload: null });
       return;
     }
     const normalized = data.timeZone
       ? data
       : { ...data, timeZone: getResolvedTimeZone() };
-    const previous = stateRef.current.schedule;
-    const scheduleChanged =
-      !previous ||
-      previous.start !== normalized.start ||
-      previous.end !== normalized.end ||
-      previous.fastingHours !== normalized.fastingHours ||
-      previous.timeZone !== normalized.timeZone;
-
-    if (
-      scheduleChanged &&
-      options.anchor !== false &&
-      stateRef.current.events.length
-    ) {
-      const now = Date.now();
-      const lastEvent = stateRef.current.events.length
-        ? stateRef.current.events[stateRef.current.events.length - 1]
-        : null;
-      const lastType = lastEvent?.type;
-      const isFasting = lastType === events.EVENT.START || lastType === "start";
-      const anchorType = isFasting ? events.EVENT.START : events.EVENT.END;
-
-      dispatch({ type: "SET_BASELINE_ANCHOR", payload: now });
-      await addEventAndPersist(now, anchorType, "schedule", {
-        allowDuplicateType: true,
-      });
-    }
 
     dispatch({ type: "SET_SCHEDULE", payload: normalized });
+
+    const uid = auth.currentUser?.uid;
+    if (uid) {
+      setFastingScheduleDb(uid, normalized).catch((e) =>
+        console.warn("[fasting] schedule save failed", e)
+      );
+    }
   }
 
   async function startFast(trigger) {
     const ts = Date.now();
-    return await addEventAndPersist(ts, events.EVENT.START, trigger);
+    await dispatchEvent(ts, events.EVENT.START, trigger);
+    uploadCurrentDaySnapshot();
   }
 
   async function endFast(trigger) {
     const ts = Date.now();
-    return await addEventAndPersist(ts, events.EVENT.END, trigger);
-  }
-
-  function setBaselineAnchor(timestamp) {
-    dispatch({ type: "SET_BASELINE_ANCHOR", payload: timestamp });
+    await dispatchEvent(ts, events.EVENT.END, trigger);
+    uploadCurrentDaySnapshot();
   }
 
   function clearFast() {
@@ -282,11 +210,10 @@ export default function FastingContextProvider({ children }) {
     events: state.events,
     state: state,
     hoursFastedToday: hours,
-    setSchedule: setSchedule,
-    startFast: startFast,
-    endFast: endFast,
-    setBaselineAnchor: setBaselineAnchor,
-    clearFast: clearFast,
+    setSchedule,
+    startFast,
+    endFast,
+    clearFast,
     isFasting: () => isFasting(),
   };
 

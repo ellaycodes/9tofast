@@ -48,6 +48,14 @@ export default function WeeklyDonut({
   // map stats to quick lookup
   const statsMap = useMemo(() => buildStatsMap(weeklyStats), [weeklyStats]);
 
+  // Keep latest-ref copies so the stable FlatList callback is never stale
+  const onWeekChangeRef = useRef(onWeekChange);
+  const refreshWeeklyStatsRef = useRef(refreshWeeklyStats);
+  useEffect(() => {
+    onWeekChangeRef.current = onWeekChange;
+    refreshWeeklyStatsRef.current = refreshWeeklyStats;
+  });
+
   // load current week on mount
   // FlatList onViewableItemsChanged will lazy load other weeks as you scroll
   const onViewableItemsChanged = useRef(({ viewableItems }) => {
@@ -56,8 +64,8 @@ export default function WeeklyDonut({
     const first = firstItem ? firstItem.item : undefined;
 
     if (!first) return;
-    refreshWeeklyStats(first.start, first.end);
-    onWeekChange && onWeekChange(first.start, first.end);
+    refreshWeeklyStatsRef.current?.(first.start, first.end);
+    onWeekChangeRef.current?.(first.start, first.end);
   }).current;
 
   const viewabilityConfig = useRef({

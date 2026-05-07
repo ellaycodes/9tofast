@@ -9,7 +9,7 @@ import {
 import { useAppTheme } from "../store/app-theme-context";
 import FlatButton from "../components/ui/FlatButton";
 import * as dt from "date-fns";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import useWeeklyStats from "../store/fastingLogic/useWeeklyStats";
 import MonthGrid from "../components/progress/MonthGrid";
 import { buildStatsMap } from "../util/progress/stats";
@@ -25,7 +25,6 @@ export default function ProgressCalendarModal({
   const { weeklyStats, refreshWeeklyStats } = useWeeklyStats();
   const { schedule } = useFasting();
   const timeZone = getScheduleTimeZone(schedule);
-  const currentMonthStart = useMemo(() => dt.startOfMonth(new Date()), []);
   const [visibleMonth, setVisibleMonth] = useState(
     dt.format(new Date(), "MMMM yyyy")
   );
@@ -43,6 +42,14 @@ export default function ProgressCalendarModal({
     });
   }, []);
 
+  // Keep latest-ref copies so the stable FlatList callback is never stale
+  const currentMonthStartRef = useRef(dt.startOfMonth(new Date()));
+  const refreshWeeklyStatsRef = useRef(refreshWeeklyStats);
+  useEffect(() => {
+    currentMonthStartRef.current = dt.startOfMonth(new Date());
+    refreshWeeklyStatsRef.current = refreshWeeklyStats;
+  });
+
   // hydrate stats and update header on view change
   const onViewableItemsChanged = useRef(({ viewableItems }) => {
     if (!viewableItems || !viewableItems.length) return;
@@ -51,8 +58,8 @@ export default function ProgressCalendarModal({
     if (!first) return;
     const start = dt.startOfMonth(dt.subMonths(first.month, 2));
     const end = dt.endOfMonth(dt.addMonths(first.month, 2));
-
-    refreshWeeklyStats(start, end);
+    refreshWeeklyStatsRef.current?.(start, end);
+    const currentMonthStart = currentMonthStartRef.current;
     const monthToDisplay = dt.isAfter(first.month, currentMonthStart)
       ? dt.max([currentMonthStart])
       : first.month;

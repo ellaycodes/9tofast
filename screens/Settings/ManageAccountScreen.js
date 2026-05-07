@@ -8,7 +8,7 @@ import { StatsContext } from "../../store/statsLogic/stats-context";
 function ManageAccountScreen({ navigation }) {
   const authCxt = useContext(AuthContext);
   const { statsLogout } = useContext(StatsContext);
-  const { clearFast, setBaselineAnchor } = useFasting();
+  const { clearFast } = useFasting();
 
   async function logoutHandler() {
     await statsLogout();
@@ -18,7 +18,6 @@ function ManageAccountScreen({ navigation }) {
 
   function clearAllHandler() {
     clearFast();
-    setBaselineAnchor(Date.now());
     statsLogout();
     navigation.navigate("TimerScreen");
   }

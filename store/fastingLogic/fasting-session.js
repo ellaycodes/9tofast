@@ -1,12 +1,14 @@
-import * as ev from "./events";
-import { baselineSinceAnchor } from "./scheduler";
-import { getScheduleTimeZone, startOfDayTs } from "../../util/timezone";
+import {
+  formatDayString,
+  getScheduleTimeZone,
+  startOfDayTs,
+} from "../../util/timezone";
 
 export function getInitialState() {
   return {
     schedule: null,
     events: [],
-    baselineAnchorTs: null,
+    loading: true,
   };
 }
 
@@ -18,68 +20,58 @@ export function clearAll() {
   return getInitialState();
 }
 
-// isFasting([{ start: 10 }, { pause: 20 }, { resume: 30 }])
-// → true
+// events: array of { type: "start"|"end", ts }
+// "start" = start fasting, "end" = stop fasting
 export function isFasting(events) {
-  if (!events.length) return false;
-  const last = events[events.length - 1].type;
-  return last === ev.EVENT.START;
+  if (!events || !events.length) return false;
+  return events[events.length - 1].type === "start";
 }
 
 export function hoursFastedToday(state, now = Date.now()) {
-  const { schedule, events: userEvents = [], baselineAnchorTs } = state;
-  if (!schedule && !userEvents.length) return 0;
+  const { schedule, events = [] } = state;
+  if (!schedule && !events.length) return 0;
+
   const timeZone = getScheduleTimeZone(schedule);
-
-  // build baseline once
-  const baseline = schedule
-    ? baselineSinceAnchor(schedule, baselineAnchorTs, now, userEvents)
-    : [];
-
-  // helper: are we fasting at a given time?
-  const activeAt = (atTs) => {
-    const allUpTo = [
-      ...baseline.filter((e) => e.ts <= atTs),
-      ...userEvents.filter((e) => e.ts <= atTs),
-    ].sort((a, b) => a.ts - b.ts);
-
-    let active = false;
-    for (const e of allUpTo) {
-      if (e.type === ev.EVENT.START || e.type === "start") active = true;
-      if (e.type === ev.EVENT.END || e.type === "end") active = false;
-    }
-    return active;
-  };
-
-  // midnight anchor for "today"
   const dayStart = startOfDayTs(now, timeZone);
+  const sorted = [...events].sort((a, b) => a.ts - b.ts);
 
-  // only today’s events, sorted, and collapse exact dupes
-  const all = [...baseline, ...userEvents]
-    .filter((e) => e.ts >= dayStart && e.ts <= now)
-    .sort((a, b) => a.ts - b.ts)
-    .filter(
-      (e, i, arr) =>
-        i === 0 || !(e.ts === arr[i - 1].ts && e.type === arr[i - 1].type)
-    );
+  // Determine fasting state at the start of today from events before midnight.
+  // This handles overnight fasts without needing synthetic baseline events.
+  const beforeMidnight = sorted.filter((e) => e.ts < dayStart);
+  let active =
+    beforeMidnight.length > 0
+      ? beforeMidnight[beforeMidnight.length - 1].type === "start"
+      : false;
 
-  // starting state at midnight
-  let active = activeAt(dayStart);
   let cursor = dayStart;
   let totalMs = 0;
 
-  for (const e of all) {
-    // accrue up to this event if we are active
+  for (const e of sorted.filter((e) => e.ts >= dayStart && e.ts <= now)) {
     if (active) totalMs += e.ts - cursor;
     cursor = e.ts;
-
-    // flip state on this event
-    if (e.type === ev.EVENT.START || e.type === "start") active = true;
-    if (e.type === ev.EVENT.END || e.type === "end") active = false;
+    active = e.type === "start";
   }
 
-  // tail after last event, up to now
   if (active) totalMs += now - cursor;
-
   return +(totalMs / 36e5).toFixed(5);
+}
+
+// Builds the daily stats snapshot for the current day.
+// Used by fasting-context to upload today's progress to Firestore.
+export function buildCurrentDayStats(state, now = new Date()) {
+  const timeZone = getScheduleTimeZone(state.schedule);
+  const dayString = formatDayString(now, timeZone);
+  const dayStart = startOfDayTs(now, timeZone);
+  const hoursToday = hoursFastedToday(state, now.getTime());
+  const scheduleHours = state.schedule?.fastingHours ?? undefined;
+  const eventsToday = (state.events || []).filter((e) => e.ts >= dayStart);
+
+  return {
+    day: dayString,
+    hoursFasted: hoursToday,
+    scheduleHours,
+    events: eventsToday,
+    timeZone,
+    dayStartUtc: dayStart,
+  };
 }

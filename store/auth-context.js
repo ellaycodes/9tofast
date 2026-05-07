@@ -4,11 +4,7 @@ import { signOut } from "firebase/auth";
 import { auth } from "../firebase/app";
 import { setFastingStateDb } from "../firebase/fasting.db.js";
 import { logWarn } from "../util/logger";
-import {
-  getLastSavedTimestampKey,
-  getLastUploadedDayKey,
-  getStateStorageKey,
-} from "./fastingLogic/useFastingPersistence.js";
+import { getStateStorageKey } from "./fastingLogic/useFastingPersistence.js";
 
 export const AuthContext = createContext({
   token: "",
@@ -41,7 +37,7 @@ function AuthContextProvider({ children }) {
 
   function setEmailAddress(email) {
     setEmail(email);
-    AsyncStorage.setItem("emailAddress", email);
+    AsyncStorage.setItem("emailAddress", email).catch(console.warn);
     return true;
   }
 
@@ -49,9 +45,9 @@ function AuthContextProvider({ children }) {
     setAuthToken(token);
     setUsername(userName);
     setUid(uid);
-    AsyncStorage.setItem("token", token);
-    AsyncStorage.setItem("username", userName);
-    AsyncStorage.setItem("uid", uid);
+    AsyncStorage.setItem("token", token).catch(console.warn);
+    AsyncStorage.setItem("username", userName).catch(console.warn);
+    AsyncStorage.setItem("uid", uid).catch(console.warn);
   }
 
   async function logout() {
@@ -77,54 +73,50 @@ function AuthContextProvider({ children }) {
     setAvatarId(null);
     setOnboarded(false);
     setEmail(null);
-    AsyncStorage.removeItem("token");
-    AsyncStorage.removeItem("username");
-    AsyncStorage.removeItem("emailAddress");
-    AsyncStorage.removeItem("uid");
-    AsyncStorage.removeItem("fullname");
-    AsyncStorage.removeItem("avatarId");
-    AsyncStorage.removeItem("onboarded");
+    AsyncStorage.removeItem("token").catch(console.warn);
+    AsyncStorage.removeItem("username").catch(console.warn);
+    AsyncStorage.removeItem("emailAddress").catch(console.warn);
+    AsyncStorage.removeItem("uid").catch(console.warn);
+    AsyncStorage.removeItem("fullname").catch(console.warn);
+    AsyncStorage.removeItem("avatarId").catch(console.warn);
+    AsyncStorage.removeItem("onboarded").catch(console.warn);
     if (uid) {
-      AsyncStorage.removeItem(getStateStorageKey(uid));
-      AsyncStorage.removeItem(getLastSavedTimestampKey(uid));
-      AsyncStorage.removeItem(getLastUploadedDayKey(uid));
+      AsyncStorage.removeItem(getStateStorageKey(uid)).catch(console.warn);
     }
-    AsyncStorage.removeItem("fastingstate_v2");
-    AsyncStorage.removeItem("fasting_last_ts");
-    AsyncStorage.removeItem("fasting_last_uploaded_day");
+    AsyncStorage.removeItem("fastingstate_v2").catch(console.warn);
   }
 
   function refreshToken(idToken) {
     setAuthToken(idToken);
-    AsyncStorage.setItem("token", idToken);
+    AsyncStorage.setItem("token", idToken).catch(console.warn);
   }
 
   function updateUsername(username) {
     setUsername(username);
-    AsyncStorage.setItem("username", username);
+    AsyncStorage.setItem("username", username).catch(console.warn);
   }
 
   function updateFullName(fullName) {
     setFullName(fullName);
-    AsyncStorage.setItem("fullname", fullName);
+    AsyncStorage.setItem("fullname", fullName).catch(console.warn);
   }
 
   function updateAvatarId(id) {
     setAvatarId(id);
-    AsyncStorage.setItem("avatarId", id);
+    AsyncStorage.setItem("avatarId", id).catch(console.warn);
   }
 
   function completeOnboarding() {
     setOnboarded(true);
-    AsyncStorage.setItem("onboarded", "true");
+    AsyncStorage.setItem("onboarded", "true").catch(console.warn);
   }
 
   function setOnboardedState(flag) {
     setOnboarded(flag);
     if (flag) {
-      AsyncStorage.setItem("onboarded", "true");
+      AsyncStorage.setItem("onboarded", "true").catch(console.warn);
     } else {
-      AsyncStorage.removeItem("onboarded");
+      AsyncStorage.removeItem("onboarded").catch(console.warn);
     }
   }
 

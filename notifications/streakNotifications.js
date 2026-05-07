@@ -1,11 +1,18 @@
 import * as Notifications from "expo-notifications";
 import randomNotificationMessage from "../util/randomNotificationMessage";
+import { NOTIF_IDS } from "./ids.js";
+
+const SLOT_IDS = [NOTIF_IDS.STREAK_MORNING, NOTIF_IDS.STREAK_EVENING];
 
 export async function scheduleStreakNotifications(times) {
   if (!Array.isArray(times)) return console.warn("Times must be an array");
 
-  await Notifications.cancelAllScheduledNotificationsAsync();
-  for (const time of times) {
+  for (let i = 0; i < SLOT_IDS.length; i++) {
+    await Notifications.cancelScheduledNotificationAsync(SLOT_IDS[i]);
+  }
+
+  for (let i = 0; i < times.length; i++) {
+    const time = times[i];
     const [hour, minute] = time.split(":").map(Number);
 
     if (isNaN(hour) || isNaN(minute)) {
@@ -17,6 +24,7 @@ export async function scheduleStreakNotifications(times) {
     const { title, body } = randomNotificationMessage(category);
 
     await Notifications.scheduleNotificationAsync({
+      identifier: SLOT_IDS[i] ?? `streak-slot-${i}`,
       content: {
         title,
         body,

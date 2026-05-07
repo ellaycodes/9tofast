@@ -30,8 +30,8 @@ function FastingCalendar() {
     for (let i = 0; i < 42; i++) {
       const day = dt.addDays(startDate, i);
       const formatted = formatDayString(day, timeZone);
-      const stat = weeklyStats.find((s) => s.day === formatted);
-      const value = stat && stat.percent != null ? stat.percent : 0;
+      const stat = weeklyStats.find((s) => s?.day === formatted);
+      const value = stat?.percent ?? 0;
       list.push({ date: day, percent: value });
     }
     return list;

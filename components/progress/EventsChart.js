@@ -17,10 +17,14 @@ function EventsChart({ events = [], date, timeZone }) {
       .filter((e) => e.ts >= start && e.ts < end)
       .sort((a, b) => a.ts - b.ts);
 
-    // Build segments between events
+    // Determine fasting state at midnight from events before today
+    const beforeDay = [...events].filter((e) => e.ts < start).sort((a, b) => a.ts - b.ts);
+    const initialFasting =
+      beforeDay.length > 0 && beforeDay[beforeDay.length - 1].type === "start";
+
     const segs = [];
     let lastTs = start;
-    let fasting = false;
+    let fasting = initialFasting;
     dayEvents.forEach((ev) => {
       const ts = ev.ts;
       segs.push({ start: lastTs, end: ts, fasting });
@@ -31,7 +35,19 @@ function EventsChart({ events = [], date, timeZone }) {
     return segs.filter((s) => s.end > s.start);
   }, [events, start, end]);
 
-  const labels = ["00:00", "06:00", "12:00", "18:00", "24:00"];
+  const labels = useMemo(() => {
+    const tz = timeZone || "UTC";
+    const fmt = new Intl.DateTimeFormat(undefined, {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: tz,
+    });
+    return [
+      ...[0, 0.25, 0.5, 0.75].map((frac) => fmt.format(new Date(start + frac * total))),
+      "24:00",
+    ];
+  }, [start, total, timeZone]);
 
   return (
     <View style={styles.wrapper}>

@@ -12,9 +12,9 @@ export const PRESET_SCHEDULES = [
     fastingHours: 14
   },
   {
-    label: "After-Hours Fast 18:6 (1pm - 7pm)",
-    start: "13:00",
-    end: "19:00",
+    label: "After-Hours Fast 18:6 (5pm - 11pm)",
+    start: "17:00",
+    end: "23:00",
     fastingHours: 18
   },
 ];

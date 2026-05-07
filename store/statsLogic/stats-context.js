@@ -2,7 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createContext, useState, useEffect } from "react";
 import { getStreak, setStreak } from "../../firebase/stats.db.js";
 import { auth } from "../../firebase/app.js";
-import { dayQualifier } from "./qualifier.js";
+import { dayQualifier, fastingQualifier } from "./qualifier.js";
 import { useFasting } from "../fastingLogic/fasting-context.js";
 import { yesterdayHoursFasted } from "./yesterdayHours.js";
 import {
@@ -154,22 +154,28 @@ function StatsContextProvider({ children }) {
   }
 
   async function statsLogout() {
+    // Capture uid before signOut can null out auth.currentUser
+    const uid = auth.currentUser?.uid;
+
     setCurrentStreak(0);
     setLongestStreak(0);
     setPreviousStreak(0);
     setLastStreakDate(null);
     setLastOverrideDate(null);
 
+    // Build from literal zeros — setState above is async so closure values are stale
     const streakData = {
-      currentStreak,
-      longestStreak,
-      previousStreak,
-      lastStreakDate,
-      lastOverrideDate,
+      currentStreak: 0,
+      longestStreak: 0,
+      previousStreak: 0,
+      lastStreakDate: null,
+      lastOverrideDate: null,
     };
 
-    await setStreak(auth.currentUser.uid, streakData);
-    AsyncStorage.removeItem(STREAK_DATA);
+    if (uid) {
+      await setStreak(uid, streakData);
+    }
+    AsyncStorage.removeItem(STREAK_DATA).catch(console.warn);
 
     return true;
   }
@@ -184,16 +190,16 @@ function StatsContextProvider({ children }) {
     if (dayStatus === "same") return;
 
     if (dayStatus === "yesterday") {
-      // const qualifies = fastingQualifier(
-      //   hoursFastedYesterday,
-      //   fastingGoalHours
-      // );
+      const qualifies = fastingQualifier(
+        hoursFastedYesterday,
+        fastingGoalHours
+      );
 
-      // if (qualifies) {
-      incrementStreak();
-      // } else {
-      //   breakStreak();
-      // }
+      if (qualifies) {
+        incrementStreak();
+      } else {
+        breakStreak();
+      }
       return;
     }
 
