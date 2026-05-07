@@ -10,6 +10,10 @@ import {
   formatDayString,
   getScheduleTimeZone,
 } from "../../util/timezone";
+import {
+  getDayConfig,
+  getDayKey,
+} from "../fastingLogic/data/weekly-schedule.js";
 
 export const StatsContext = createContext({
   currentStreak: 0,
@@ -25,7 +29,7 @@ export const StatsContext = createContext({
 });
 
 function StatsContextProvider({ children }) {
-  const { schedule } = useFasting();
+  const { schedule, weeklySchedule } = useFasting();
 
   const [currentStreak, setCurrentStreak] = useState(0);
   const [previousStreak, setPreviousStreak] = useState(0);
@@ -184,16 +188,24 @@ function StatsContextProvider({ children }) {
   useEffect(() => {
     if (!lastStreakDate) return;
     if (hoursFastedYesterday === null) return;
-    if (!fastingGoalHours) return;
 
     const dayStatus = dayQualifier(today, lastStreakDate, timeZone);
     if (dayStatus === "same") return;
 
     if (dayStatus === "yesterday") {
-      const qualifies = fastingQualifier(
-        hoursFastedYesterday,
-        fastingGoalHours
-      );
+      // Rest days auto-pass: the user gets streak credit just for opening the app.
+      const yesterdayDate = addDaysInTimeZone(Date.now(), -1, timeZone);
+      const yesterdayKey = getDayKey(yesterdayDate, timeZone);
+      const yesterdayConfig = weeklySchedule
+        ? getDayConfig(weeklySchedule, yesterdayKey)
+        : null;
+      const isRestDay = yesterdayConfig?.type === "rest";
+
+      // Without a goal we can only evaluate rest days
+      if (!isRestDay && !fastingGoalHours) return;
+
+      const qualifies =
+        isRestDay || fastingQualifier(hoursFastedYesterday, fastingGoalHours);
 
       if (qualifies) {
         incrementStreak();
@@ -204,6 +216,8 @@ function StatsContextProvider({ children }) {
     }
 
     if (dayStatus === "missed") {
+      // Only break if a schedule goal is set; no schedule = nothing to break
+      if (!fastingGoalHours) return;
       breakStreak();
       return;
     }
@@ -213,6 +227,7 @@ function StatsContextProvider({ children }) {
     fastingGoalHours,
     hoursFastedYesterday,
     timeZone,
+    weeklySchedule,
   ]);
 
   const value = {

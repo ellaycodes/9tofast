@@ -5,6 +5,7 @@ import ManageAccountScreen from "../screens/Settings/ManageAccountScreen";
 import AboutScreen from "../screens/Settings/AboutScreen";
 import { useAppTheme } from "../store/app-theme-context";
 import EditScheduleScreen from "../screens/Settings/EditScheduleScreen";
+import DayEditorScreen from "../screens/Settings/DayEditorScreen";
 import EditThemeScreen from "../screens/Settings/EditThemeScreen";
 import ProfileScreen from "../screens/Settings/ProfileScreen";
 import SupportScreen from "../screens/Settings/SupportScreen";
@@ -69,6 +70,17 @@ function SettingsStack() {
         options={{
           title: "Edit Schedule",
         }}
+      />
+      <Stack.Screen
+        name="DayEditorScreen"
+        component={DayEditorScreen}
+        options={({ route }) => ({
+          title:
+            route.params?.dayKey
+              ? route.params.dayKey.charAt(0).toUpperCase() +
+                route.params.dayKey.slice(1)
+              : "Edit Day",
+        })}
       />
       <Stack.Screen
         name="EditThemeScreen"

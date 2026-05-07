@@ -57,11 +57,24 @@ export async function getPreferences(uid) {
   }
 }
 
-export async function setFastingScheduleDb(uid, schedule) {
+// Firestore rejects `undefined` values — strip them recursively before any write.
+function stripUndefined(value) {
+  if (Array.isArray(value)) return value.map(stripUndefined);
+  if (value !== null && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value)
+        .filter(([, v]) => v !== undefined)
+        .map(([k, v]) => [k, stripUndefined(v)])
+    );
+  }
+  return value;
+}
+
+export async function setFastingScheduleDb(uid, weeklySchedule) {
   try {
     await setDoc(
       doc(db, "users", uid, "settings", "preferences"),
-      { fastingSchedule: schedule },
+      { fastingSchedule: stripUndefined(weeklySchedule) },
       { merge: true }
     );
   } catch (error) {

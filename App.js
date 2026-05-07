@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { Text } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { NavigationContainer } from "@react-navigation/native";
@@ -56,7 +56,7 @@ function Navigator() {
   const { premiumLogIn, premiumLogOut } = usePremium();
   const [loading, setLoading] = useState(true);
   const { loadStreak, currentStreak } = useContext(StatsContext);
-  const { schedule, isFasting } = useFasting();
+  const { weeklySchedule } = useFasting();
 
   useEffect(() => {
     const timeout = setTimeout(() => setLoading(false), 8000);
@@ -135,29 +135,32 @@ function Navigator() {
     }
   }, [authCxt.isAuthed, authCxt.onboarded]);
 
-  useEffect(() => {
-    if (!authCxt.isAuthed || !authCxt.onboarded || !schedule) {
-      cancelStreakRiskNotification();
-      return;
-    }
-    if (currentStreak >= 3) {
-      scheduleStreakRiskNotification(schedule);
-    } else {
-      cancelStreakRiskNotification();
-    }
-  }, [currentStreak, schedule, authCxt.isAuthed, authCxt.onboarded]);
+  // Debounce notification reschedule so rapid changes (e.g. Copy To 5 days)
+  // only trigger a single cancel+reschedule pass.
+  const rescheduleTimerRef = useRef(null);
 
   useEffect(() => {
-    if (!authCxt.isAuthed || !authCxt.onboarded || !schedule) {
+    if (rescheduleTimerRef.current) clearTimeout(rescheduleTimerRef.current);
+
+    if (!authCxt.isAuthed || !authCxt.onboarded || !weeklySchedule) {
+      cancelStreakRiskNotification();
       cancelEatingWindowNotification();
       return;
     }
-    if (isFasting()) {
-      scheduleEatingWindowNotification(schedule);
-    } else {
-      cancelEatingWindowNotification();
-    }
-  }, [schedule, isFasting, authCxt.isAuthed, authCxt.onboarded]);
+
+    rescheduleTimerRef.current = setTimeout(async () => {
+      await scheduleEatingWindowNotification(weeklySchedule);
+      if (currentStreak >= 3) {
+        await scheduleStreakRiskNotification(weeklySchedule);
+      } else {
+        await cancelStreakRiskNotification();
+      }
+    }, 300);
+
+    return () => {
+      if (rescheduleTimerRef.current) clearTimeout(rescheduleTimerRef.current);
+    };
+  }, [currentStreak, weeklySchedule, authCxt.isAuthed, authCxt.onboarded]);
 
   if (loading) {
     return (

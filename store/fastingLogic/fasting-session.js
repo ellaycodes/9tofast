@@ -7,6 +7,7 @@ import {
 export function getInitialState() {
   return {
     schedule: null,
+    weeklySchedule: null,
     events: [],
     loading: true,
   };

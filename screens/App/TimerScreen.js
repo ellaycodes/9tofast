@@ -15,12 +15,17 @@ import PrimaryButton from "../../components/ui/PrimaryButton";
 import { prefetchAvatars } from "../../assets/avatars";
 import { stateAt } from "../../store/fastingLogic/scheduler";
 import Streaks from "../../components/Home/Streaks.js";
-// import { usePremium } from "../../hooks/usePremium.js";
 import FlatButton from "../../components/ui/FlatButton.js";
 import { usePremium } from "../../store/premium-context.js";
+import {
+  getTodayConfig,
+  getDayKey,
+} from "../../store/fastingLogic/data/weekly-schedule.js";
+import { getScheduleTimeZone } from "../../util/timezone.js";
 
 function TimerScreen({ navigation }) {
-  const { schedule, isFasting, hoursFastedToday } = useFasting();
+  const { schedule, weeklySchedule, isFasting, hoursFastedToday } =
+    useFasting();
   const { theme, themeName } = useAppTheme();
   const memoStyle = useMemo(() => styles(theme, themeName), [theme, themeName]);
   const [readout, setReadout] = useState(null);
@@ -29,6 +34,22 @@ function TimerScreen({ navigation }) {
 
   const fasting = isFasting();
 
+  // Resolve today's config and timezone from whichever model is available
+  const timeZone = schedule
+    ? getScheduleTimeZone(schedule)
+    : weeklySchedule?.timeZone ?? undefined;
+
+  const todayConfig = weeklySchedule ? getTodayConfig(weeklySchedule, timeZone) : null;
+  const isRestDay = todayConfig?.type === "rest";
+
+  // Day label for the active-window line (e.g. "Monday")
+  const dayLabel = timeZone
+    ? new Intl.DateTimeFormat("en-US", {
+        timeZone,
+        weekday: "long",
+      }).format(new Date())
+    : "";
+
   useEffect(() => {
     if (!schedule) return;
 
@@ -36,7 +57,6 @@ function TimerScreen({ navigation }) {
     update();
 
     const id = setInterval(update, 100);
-
     prefetchAvatars(12);
 
     return () => {
@@ -45,7 +65,6 @@ function TimerScreen({ navigation }) {
   }, [schedule, fasting]);
 
   const inside = schedule ? stateAt(schedule, Date.now()) === "fasting" : false;
-
   const offSchedule = fasting !== inside;
 
   useEffect(() => {
@@ -76,6 +95,29 @@ function TimerScreen({ navigation }) {
       : inside
       ? "Fasting Window"
       : "Eating Window";
+
+  // Active-day window line shown below the subtitle
+  const windowLine = isRestDay
+    ? `${dayLabel} · Rest Day`
+    : schedule
+    ? `${dayLabel} · ${dt.format(
+        dt.parse(schedule.start, "HH:mm", new Date()),
+        "p"
+      )} – ${dt.format(dt.parse(schedule.end, "HH:mm", new Date()), "p")}`
+    : null;
+
+  // Rest Day state — no schedule but a weekly schedule has today as rest
+  if (isRestDay && !schedule) {
+    return (
+      <View style={[memoStyle.container, memoStyle.centeredContent]}>
+        <Title style={[memoStyle.title, memoStyle.eating]}>Rest Day</Title>
+        <SubtitleText muted>Enjoy your rest — no fasting goal today</SubtitleText>
+        <View style={memoStyle.buttonsContainer}>
+          <ButtonsContainer fast={fasting} withinFasting={false} />
+        </View>
+      </View>
+    );
+  }
 
   return schedule ? (
     <View style={memoStyle.container}>
@@ -113,6 +155,9 @@ function TimerScreen({ navigation }) {
             dt.format(dt.parse(schedule.end, "HH:mm", new Date()), "p")}
         </SubtitleText>
       )}
+      {windowLine && !offSchedule && (
+        <Text style={memoStyle.windowLine}>{windowLine}</Text>
+      )}
       <Ads disabled={isPremium || loading} />
       <View style={memoStyle.buttonsContainer}>
         <ButtonsContainer fast={fasting} withinFasting={inside} />
@@ -139,6 +184,11 @@ const styles = (theme, themeName) =>
   StyleSheet.create({
     container: {
       // marginHorizontal: 20,
+    },
+    centeredContent: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
     },
     countdownContainer: {
       flexDirection: "row",
@@ -168,5 +218,12 @@ const styles = (theme, themeName) =>
     },
     streaks: {
       paddingHorizontal: 30,
+    },
+    windowLine: {
+      textAlign: "center",
+      fontSize: 13,
+      color: theme.muted,
+      marginTop: 6,
+      marginBottom: 8,
     },
   });

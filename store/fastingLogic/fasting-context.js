@@ -11,6 +11,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AppState } from "react-native";
 import useFastingPersistence, {
   getStateStorageKey,
+  getWeeklyStorageKey,
 } from "./useFastingPersistence.js";
 import * as session from "./fasting-session";
 import * as events from "./events";
@@ -24,10 +25,16 @@ import {
   setFastingStateDb,
   setFastingScheduleDb,
 } from "../../firebase/fasting.db.js";
+import {
+  buildWeeklyScheduleFromLegacy,
+  flatScheduleFromWeekly,
+  isWeeklySchedule,
+} from "./data/weekly-schedule.js";
 
 export const FastingContext = createContext({
   loading: true,
   schedule: null,
+  weeklySchedule: null,
   events: [],
   state: null,
   hoursFastedToday: null,
@@ -45,6 +52,9 @@ function reducer(state, action) {
 
     case "SET_SCHEDULE":
       return session.setSchedule(state, action.payload);
+
+    case "SET_WEEKLY_SCHEDULE":
+      return { ...state, weeklySchedule: action.payload };
 
     case "START_FAST":
       return events.startFast(state, action.trigger, action.payload);
@@ -76,7 +86,7 @@ export default function FastingContextProvider({ children }) {
     stateRef.current = state;
   }, [state]);
 
-  // --- Auto-save: write to Firestore + AsyncStorage on every meaningful change ---
+  // --- Auto-save: write fasting state (schedule + events) on every meaningful change ---
   useEffect(() => {
     if (state.loading) return;
     const uid = auth.currentUser?.uid || null;
@@ -92,6 +102,24 @@ export default function FastingContextProvider({ children }) {
       JSON.stringify(toSave)
     ).catch(console.warn);
   }, [state.events, state.schedule]);
+
+  // --- Auto-save: persist WeeklySchedule to AsyncStorage + Firestore when it changes ---
+  // This also covers the initial migration write: after LOADED sets weeklySchedule
+  // for the first time, this effect fires and persists it to Firestore without
+  // blocking startup.
+  useEffect(() => {
+    if (state.loading || !state.weeklySchedule) return;
+    const uid = auth.currentUser?.uid || null;
+    AsyncStorage.setItem(
+      getWeeklyStorageKey(uid),
+      JSON.stringify(state.weeklySchedule)
+    ).catch(console.warn);
+    if (uid) {
+      setFastingScheduleDb(uid, state.weeklySchedule).catch((e) =>
+        console.warn("[fasting] weekly schedule save failed", e)
+      );
+    }
+  }, [state.weeklySchedule]);
 
   // --- Daily stats snapshot helpers ---
   const uploadCurrentDaySnapshot = useCallback(
@@ -146,7 +174,6 @@ export default function FastingContextProvider({ children }) {
   );
 
   // --- Event dispatchers ---
-  // Used by scheduler auto-events and by startFast/endFast below
   const dispatchEvent = useCallback(
     async (ts, type, trigger, options = {}) => {
       const last = stateRef.current.events.slice(-1)[0];
@@ -169,23 +196,36 @@ export default function FastingContextProvider({ children }) {
   );
 
   // --- Public API ---
+
+  /**
+   * Accepts either a legacy flat schedule object or a WeeklySchedule.
+   * Always normalises to both representations before persisting.
+   */
   async function setSchedule(data) {
     if (!data) {
       dispatch({ type: "SET_SCHEDULE", payload: null });
+      dispatch({ type: "SET_WEEKLY_SCHEDULE", payload: null });
       return;
     }
-    const normalized = data.timeZone
-      ? data
-      : { ...data, timeZone: getResolvedTimeZone() };
 
-    dispatch({ type: "SET_SCHEDULE", payload: normalized });
+    let flatSchedule, weeklySchedule;
 
-    const uid = auth.currentUser?.uid;
-    if (uid) {
-      setFastingScheduleDb(uid, normalized).catch((e) =>
-        console.warn("[fasting] schedule save failed", e)
-      );
+    if (isWeeklySchedule(data)) {
+      weeklySchedule = data;
+      flatSchedule = flatScheduleFromWeekly(data);
+      if (flatSchedule && !flatSchedule.timeZone) {
+        flatSchedule = { ...flatSchedule, timeZone: getResolvedTimeZone() };
+      }
+    } else {
+      flatSchedule = data.timeZone
+        ? data
+        : { ...data, timeZone: getResolvedTimeZone() };
+      weeklySchedule = buildWeeklyScheduleFromLegacy(flatSchedule);
     }
+
+    dispatch({ type: "SET_SCHEDULE", payload: flatSchedule });
+    dispatch({ type: "SET_WEEKLY_SCHEDULE", payload: weeklySchedule });
+    // Firestore + AsyncStorage persistence is handled by the auto-save effect above.
   }
 
   async function startFast(trigger) {
@@ -207,6 +247,7 @@ export default function FastingContextProvider({ children }) {
   const value = {
     loading: state.loading,
     schedule: state.schedule,
+    weeklySchedule: state.weeklySchedule,
     events: state.events,
     state: state,
     hoursFastedToday: hours,
