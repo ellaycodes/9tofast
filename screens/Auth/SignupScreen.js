@@ -5,7 +5,7 @@ import LoadingOverlay from "../../components/ui/LoadingOverlay";
 import { Alert, KeyboardAvoidingView, ScrollView } from "react-native";
 import { Platform } from "react-native";
 import randomUsername from "../../util/randomUsername";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, getIdToken } from "firebase/auth";
 import { auth } from "../../firebase/app";
 import { addUser } from "../../firebase/users.db.js";
 import { usePremium } from "../../store/premium-context.js";
@@ -36,8 +36,9 @@ function SignupScreen({ navigation }) {
 
       await premiumLogIn(user.uid);
 
+      const token = await getIdToken(user);
       navigation.navigate("OnboardingCarousel", {
-        token: user.stsTokenManager.accessToken,
+        token,
         userName: userName,
         localId: user.uid,
       });

@@ -1,14 +1,13 @@
 import { StyleSheet, View } from "react-native";
 import PrimaryButton from "./PrimaryButton";
 import { useFasting } from "../../store/fastingLogic/fasting-context";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useAppTheme } from "../../store/app-theme-context";
 import { Ionicons } from "@expo/vector-icons";
 
 function ButtonsContainer({ withinFasting }) {
   const { startFast, endFast, isFasting } = useFasting();
-  const { setThemeName, themeName, theme } = useAppTheme();
-  const [tempTheme, setTempTheme] = useState(null);
+  const { setThemeName, themeName, previousThemeName, theme } = useAppTheme();
 
   async function toggleFastHandler() {
     if (isFasting()) {
@@ -36,11 +35,9 @@ function ButtonsContainer({ withinFasting }) {
 
   function onAppThemeChange() {
     if (themeName !== "Desk") {
-      setTempTheme(themeName);
       setThemeName("Desk");
     } else {
-      setThemeName(tempTheme || "Original");
-      setTempTheme(null);
+      setThemeName(previousThemeName || "Original");
     }
   }
 

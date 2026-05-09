@@ -90,7 +90,7 @@ export default function StartTimerSlide({
         await startFast("manual");
       }
 
-      await setSchedule(schedule, { anchor: false });
+      await setSchedule(schedule);
       setStarted(true);
     };
 

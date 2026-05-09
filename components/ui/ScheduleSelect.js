@@ -412,7 +412,7 @@ function ScheduleSelect({ settings, setWizardState, token, userName, uid }) {
           )}
         </View>
 
-        {!settings && isTooLong && (
+        {isTooLong && (
           <ErrorText>Please choose a longer eating window</ErrorText>
         )}
 
@@ -426,13 +426,14 @@ function ScheduleSelect({ settings, setWizardState, token, userName, uid }) {
             <PrimaryButton
               onPress={() => onSave(true)}
               style={{ marginTop: 16 }}
+              disabled={isTooLong}
             >
               Save
             </PrimaryButton>
           ) : (
             <PrimaryButton
               onPress={() => onSave(false)}
-              disabled={chosenSchedule.fastingHours > 18}
+              disabled={isTooLong}
             >
               Next
             </PrimaryButton>

@@ -14,6 +14,7 @@ import { logWarn } from "../util/logger";
 
 export const AppThemeContext = createContext({
   themeName: "Original",
+  previousThemeName: null,
   theme: Colors.Original,
   setThemeName: () => {}
 });
@@ -21,6 +22,7 @@ export const AppThemeContext = createContext({
 export default function AppThemeContextProvider({ children }) {
   const [theme, setTheme] = useState(Colors.Original);
   const [themeName, setThemeNameState] = useState("Original");
+  const [previousThemeName, setPreviousThemeName] = useState(null);
   const [loaded, setLoaded] = useState(false);
 
   const loadTheme = useCallback(async () => {
@@ -65,6 +67,7 @@ export default function AppThemeContextProvider({ children }) {
       console.warn(`Unknown theme "${name}". Using original.`);
       name = "Original";
     }
+    setPreviousThemeName(themeName);
     setTheme(Colors[name]);
     setThemeNameState(name);
     try {
@@ -79,6 +82,7 @@ export default function AppThemeContextProvider({ children }) {
 
   const value = {
     themeName,
+    previousThemeName,
     theme,
     setThemeName,
   };

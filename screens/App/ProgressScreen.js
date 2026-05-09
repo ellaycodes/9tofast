@@ -136,7 +136,7 @@ function ProgressScreen() {
 
       <ProgressCalendarModal
         showModal={openModal}
-        onRequestClose={() => setOpenModal((prev) => !prev)}
+        onRequestClose={() => setOpenModal(false)}
         onDaySelect={handleDaySelect}
       />
     </ScrollView>

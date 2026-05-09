@@ -28,7 +28,7 @@ export default function useAuthHelpers() {
     }
 
     if (prefs && prefs.fastingSchedule) {
-      await setSchedule(prefs.fastingSchedule, { anchor: false });
+      await setSchedule(prefs.fastingSchedule);
     }
   }
 
@@ -44,8 +44,9 @@ export default function useAuthHelpers() {
     if (email) authCxt.setEmailAddress(email);
     if (fullName) authCxt.updateFullName(fullName);
 
+    const token = await getIdToken(user);
     return navigation.navigate("OnboardingCarousel", {
-      token: user.stsTokenManager.accessToken,
+      token,
       userName: username,
       localId: user.uid,
     });
@@ -59,8 +60,9 @@ export default function useAuthHelpers() {
       isAnonymous: true,
     });
 
+    const token = await getIdToken(user);
     navigation.navigate("OnboardingCarousel", {
-      token: user.stsTokenManager.accessToken,
+      token,
       userName: username,
       localId: user.uid,
     });

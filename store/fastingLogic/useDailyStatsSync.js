@@ -48,8 +48,11 @@ export default function useDailyStatsSync(
       }
     }
 
-    // Rollover fires exactly once when the calendar day changes
+    // Rollover fires exactly once when the calendar day changes.
+    // Guard is set before async work so a re-render mid-rollover doesn't
+    // re-trigger the effect and launch a second concurrent Firestore write.
     if (lastProcessedDay.current === currentDayString) return;
+    lastProcessedDay.current = currentDayString;
 
     (async () => {
       const previousDayDate = addDaysInTimeZone(
@@ -100,7 +103,6 @@ export default function useDailyStatsSync(
       }
 
       dispatch({ type: "SET_EVENTS", payload: todaysEvents });
-      lastProcessedDay.current = currentDayString;
     })();
   }, [fastingState, uploadDailyStats, dispatch]);
 }

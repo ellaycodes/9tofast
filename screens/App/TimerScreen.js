@@ -73,7 +73,7 @@ function TimerScreen({ navigation }) {
         getRandomOffScheduleTitle(!fasting && inside ? "eating" : "fasting")
       );
     }
-  }, [offSchedule, fasting, inside, hoursFastedToday]);
+  }, [offSchedule, fasting, inside]);
 
   const timeUnits = readout ? Object.keys(readout.units).slice(0, -1) : [];
 
@@ -85,7 +85,7 @@ function TimerScreen({ navigation }) {
         </View>
       ),
     });
-  }, []);
+  }, [theme, themeName]);
 
   const label =
     themeName === "Desk"

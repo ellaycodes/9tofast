@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { AppState } from "react-native";
 import { onAuthStateChanged } from "firebase/auth";
 import * as dt from "date-fns";
@@ -13,6 +13,7 @@ export default function useWeeklyStats() {
   const [weeklyStats, setWeeklyStats] = useState([]);
   const { schedule } = useFasting();
   const timeZone = getScheduleTimeZone(schedule);
+  const lastFetchRangeRef = useRef(null);
 
   const refreshWeeklyStats = useCallback(async (startDate, endDate) => {
     if (!auth.currentUser) {
@@ -22,6 +23,7 @@ export default function useWeeklyStats() {
     try {
       const resolvedEnd = endDate || new Date();
       const resolvedStart = startDate || dt.subDays(resolvedEnd, 6);
+      lastFetchRangeRef.current = { startDate: resolvedStart, endDate: resolvedEnd };
       const end = formatDayString(resolvedEnd, timeZone);
       const start = formatDayString(resolvedStart, timeZone);
       const stats = await getDailyStatsRange(auth.currentUser.uid, start, end);
@@ -34,7 +36,8 @@ export default function useWeeklyStats() {
   useEffect(() => {
     const unsubscribeFromRefresh = subscribeWeeklyStatsRefresh(
       ({ startDate, endDate } = {}) => {
-        refreshWeeklyStats(startDate, endDate);
+        const range = lastFetchRangeRef.current;
+        refreshWeeklyStats(startDate ?? range?.startDate, endDate ?? range?.endDate);
       }
     );
 
@@ -54,7 +57,7 @@ export default function useWeeklyStats() {
 
   useEffect(() => {
     const handleAppStateChange = (nextState) => {
-      if (nextState === "active" && weeklyStats.length === 0) {
+      if (nextState === "active") {
         refreshWeeklyStats();
       }
     };
@@ -71,7 +74,7 @@ export default function useWeeklyStats() {
         AppState.removeEventListener("change", handleAppStateChange);
       }
     };
-  }, [refreshWeeklyStats, weeklyStats.length]);
+  }, [refreshWeeklyStats]);
 
   return { weeklyStats, refreshWeeklyStats };
 }

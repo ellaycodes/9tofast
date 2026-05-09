@@ -158,6 +158,7 @@ export function decimalHoursToHms(decimalHours) {
 
 export function timeStringToDate(timeString, base = new Date()) {
   const [h, m] = timeString.split(":").map(Number);
-  base.setHours(h, m, 0, 0);
-  return base;
+  const d = new Date(base);
+  d.setHours(h, m, 0, 0);
+  return d;
 }

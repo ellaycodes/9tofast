@@ -2,7 +2,7 @@ import { ScrollView, StyleSheet, Text } from "react-native";
 import { View } from "react-native";
 import SettingsPressable from "../../components/Settings/SettingsPressable";
 import Title from "../../components/ui/Title";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { AppThemeContext } from "../../store/app-theme-context";
 import Section from "../../components/ui/Section";
 import StatsCard from "../../components/ui/StatsCard";
@@ -17,12 +17,8 @@ export default function Stats() {
     useContext(StatsContext);
 
   const [openModal, setOpenModal] = useState(false);
-  const [canOverride, setCanOverride] = useState();
+  const { canOverride } = canOverrideStreak();
   const navigation = useNavigation()
-
-  useEffect(() => {
-    setCanOverride(canOverrideStreak().canOverride);
-  }, []);
 
   function openOverrideStreakModal(toggle) {
     toggle === "close" ? setOpenModal(false) : setOpenModal(true);

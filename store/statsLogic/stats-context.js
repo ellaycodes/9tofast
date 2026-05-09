@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createContext, useState, useEffect } from "react";
 import { getStreak, setStreak } from "../../firebase/stats.db.js";
 import { auth } from "../../firebase/app.js";
+import { onAuthStateChanged } from "firebase/auth";
 import { dayQualifier, fastingQualifier } from "./qualifier.js";
 import { useFasting } from "../fastingLogic/fasting-context.js";
 import { yesterdayHoursFasted } from "./yesterdayHours.js";
@@ -37,6 +38,14 @@ function StatsContextProvider({ children }) {
   const [lastStreakDate, setLastStreakDate] = useState(null);
   const [lastOverrideDate, setLastOverrideDate] = useState(null);
   const [hoursFastedYesterday, setHoursFastedYesterday] = useState(null);
+  const [userId, setUserId] = useState(() => auth.currentUser?.uid ?? null);
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (user) => {
+      setUserId(user?.uid ?? null);
+    });
+    return unsub;
+  }, []);
 
   const oneDay = 24 * 60 * 60 * 1000;
   const timeZone = getScheduleTimeZone(schedule);
@@ -79,7 +88,7 @@ function StatsContextProvider({ children }) {
     yesterdayHoursFromDb();
 
     loadStreak();
-  }, [auth.currentUser, timeZone]);
+  }, [userId, timeZone]);
 
   async function save(streakData) {
     await AsyncStorage.setItem(STREAK_DATA, JSON.stringify(streakData));

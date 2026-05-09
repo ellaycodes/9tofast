@@ -11,7 +11,6 @@ import {
   getDocs,
   collection,
   documentId,
-  waitForPendingWrites,
   runTransaction,
 } from "firebase/firestore";
 import { logWarn } from "../util/logger";
@@ -140,13 +139,13 @@ export async function addDailyStatsDb(
     });
   } catch (error) {
     logWarn("addDailyStatsDb", error);
+    throw error;
   }
 }
 
 export async function getDailyStatsDb(uid, day) {
   try {
     const docSnap = await getDoc(doc(db, "users", uid, "daily_stats", day));
-    await waitForPendingWrites(db);
     const data = docSnap.exists() ? docSnap?.data() : null;
     if (!data) return;
     return data;
