@@ -6,6 +6,9 @@ import {
   updateDoc,
   deleteDoc,
   getDoc,
+  collection,
+  getDocs,
+  writeBatch,
 } from "firebase/firestore";
 import { logWarn } from "../util/logger";
 
@@ -69,9 +72,20 @@ export async function updateUser(uid, partial) {
 export async function deleteCurrentUser(uid) {
   if (!uid) throw new Error("DELETE_USER_MISSING_UID");
 
-  try {
-    await deleteDoc(doc(db, "users", uid));
-  } catch (error) {
-    throw error;
+  // Delete known singleton subcollection documents
+  await Promise.allSettled([
+    deleteDoc(doc(db, "users", uid, "settings", "preferences")),
+    deleteDoc(doc(db, "users", uid, "fasting_state", "current")),
+  ]);
+
+  // Delete all daily_stats documents (one per day, potentially hundreds)
+  const statsSnap = await getDocs(collection(db, "users", uid, "daily_stats"));
+  const statsDocs = statsSnap.docs;
+  for (let i = 0; i < statsDocs.length; i += 500) {
+    const batch = writeBatch(db);
+    statsDocs.slice(i, i + 500).forEach((d) => batch.delete(d.ref));
+    await batch.commit();
   }
+
+  await deleteDoc(doc(db, "users", uid));
 }

@@ -2,6 +2,7 @@ export const PRESET_SCHEDULES = [
   {
     id: "skip-breakfast-16-8",
     label: "Skip Breakfast 16:8 (12pm - 8pm)",
+    shortName: "Skip Breakfast",
     start: "12:00",
     end: "20:00",
     fastingHours: 16,
@@ -9,6 +10,7 @@ export const PRESET_SCHEDULES = [
   {
     id: "work-lunch-14-10",
     label: "Work-Lunch Window 14:10 (9am - 7pm)",
+    shortName: "Work-Lunch",
     start: "09:00",
     end: "19:00",
     fastingHours: 14,
@@ -16,6 +18,7 @@ export const PRESET_SCHEDULES = [
   {
     id: "after-hours-18-6",
     label: "After-Hours Fast 18:6 (5pm - 11pm)",
+    shortName: "After-Hours",
     start: "17:00",
     end: "23:00",
     fastingHours: 18,

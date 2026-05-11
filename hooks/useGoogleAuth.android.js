@@ -3,12 +3,11 @@ import { auth } from "../firebase/app";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import Constants from "expo-constants";
 
-GoogleSignin.configure({
-  webClientId: Constants.expoConfig.extra.expoClientId,
-});
-
 export default function useGoogleAuthAndroid() {
   async function signIn() {
+    GoogleSignin.configure({
+      webClientId: Constants.expoConfig.extra.expoClientId,
+    });
     await GoogleSignin.hasPlayServices();
     const { data } = await GoogleSignin.signIn();
 

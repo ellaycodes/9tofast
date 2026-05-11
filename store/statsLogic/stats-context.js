@@ -98,6 +98,7 @@ function StatsContextProvider({ children }) {
   }
 
   async function incrementStreak() {
+    const today = formatDayString(new Date(), timeZone);
     const newStreak = currentStreak + 1;
     const newLongest = Math.max(newStreak, longestStreak);
 
@@ -115,6 +116,7 @@ function StatsContextProvider({ children }) {
   }
 
   async function breakStreak() {
+    const yesterday = formatDayString(addDaysInTimeZone(Date.now(), -1, timeZone), timeZone);
     const updatedLongest = Math.max(currentStreak, longestStreak);
 
     setPreviousStreak(currentStreak);
@@ -132,6 +134,7 @@ function StatsContextProvider({ children }) {
   }
 
   async function overrideStreak() {
+    const today = formatDayString(new Date(), timeZone);
     if (!canOverrideStreak().canOverride) return;
 
     const restoredStreak = previousStreak + 1;
@@ -198,6 +201,7 @@ function StatsContextProvider({ children }) {
     if (!lastStreakDate) return;
     if (hoursFastedYesterday === null) return;
 
+    const today = formatDayString(new Date(), timeZone);
     const dayStatus = dayQualifier(today, lastStreakDate, timeZone);
     if (dayStatus === "same") return;
 

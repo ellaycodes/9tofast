@@ -1,17 +1,17 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
   Platform,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 import * as dt from "date-fns";
+import { Ionicons } from "@expo/vector-icons";
 import { useAppTheme } from "../../store/app-theme-context";
 import { PRESET_SCHEDULES } from "../../store/fastingLogic/data/fasting-presets";
-import CarouselButton from "../../components/ui/CarouselButton";
-import CustomContainer from "../../components/Carousel/CustomContainer";
 import PrimaryButton from "../../components/ui/PrimaryButton";
 import SchedulePickerModal from "../../modals/SchedulePickerModal";
 import CopyToModal from "../../components/ui/CopyToModal";
@@ -39,6 +39,25 @@ function calcDuration({ start: startStr, end: endStr }) {
   };
 }
 
+function formatHour(timeStr) {
+  return dt.format(dt.parse(timeStr, "HH:mm", new Date()), "h:mm");
+}
+
+function formatPeriod(timeStr) {
+  return dt.format(dt.parse(timeStr, "HH:mm", new Date()), "a");
+}
+
+function formatTimePretty(timeStr) {
+  const d = dt.parse(timeStr, "HH:mm", new Date());
+  const minutes = d.getMinutes();
+  return dt.format(d, minutes === 0 ? "ha" : "h:mma").toLowerCase();
+}
+
+function presetSubtitle(preset) {
+  const ratio = `${preset.fastingHours}:${24 - preset.fastingHours}`;
+  return `${ratio} · ${formatTimePretty(preset.start)} – ${formatTimePretty(preset.end)}`;
+}
+
 function initialConfig(dayConfig) {
   if (dayConfig) return dayConfig;
   return {
@@ -59,6 +78,34 @@ function deriveHighlightedLabel(config) {
   return preset?.label ?? null;
 }
 
+function RadioOption({ title, subtitle, selected, onPress, theme }) {
+  return (
+    <Pressable
+      style={[styles.radioRow, { borderBottomColor: theme.border }]}
+      onPress={onPress}
+    >
+      <View
+        style={[
+          styles.radioOuter,
+          { borderColor: selected ? theme.primary100 : theme.border },
+        ]}
+      >
+        {selected && (
+          <View
+            style={[styles.radioInner, { backgroundColor: theme.primary100 }]}
+          />
+        )}
+      </View>
+      <View style={styles.radioContent}>
+        <Text style={[styles.radioTitle, { color: theme.text }]}>{title}</Text>
+        <Text style={[styles.radioSubtitle, { color: theme.muted }]}>
+          {subtitle}
+        </Text>
+      </View>
+    </Pressable>
+  );
+}
+
 export default function DayEditorScreen({ navigation, route }) {
   const { dayKey, dayConfig } = route.params;
   const { theme } = useAppTheme();
@@ -75,10 +122,9 @@ export default function DayEditorScreen({ navigation, route }) {
   const [showCopyTo, setShowCopyTo] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
 
-  // Prevents the beforeRemove guard from firing on intentional Save navigation
   const savingRef = useRef(false);
 
-  // Unsaved-changes guard
+  // Unsaved-changes guard — also fires on swipe-to-dismiss
   useEffect(() => {
     const unsub = navigation.addListener("beforeRemove", (e) => {
       if (!isDirty || savingRef.current) return;
@@ -140,8 +186,7 @@ export default function DayEditorScreen({ navigation, route }) {
     if (Platform.OS !== "ios") setShowStartPicker(false);
     if (!(date instanceof Date)) return;
     const timeStr = dt.format(date, "HH:mm");
-    const fastingHours = calcDuration({ start: timeStr, end: chosenConfig.end })
-      .fastingHours;
+    const fastingHours = calcDuration({ start: timeStr, end: chosenConfig.end }).fastingHours;
     setChosenConfig((prev) => ({ ...prev, start: timeStr, fastingHours }));
     setIsDirty(true);
   };
@@ -150,26 +195,26 @@ export default function DayEditorScreen({ navigation, route }) {
     if (Platform.OS !== "ios") setShowEndPicker(false);
     if (!(date instanceof Date)) return;
     const timeStr = dt.format(date, "HH:mm");
-    const fastingHours = calcDuration({
-      start: chosenConfig.start,
-      end: timeStr,
-    }).fastingHours;
+    const fastingHours = calcDuration({ start: chosenConfig.start, end: timeStr }).fastingHours;
     setChosenConfig((prev) => ({ ...prev, end: timeStr, fastingHours }));
     setIsDirty(true);
   };
 
   // ---- save / copy ----
 
-  function navigate_back_with_result(config, copyToDays) {
-    savingRef.current = true;
-    navigation.navigate("EditScheduleScreen", {
-      _dayResult: { dayKey, config, copyToDays: copyToDays ?? undefined },
-    });
-  }
+  const navigate_back_with_result = useCallback(
+    (config, copyToDays) => {
+      savingRef.current = true;
+      navigation.navigate("EditScheduleScreen", {
+        _dayResult: { dayKey, config, copyToDays: copyToDays ?? undefined },
+      });
+    },
+    [navigation, dayKey]
+  );
 
-  function handleSave() {
+  const handleSave = useCallback(() => {
     navigate_back_with_result(chosenConfig);
-  }
+  }, [navigate_back_with_result, chosenConfig]);
 
   function handleCopyToApply(targetDays) {
     navigate_back_with_result(chosenConfig, targetDays);
@@ -177,67 +222,135 @@ export default function DayEditorScreen({ navigation, route }) {
 
   const isTooLong = chosenConfig.fastingHours > 20;
 
-  return (
-    <ScrollView
-      contentContainerStyle={{ flexGrow: 1, justifyContent: "space-between" }}
-    >
-      <View style={styles.container}>
-        <View>
-          <Text style={[styles.dayTitle, { color: theme.text }]}>
-            {DAY_FULL[dayKey] ?? dayKey}
+  // Cancel / Done in the navigation header
+  useEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => (
+        <Pressable
+          onPress={() => navigation.goBack()}
+          hitSlop={10}
+          style={styles.headerBtn}
+        >
+          <Text style={[styles.headerCancel, { color: theme.muted }]}>
+            Cancel
           </Text>
-
-          {PRESET_SCHEDULES.map((preset) => (
-            <CarouselButton
-              key={preset.id}
-              onPress={() => selectPreset(preset)}
-              highlight={highlightedLabel === preset.label}
-            >
-              {preset.label}
-            </CarouselButton>
-          ))}
-
-          <CarouselButton
-            onPress={selectRestDay}
-            highlight={highlightedLabel === "Rest Day"}
+        </Pressable>
+      ),
+      headerRight: () => (
+        <Pressable
+          onPress={handleSave}
+          hitSlop={10}
+          disabled={isTooLong}
+          style={styles.headerBtn}
+        >
+          <Text
+            style={[
+              styles.headerDone,
+              { color: isTooLong ? theme.muted : theme.primary100 },
+            ]}
           >
-            Rest Day
-          </CarouselButton>
+            Done
+          </Text>
+        </Pressable>
+      ),
+    });
+  }, [navigation, theme, handleSave, isTooLong]);
 
-          <CarouselButton
-            onPress={selectCustom}
-            highlight={highlightedLabel === "Custom"}
-          >
-            Custom
-          </CarouselButton>
+  return (
+    <ScrollView>
+      <View style={styles.container}>
+        <Text style={[styles.sectionLabel, { color: theme.muted }]}>
+          Schedule
+        </Text>
 
-          {showCustom && chosenConfig.type !== "rest" && (
-            <CustomContainer
-              startTime={chosenConfig.start}
-              onStartTimePress={() => setShowStartPicker(true)}
-              onEndTimePress={() => setShowEndPicker(true)}
-              endTime={chosenConfig.end}
-            />
-          )}
-        </View>
+        {PRESET_SCHEDULES.map((preset) => (
+          <RadioOption
+            key={preset.id}
+            title={preset.shortName}
+            subtitle={presetSubtitle(preset)}
+            selected={highlightedLabel === preset.label}
+            onPress={() => selectPreset(preset)}
+            theme={theme}
+          />
+        ))}
 
-        <View>
-          {isTooLong && (
-            <Text style={[styles.errorText, { color: theme.error }]}>
-              Please choose a longer eating window
+        <RadioOption
+          title="Free Day"
+          subtitle="No fasting"
+          selected={highlightedLabel === "Rest Day"}
+          onPress={selectRestDay}
+          theme={theme}
+        />
+
+        <RadioOption
+          title="Custom"
+          subtitle="Set your own hours"
+          selected={highlightedLabel === "Custom"}
+          onPress={selectCustom}
+          theme={theme}
+        />
+
+        {chosenConfig.type !== "rest" && (
+          <View style={styles.eatingWindowSection}>
+            <Text style={[styles.sectionLabel, { color: theme.muted }]}>
+              Eating window
             </Text>
-          )}
-          <PrimaryButton
-            lowlight
-            onPress={() => setShowCopyTo(true)}
-            style={{ marginBottom: 0 }}
-          >
-            Copy to...
-          </PrimaryButton>
-          <PrimaryButton onPress={handleSave} disabled={isTooLong}>
-            Save
-          </PrimaryButton>
-        </View>
+            <View style={[styles.windowBox, { backgroundColor: theme.card }]}>
+              <Pressable
+                style={styles.timeCol}
+                onPress={showCustom ? () => setShowStartPicker(true) : undefined}
+                disabled={!showCustom}
+              >
+                <Text style={[styles.timeLabel, { color: theme.muted }]}>
+                  Start
+                </Text>
+                <Text style={[styles.timeLarge, { color: theme.text }]}>
+                  {formatHour(chosenConfig.start)}
+                </Text>
+                <Text style={[styles.timePeriod, { color: theme.muted }]}>
+                  {formatPeriod(chosenConfig.start)}
+                </Text>
+              </Pressable>
+
+              <Ionicons
+                name="arrow-forward"
+                size={18}
+                color={theme.muted}
+                style={styles.arrowIcon}
+              />
+
+              <Pressable
+                style={styles.timeCol}
+                onPress={showCustom ? () => setShowEndPicker(true) : undefined}
+                disabled={!showCustom}
+              >
+                <Text style={[styles.timeLabel, { color: theme.muted }]}>
+                  End
+                </Text>
+                <Text style={[styles.timeLarge, { color: theme.text }]}>
+                  {formatHour(chosenConfig.end)}
+                </Text>
+                <Text style={[styles.timePeriod, { color: theme.muted }]}>
+                  {formatPeriod(chosenConfig.end)}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        )}
+
+        {isTooLong && (
+          <Text style={[styles.errorText, { color: theme.error }]}>
+            Please choose a longer eating window
+          </Text>
+        )}
+
+        <PrimaryButton
+          lowlight
+          onPress={() => setShowCopyTo(true)}
+          style={styles.copyBtn}
+        >
+          Copy to...
+        </PrimaryButton>
       </View>
 
       <SchedulePickerModal
@@ -267,18 +380,97 @@ export default function DayEditorScreen({ navigation, route }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "space-between",
     margin: 16,
   },
-  dayTitle: {
-    fontSize: 22,
-    fontWeight: "700",
-    marginBottom: 8,
-    marginLeft: 8,
+  // Navigation header
+  headerBtn: {
+    paddingHorizontal: 4,
   },
+  headerCancel: {
+    fontSize: 16,
+  },
+  headerDone: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  // Section labels
+  sectionLabel: {
+    fontSize: 12,
+    fontWeight: "600",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    marginBottom: 8,
+    marginLeft: 2,
+  },
+  // Radio options
+  radioRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 14,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  radioOuter: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 14,
+  },
+  radioInner: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  radioContent: {
+    flex: 1,
+  },
+  radioTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  radioSubtitle: {
+    fontSize: 13,
+    marginTop: 2,
+  },
+  // Eating window
+  eatingWindowSection: {
+    marginTop: 24,
+  },
+  windowBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-around",
+    borderRadius: 12,
+    padding: 20,
+  },
+  timeCol: {
+    alignItems: "center",
+  },
+  timeLabel: {
+    fontSize: 12,
+    fontWeight: "500",
+    marginBottom: 4,
+  },
+  timeLarge: {
+    fontSize: 28,
+    fontWeight: "300",
+  },
+  timePeriod: {
+    fontSize: 14,
+    marginTop: 2,
+  },
+  arrowIcon: {
+    marginHorizontal: 8,
+  },
+  // Error / Copy
   errorText: {
     fontSize: 13,
-    marginBottom: 8,
+    marginTop: 12,
     textAlign: "center",
+  },
+  copyBtn: {
+    marginTop: 24,
   },
 });

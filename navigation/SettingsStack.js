@@ -68,18 +68,19 @@ function SettingsStack() {
         name="EditScheduleScreen"
         component={EditScheduleScreen}
         options={{
-          title: "Edit Schedule",
+          title: "Fasting Schedule",
         }}
       />
       <Stack.Screen
         name="DayEditorScreen"
         component={DayEditorScreen}
         options={({ route }) => ({
-          title:
-            route.params?.dayKey
-              ? route.params.dayKey.charAt(0).toUpperCase() +
-                route.params.dayKey.slice(1)
-              : "Edit Day",
+          presentation: "modal",
+          headerBackVisible: false,
+          title: route.params?.dayKey
+            ? route.params.dayKey.charAt(0).toUpperCase() +
+              route.params.dayKey.slice(1)
+            : "Edit Day",
         })}
       />
       <Stack.Screen

@@ -59,7 +59,6 @@ function Navigator() {
   const { weeklySchedule } = useFasting();
 
   useEffect(() => {
-    const timeout = setTimeout(() => setLoading(false), 8000);
     Ionicons.loadFont();
     loadStreak();
 
@@ -105,7 +104,7 @@ function Navigator() {
         }
       } else {
         await premiumLogOut();
-        authCxt.logout();
+        authCxt.clearAuthState();
         setLoading(false);
       }
     });
@@ -119,7 +118,6 @@ function Navigator() {
     return () => {
       unsubAuth();
       unsubToken();
-      clearTimeout(timeout);
     };
   }, [authCxt, premiumLogIn, premiumLogOut]);
 

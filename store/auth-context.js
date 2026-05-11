@@ -18,6 +18,7 @@ export const AuthContext = createContext({
   setEmailAddress: (emailAddress) => {},
   authenticate: (token, userName, uid) => {},
   logout: () => {},
+  clearAuthState: () => {},
   refreshToken: (idToken) => {},
   updateUsername: (username) => {},
   updateFullName: (fullName) => {},
@@ -50,22 +51,7 @@ function AuthContextProvider({ children }) {
     AsyncStorage.setItem("uid", uid).catch(console.warn);
   }
 
-  async function logout() {
-    try {
-      if (uid) {
-        const rawState = await AsyncStorage.getItem(getStateStorageKey(uid));
-        if (rawState) {
-          const parsed = JSON.parse(rawState);
-          if (auth && auth.currentUser && auth.currentUser.uid) {
-            const { ownerUid, ...rest } = parsed;
-            await setFastingStateDb(uid, rest);
-          }
-        }
-      }
-    } catch (error) {
-      logWarn("[auth-context] logout backup failed", error);
-    }
-    await signOut(auth);
+  function clearAuthState() {
     setAuthToken(null);
     setUsername(null);
     setUid(null);
@@ -84,6 +70,25 @@ function AuthContextProvider({ children }) {
       AsyncStorage.removeItem(getStateStorageKey(uid)).catch(console.warn);
     }
     AsyncStorage.removeItem("fastingstate_v2").catch(console.warn);
+  }
+
+  async function logout() {
+    try {
+      if (uid) {
+        const rawState = await AsyncStorage.getItem(getStateStorageKey(uid));
+        if (rawState) {
+          const parsed = JSON.parse(rawState);
+          if (auth && auth.currentUser && auth.currentUser.uid) {
+            const { ownerUid, ...rest } = parsed;
+            await setFastingStateDb(uid, rest);
+          }
+        }
+      }
+    } catch (error) {
+      logWarn("[auth-context] logout backup failed", error);
+    }
+    await signOut(auth);
+    clearAuthState();
   }
 
   function refreshToken(idToken) {
@@ -132,6 +137,7 @@ function AuthContextProvider({ children }) {
     setEmailAddress: setEmailAddress,
     authenticate: authenticate,
     logout: logout,
+    clearAuthState: clearAuthState,
     refreshToken: refreshToken,
     updateUsername: updateUsername,
     updateFullName: updateFullName,

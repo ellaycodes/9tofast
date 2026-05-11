@@ -147,8 +147,13 @@ export default ProgressScreen;
 
 const styles = (theme) =>
   StyleSheet.create({
+    container: {
+      flex: 1,
+      paddingHorizontal: 16,
+      paddingBottom: 16,
+    },
     headerButton: {
       paddingHorizontal: 10,
       flex: 1,
-    }
+    },
   });

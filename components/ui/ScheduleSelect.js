@@ -1,6 +1,7 @@
 import {
   View,
   Platform,
+  Pressable,
   StyleSheet,
   ScrollView,
   Text,
@@ -21,6 +22,7 @@ import { AuthContext } from "../../store/auth-context";
 import { getResolvedTimeZone } from "../../util/timezone";
 import DayRow from "../Settings/DayRow";
 import ActiveFastPrompt from "./ActiveFastPrompt";
+import { useAppTheme } from "../../store/app-theme-context";
 import {
   DAY_KEYS,
   applyToAllDays,
@@ -29,17 +31,6 @@ import {
 } from "../../store/fastingLogic/data/weekly-schedule";
 
 // --- helpers ---
-
-function deriveHighlightedLabel(weekly) {
-  if (!weekly) return null;
-  if (weekly.mode === "perDay") return null;
-  const config = weekly.days?.monday;
-  if (!config) return null;
-  if (config.type === "rest") return "Rest Day";
-  if (config.label === "Custom") return "Custom";
-  const preset = PRESET_SCHEDULES.find((p) => p.id === config.presetId);
-  return preset?.label ?? null;
-}
 
 function calcDuration({ start: startStr, end: endStr }) {
   const midnight = dt.startOfDay(new Date());
@@ -54,16 +45,34 @@ function calcDuration({ start: startStr, end: endStr }) {
   };
 }
 
+function PresetChip({ label, onPress, theme }) {
+  return (
+    <Pressable
+      style={({ pressed }) => [
+        styles.chip,
+        {
+          borderColor: theme.border,
+          backgroundColor: pressed ? theme.card : theme.background,
+        },
+      ]}
+      onPress={onPress}
+      hitSlop={4}
+    >
+      <Text style={[styles.chipText, { color: theme.text }]}>{label}</Text>
+    </Pressable>
+  );
+}
+
 // ---
 
 function ScheduleSelect({ settings, setWizardState, token, userName, uid }) {
   const { schedule, weeklySchedule, setSchedule, isFasting, events, endFast } =
     useFasting();
   const authCxt = useContext(AuthContext);
+  const { theme } = useAppTheme();
   const navigate = useNavigation();
   const route = useRoute();
 
-  // ---- shared flat-schedule state (drives custom time pickers in both modes) ----
   const defaultStart = dt.format(
     dt.addHours(dt.startOfHour(new Date()), 2),
     "HH:mm"
@@ -78,12 +87,9 @@ function ScheduleSelect({ settings, setWizardState, token, userName, uid }) {
   const initialEnd = schedule?.end ?? defaultEnd;
   const initialFastingHours = schedule?.fastingHours ?? 8;
 
-  const initialIsCustom = settings
-    ? weeklySchedule?.mode === "uniform" &&
-      weeklySchedule?.days?.monday?.label === "Custom"
-    : schedule?.label === "Custom";
-
-  const [showCustom, setShowCustom] = useState(initialIsCustom);
+  const [showCustom, setShowCustom] = useState(
+    settings ? false : schedule?.label === "Custom"
+  );
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
   const [chosenSchedule, setChosenSchedule] = useState({
@@ -94,21 +100,28 @@ function ScheduleSelect({ settings, setWizardState, token, userName, uid }) {
     timeZone: initialTimeZone,
   });
 
-  // ---- settings-mode draft weekly state ----
   const [draftWeekly, setDraftWeekly] = useState(
     settings ? weeklySchedule : null
   );
+  // Onboarding mode uses highlightedLabel for CarouselButton state
   const [highlightedLabel, setHighlightedLabel] = useState(
-    settings
-      ? deriveHighlightedLabel(weeklySchedule)
-      : schedule?.label ?? null
+    settings ? null : schedule?.label ?? null
   );
 
-  // ---- in-progress fast prompt state ----
+  // Undo toast (settings mode only)
+  const [undoVisible, setUndoVisible] = useState(false);
+  const prevDraftRef = useRef(null);
+  const undoTimerRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+    };
+  }, []);
+
   const [pendingSchedule, setPendingSchedule] = useState(null);
   const [showFastPrompt, setShowFastPrompt] = useState(false);
 
-  // Track last applied result to avoid double-applying the same _dayResult param
   const lastDayResultRef = useRef(null);
 
   // Pick up results returned from DayEditorScreen
@@ -127,79 +140,66 @@ function ScheduleSelect({ settings, setWizardState, token, userName, uid }) {
       }
       return updated;
     });
-    // If the user came back from a per-day edit, no single preset is active
-    setHighlightedLabel(null);
   }, [route.params?._dayResult]);
 
-  // ---- preset / rest / custom selection ----
+  // ---- onboarding-mode selection ----
 
   function selectPreset(preset) {
     const fastingHours = calcDuration({
       start: preset.start,
       end: preset.end,
     }).fastingHours;
-    const flatPreset = {
+    setChosenSchedule({
       label: preset.label,
       presetId: preset.id,
       start: preset.start,
       end: preset.end,
       fastingHours,
       timeZone: initialTimeZone,
-    };
-    setChosenSchedule(flatPreset);
+    });
     setShowCustom(false);
     setHighlightedLabel(preset.label);
-
-    if (settings) {
-      const dayConfig = {
-        type: "fast",
-        start: preset.start,
-        end: preset.end,
-        fastingHours,
-        presetId: preset.id,
-        label: preset.label,
-      };
-      const base = draftWeekly ?? {
-        mode: "uniform",
-        timeZone: initialTimeZone,
-        days: {},
-      };
-      setDraftWeekly(applyToAllDays(base, dayConfig));
-    }
-  }
-
-  function selectRestDay() {
-    setShowCustom(false);
-    setHighlightedLabel("Rest Day");
-    if (settings) {
-      const restConfig = { type: "rest", start: "00:00", end: "00:00", fastingHours: 0 };
-      const base = draftWeekly ?? {
-        mode: "uniform",
-        timeZone: initialTimeZone,
-        days: {},
-      };
-      setDraftWeekly(applyToAllDays(base, restConfig));
-    }
   }
 
   function selectCustom() {
     setShowCustom(true);
     setChosenSchedule((s) => ({ ...s, label: "Custom" }));
     setHighlightedLabel("Custom");
-    if (settings) {
-      const customConfig = {
-        type: "fast",
-        start: chosenSchedule.start,
-        end: chosenSchedule.end,
-        fastingHours: chosenSchedule.fastingHours,
-        label: "Custom",
-      };
-      const base = draftWeekly ?? {
-        mode: "uniform",
-        timeZone: initialTimeZone,
-        days: {},
-      };
-      setDraftWeekly(applyToAllDays(base, customConfig));
+  }
+
+  // ---- settings-mode: apply preset to all days ----
+
+  function applyPresetToAll(preset) {
+    const fastingHours = calcDuration({
+      start: preset.start,
+      end: preset.end,
+    }).fastingHours;
+    const dayConfig = {
+      type: "fast",
+      start: preset.start,
+      end: preset.end,
+      fastingHours,
+      presetId: preset.id,
+      label: preset.label,
+    };
+    const base = draftWeekly ?? {
+      mode: "uniform",
+      timeZone: initialTimeZone,
+      days: {},
+    };
+    prevDraftRef.current = draftWeekly;
+    setDraftWeekly(applyToAllDays(base, dayConfig));
+
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+    setUndoVisible(true);
+    undoTimerRef.current = setTimeout(() => setUndoVisible(false), 4000);
+  }
+
+  function handleUndo() {
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+    setUndoVisible(false);
+    if (prevDraftRef.current !== null) {
+      setDraftWeekly(prevDraftRef.current);
     }
   }
 
@@ -215,17 +215,7 @@ function ScheduleSelect({ settings, setWizardState, token, userName, uid }) {
       start: timeStr,
       end: chosenSchedule.end,
     }).fastingHours;
-    const updated = { ...chosenSchedule, start: timeStr, fastingHours };
-    setChosenSchedule(updated);
-    if (settings && showCustom) {
-      const customConfig = { type: "fast", ...updated, label: "Custom" };
-      const base = draftWeekly ?? {
-        mode: "uniform",
-        timeZone: initialTimeZone,
-        days: {},
-      };
-      setDraftWeekly(applyToAllDays(base, customConfig));
-    }
+    setChosenSchedule((prev) => ({ ...prev, start: timeStr, fastingHours }));
   };
 
   const onChangeEnd = (_e, date) => {
@@ -236,17 +226,7 @@ function ScheduleSelect({ settings, setWizardState, token, userName, uid }) {
       start: chosenSchedule.start,
       end: timeStr,
     }).fastingHours;
-    const updated = { ...chosenSchedule, end: timeStr, fastingHours };
-    setChosenSchedule(updated);
-    if (settings && showCustom) {
-      const customConfig = { type: "fast", ...updated, label: "Custom" };
-      const base = draftWeekly ?? {
-        mode: "uniform",
-        timeZone: initialTimeZone,
-        days: {},
-      };
-      setDraftWeekly(applyToAllDays(base, customConfig));
-    }
+    setChosenSchedule((prev) => ({ ...prev, end: timeStr, fastingHours }));
   };
 
   function isFastingTooLong({ fastingHours }) {
@@ -280,7 +260,6 @@ function ScheduleSelect({ settings, setWizardState, token, userName, uid }) {
 
   async function onSave(isSettings) {
     if (!isSettings) {
-      // Onboarding mode — unchanged
       await setSchedule(chosenSchedule);
       setWizardState((s) => ({ ...s, step: Math.min(s.step + 1, 2) }));
       return;
@@ -302,7 +281,6 @@ function ScheduleSelect({ settings, setWizardState, token, userName, uid }) {
         todayOldConfig.type !== todayNewConfig.type);
 
     if (todayConfigChanged && isFasting()) {
-      // Check that the active fast started today (attribution rule)
       const lastStart = [...events].reverse().find((e) => e.type === "start");
       if (lastStart) {
         const fastDayKey = getDayKey(lastStart.ts, timeZone);
@@ -321,7 +299,6 @@ function ScheduleSelect({ settings, setWizardState, token, userName, uid }) {
     const timeZone = pendingSchedule.timeZone ?? initialTimeZone;
     const todayKey = getDayKey(new Date(), timeZone);
     const todayOldConfig = weeklySchedule?.days?.[todayKey];
-    // Preserve today's current config so the active fast is unaffected
     const preserved = todayOldConfig
       ? setDayConfig(pendingSchedule, todayKey, todayOldConfig)
       : pendingSchedule;
@@ -348,98 +325,117 @@ function ScheduleSelect({ settings, setWizardState, token, userName, uid }) {
     }
   }
 
-  const isTooLong = isFastingTooLong(chosenSchedule);
-  const isPerDay = settings && draftWeekly?.mode === "perDay";
+  // Validation only applies in onboarding mode; per-day validation is in DayEditorScreen
+  const isTooLong = settings ? false : isFastingTooLong(chosenSchedule);
 
   return (
-    <ScrollView
-      contentContainerStyle={{ flexGrow: 1, justifyContent: "space-between" }}
-    >
-      <View style={styles.container}>
-        <View>
-          <Title>Choose your Fasting Schedule</Title>
+    <View style={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.container}>
+          {settings ? (
+            <>
+              <Text style={[styles.sectionHeading, { color: theme.muted }]}>
+                Apply to all days
+              </Text>
+              <View style={styles.chipRow}>
+                {PRESET_SCHEDULES.map((preset) => (
+                  <PresetChip
+                    key={preset.id}
+                    label={`${preset.fastingHours}:${24 - preset.fastingHours}`}
+                    onPress={() => applyPresetToAll(preset)}
+                    theme={theme}
+                  />
+                ))}
+              </View>
 
-          {PRESET_SCHEDULES.map((preset) => (
-            <CarouselButton
-              key={preset.label}
-              onPress={() => selectPreset(preset)}
-              highlight={highlightedLabel === preset.label}
-            >
-              {preset.label}
-            </CarouselButton>
-          ))}
+              <Text style={[styles.sectionHeading, { color: theme.muted }]}>
+                Your week
+              </Text>
 
-          {settings && (
-            <CarouselButton
-              onPress={selectRestDay}
-              highlight={highlightedLabel === "Rest Day"}
-            >
-              Rest Day
-            </CarouselButton>
-          )}
+              {draftWeekly && (
+                <View
+                  style={[
+                    styles.dayRowsContainer,
+                    {
+                      borderTopColor: theme.border,
+                      borderBottomColor: theme.border,
+                    },
+                  ]}
+                >
+                  {DAY_KEYS.map((dayKey) => (
+                    <DayRow
+                      key={dayKey}
+                      dayKey={dayKey}
+                      config={draftWeekly.days?.[dayKey]}
+                      onPress={() => onDayRowPress(dayKey)}
+                    />
+                  ))}
+                </View>
+              )}
+            </>
+          ) : (
+            <>
+              <Title>Choose your Fasting Schedule</Title>
 
-          <CarouselButton
-            onPress={selectCustom}
-            highlight={highlightedLabel === "Custom"}
-          >
-            Custom
-          </CarouselButton>
-
-          {isPerDay && (
-            <Text style={styles.variesLabel}>Schedule varies by day</Text>
-          )}
-
-          {showCustom && (
-            <CustomContainer
-              startTime={chosenSchedule.start}
-              onStartTimePress={() => onTimePress("start")}
-              onEndTimePress={() => onTimePress("end")}
-              endTime={chosenSchedule.end}
-            />
-          )}
-
-          {settings && draftWeekly && (
-            <View style={styles.dayRowsContainer}>
-              {DAY_KEYS.map((dayKey) => (
-                <DayRow
-                  key={dayKey}
-                  dayKey={dayKey}
-                  config={draftWeekly.days?.[dayKey]}
-                  onPress={() => onDayRowPress(dayKey)}
-                />
+              {PRESET_SCHEDULES.map((preset) => (
+                <CarouselButton
+                  key={preset.label}
+                  onPress={() => selectPreset(preset)}
+                  highlight={highlightedLabel === preset.label}
+                >
+                  {preset.label}
+                </CarouselButton>
               ))}
-            </View>
+
+              <CarouselButton
+                onPress={selectCustom}
+                highlight={highlightedLabel === "Custom"}
+              >
+                Custom
+              </CarouselButton>
+
+              {showCustom && (
+                <CustomContainer
+                  startTime={chosenSchedule.start}
+                  onStartTimePress={() => onTimePress("start")}
+                  onEndTimePress={() => onTimePress("end")}
+                  endTime={chosenSchedule.end}
+                />
+              )}
+            </>
           )}
         </View>
+      </ScrollView>
 
+      <View style={styles.buttonArea}>
         {isTooLong && (
           <ErrorText>Please choose a longer eating window</ErrorText>
         )}
-
-        <View>
-          {settings ? null : (
-            <PrimaryButton lowlight onPress={onSkip}>
-              Skip
-            </PrimaryButton>
-          )}
-          {settings ? (
-            <PrimaryButton
-              onPress={() => onSave(true)}
-              style={{ marginTop: 16 }}
-              disabled={isTooLong}
-            >
-              Save
-            </PrimaryButton>
-          ) : (
-            <PrimaryButton
-              onPress={() => onSave(false)}
-              disabled={isTooLong}
-            >
-              Next
-            </PrimaryButton>
-          )}
-        </View>
+        {!settings && (
+          <PrimaryButton lowlight onPress={onSkip}>
+            Skip
+          </PrimaryButton>
+        )}
+        <PrimaryButton
+          onPress={() => onSave(!!settings)}
+          disabled={isTooLong}
+        >
+          {settings ? "Save" : "Next"}
+        </PrimaryButton>
       </View>
+
+      {undoVisible && (
+        <View style={[styles.toast, { backgroundColor: theme.card }]}>
+          <Text style={[styles.toastText, { color: theme.text }]}>
+            Applied to all days
+          </Text>
+          <Pressable onPress={handleUndo} hitSlop={8}>
+            <Text style={[styles.toastAction, { color: theme.primary100 }]}>
+              Undo
+            </Text>
+          </Pressable>
+        </View>
+      )}
 
       <SchedulePickerModal
         showPicker={showStartPicker}
@@ -461,31 +457,76 @@ function ScheduleSelect({ settings, setWizardState, token, userName, uid }) {
         onApplyNow={handleApplyNow}
         onClose={() => setShowFastPrompt(false)}
       />
-    </ScrollView>
+    </View>
   );
 }
 
 export default ScheduleSelect;
 
 const styles = StyleSheet.create({
+  scrollContent: {
+    flexGrow: 1,
+  },
   container: {
     flex: 1,
-    justifyContent: "space-between",
     margin: 16,
   },
-  variesLabel: {
-    marginHorizontal: 8,
-    marginTop: 4,
-    marginBottom: 4,
+  // Settings mode
+  sectionHeading: {
     fontSize: 12,
-    color: "#888",
-    fontStyle: "italic",
+    fontWeight: "600",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    marginBottom: 10,
+    marginLeft: 2,
+  },
+  chipRow: {
+    flexDirection: "row",
+    marginBottom: 24,
+  },
+  chip: {
+    borderWidth: 1.5,
+    borderRadius: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 18,
+    marginRight: 8,
+  },
+  chipText: {
+    fontSize: 15,
+    fontWeight: "600",
   },
   dayRowsContainer: {
-    marginTop: 20,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: "#ccc",
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "#ccc",
+  },
+  // Buttons (outside scroll)
+  buttonArea: {
+    paddingHorizontal: 16,
+    paddingBottom: 8,
+  },
+  // Undo toast overlay
+  toast: {
+    position: "absolute",
+    bottom: 88,
+    left: 16,
+    right: 16,
+    borderRadius: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  toastText: {
+    fontSize: 14,
+  },
+  toastAction: {
+    fontSize: 14,
+    fontWeight: "700",
   },
 });
